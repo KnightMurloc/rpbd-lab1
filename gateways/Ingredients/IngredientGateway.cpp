@@ -4,10 +4,19 @@
 
 #include "IngredientGateway.h"
 #include "../DbInstance.h"
+#include "Ingredient.h"
 #include "fmt/format.h"
 
 void IngredientGateway::save(Ingredient &data) {
+    auto db = DbInstance::getInstance();
 
+    std::string sql = fmt::format("update ingredients set name = '{}', unit = '{}' where id = {}",
+        data.get_name(),
+        unit_to_string(data.get_unit()),
+        data.get_id()
+    );
+
+    db.exec(sql);
 }
 
 Ingredient IngredientGateway::get(int id) {
@@ -51,4 +60,25 @@ std::list<Ingredient> IngredientGateway::get_all() {
     }
 
     return result;
+}
+
+Ingredient IngredientGateway::create(std::string name, Unit unit){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("insert into ingredients(name, unit) values('{}', '{}') returning id;",
+        name,
+        unit_to_string(unit)
+    );
+
+    auto response = db.exec(sql);
+
+    if(response.next()){
+        Ingredient ing(response.get<int>(0));
+        ing.set_name(name);
+        ing.set_unit(unit);
+
+        return ing;
+    }
+
+    return Ingredient(0);
 }

@@ -14,6 +14,8 @@ class IngredientGateway : public IGateway<Ingredient> {
 public:
     void save(Ingredient &data) override;
 
+    Ingredient create(std::string name, Unit unit);
+
     Ingredient get(int id) override;
 
     void remove(Ingredient &data) override;

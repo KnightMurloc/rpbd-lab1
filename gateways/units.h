@@ -14,7 +14,7 @@ enum class Unit{
     undefined
 };
 
-inline Unit string_to_unit(std::string_view unit){
+inline Unit string_to_unit(std::string unit){
     if(unit == "g"){
         return Unit::g;
     }

@@ -24,16 +24,27 @@ private:
         int get_id() override;
     };
 
+    IngredientGateway gateway;
+    Glib::RefPtr<Gtk::Builder> builder;
+
+    Gtk::Box* info_box;
+    Gtk::Entry* name_entry;
+    Gtk::ComboBoxText* unit_combo;
+
     void remove_entry();
 
     void create();
+
+    void select(Gtk::ListBoxRow* row);
+
+    void save();
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
 public:
-    IngredientGateway gateway;
 
-    Glib::RefPtr<Gtk::Builder> builder;
+
+
 
     explicit IngredientTab(TabManager* tab_manager);
 

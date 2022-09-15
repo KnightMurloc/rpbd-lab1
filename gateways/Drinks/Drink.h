@@ -29,7 +29,7 @@ public:
 
     [[nodiscard]] const std::string &getContainer() const;
 
-    [[nodiscard]] const Recipe &getRecipe() const;
+    [[nodiscard]] Recipe &getRecipe();
 
     void setName(const std::string &name);
 

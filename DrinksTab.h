@@ -8,6 +8,7 @@
 #include "Tab.h"
 #include "gateways/Drinks/Drink.h"
 #include "gateways/Drinks/Drinkgateway.h"
+#include "gtkmm/entry.h"
 
 class DrinksTab : public Tab {
 private:
@@ -22,16 +23,38 @@ private:
 
         Entry(const Drink &drink);
 
-        const Drink &getDrink() const;
+        Drink &getDrink();
 
         int get_id() override;
     };
 
     Drinkgateway gateway;
 
+    Glib::RefPtr<Gtk::Builder> builder;
+
+    Gtk::Box* info_box;
+    Gtk::Entry* name_entry;
+    Gtk::Entry* strength_entry;
+    Gtk::Entry* size_entry;
+    Gtk::Entry* container_entry;
+    Gtk::ListBox* ing_list;
+    Gtk::Button* add_button;
+    Gtk::Button* remove_button;
+
+    void select(Gtk::ListBoxRow* row);
+
+    static void add_ingredient(Gtk::ListBox* list, TabManager* tab_manager);
+    static void remove_ingredient(Gtk::ListBox* list);
+
+    void save_current();
+
+    void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
+
+    void create();
+
+    void remove_entry();
 protected:
     void fill_list(Gtk::ListBox *list) override;
-
 public:
 
     DrinksTab(TabManager* manager);

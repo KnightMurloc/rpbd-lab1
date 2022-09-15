@@ -22,7 +22,7 @@ const std::string &Drink::getContainer() const {
     return container;
 }
 
-const Recipe &Drink::getRecipe() const {
+Recipe &Drink::getRecipe() {
     return recipe;
 }
 

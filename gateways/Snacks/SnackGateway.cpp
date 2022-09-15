@@ -37,7 +37,6 @@ void SnackGateway::save(Snack &data) {
             std::get<1>(ing)
         );
         db.exec(sql);
-
     }
 }
 
