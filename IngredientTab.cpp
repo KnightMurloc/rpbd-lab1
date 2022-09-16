@@ -31,9 +31,9 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&IngredientTab::select));
 }
 
-void IngredientTab::select_by_id(int entry_id) {
-
-}
+// void IngredientTab::select_by_id(int entry_id) {
+//
+// }
 
 void IngredientTab::fill_list(Gtk::ListBox* list) {
     for(const auto& ing : gateway.get_all()){
@@ -102,7 +102,7 @@ void IngredientTab::save(){
         return;
     }
 
-    auto ing = entry->get_ingredient();
+    auto& ing = entry->get_ingredient();
 
     ing.set_name(name_entry->get_text());
     ing.set_unit(string_to_unit(unit_combo->get_active_id()));

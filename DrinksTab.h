@@ -59,7 +59,7 @@ public:
 
     DrinksTab(TabManager* manager);
 
-    void select_by_id(int entry_id) override;
+//     void select_by_id(int entry_id) override;
 
 
 };

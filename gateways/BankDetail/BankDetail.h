@@ -12,8 +12,8 @@ private:
     int id;
     std::string bank_name;
     std::string city;
-    long long tin;
-    long long settlement_account;
+    std::string tin;
+    std::string settlement_account;
 public:
     explicit BankDetail(int id);
 
@@ -23,17 +23,17 @@ public:
 
     [[nodiscard]] const std::string &getCity() const;
 
-    [[nodiscard]] long long getTin() const;
+    [[nodiscard]] std::string getTin() const;
 
-    [[nodiscard]] long long getSettlementAccount() const;
+    [[nodiscard]] std::string getSettlementAccount() const;
 
     void setBankName(const std::string &bankName);
 
     void setCity(const std::string &city);
 
-    void setTin(long long int tin);
+    void setTin(std::string tin);
 
-    void setSettlementAccount(long long int settlementAccount);
+    void setSettlementAccount(std::string settlementAccount);
 };
 
 

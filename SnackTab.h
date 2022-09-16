@@ -54,7 +54,7 @@ protected:
 public:
     explicit SnackTab(TabManager* tab_manager);
 
-    void select_by_id(int entry_id) override;
+//     void select_by_id(int entry_id) override;
 
 //    int select_dialog() override;
 };

@@ -143,16 +143,16 @@ void OrderTab::cancel_current() {
 
 }
 
-void OrderTab::select_by_id(int entry_id) {
-    for(auto row : getListBox()->get_children()){
-        auto entry = dynamic_cast<Entry*>(row);
-        std::cout << entry_id << " " << entry->get_order().get_id() << std::endl;
-        if(entry->get_order().get_id() == entry_id){
-            getListBox()->select_row(*dynamic_cast<Gtk::ListBoxRow*>(row));
-            return;
-        }
-    }
-}
+// void OrderTab::select_by_id(int entry_id) {
+//     for(auto row : getListBox()->get_children()){
+//         auto entry = dynamic_cast<Entry*>(row);
+//         std::cout << entry_id << " " << entry->get_order().get_id() << std::endl;
+//         if(entry->get_order().get_id() == entry_id){
+//             getListBox()->select_row(*dynamic_cast<Gtk::ListBoxRow*>(row));
+//             return;
+//         }
+//     }
+// }
 
 void OrderTab::create(){
 

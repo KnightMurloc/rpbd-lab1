@@ -164,7 +164,7 @@ void DrinksTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
 void DrinksTab::save_current(){
     auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
 
-    Drink drink = entry->getDrink();
+    Drink& drink = entry->getDrink();
 
     if(name_entry->get_text().empty()){
         Gtk::MessageDialog message("не указано имя");
@@ -400,9 +400,9 @@ Drink &DrinksTab::Entry::getDrink() {
     return drink;
 }
 
-void DrinksTab::select_by_id(int entry_id) {
-
-}
+// void DrinksTab::select_by_id(int entry_id) {
+//
+// }
 
 void DrinksTab::fill_list(Gtk::ListBox *list) {
     for(const auto& drink : gateway.get_all()){

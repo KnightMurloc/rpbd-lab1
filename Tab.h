@@ -39,7 +39,7 @@ protected:
 public:
     Tab(TabManager* tab_manager);
 
-    virtual void select_by_id(int entry_id) = 0;
+    void select_by_id(int entry_id);
 
 //    virtual int select_dialog() = 0;
     int select_dialog();

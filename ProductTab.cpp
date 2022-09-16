@@ -17,9 +17,9 @@ void ProductTab::cancel_current() {
 
 }
 
-void ProductTab::select_by_id(int entry_id) {
-    //TODO
-}
+// void ProductTab::select_by_id(int entry_id) {
+//     //TODO
+// }
 
 void ProductTab::fill_list(Gtk::ListBox* list) {
 

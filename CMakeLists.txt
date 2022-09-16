@@ -25,7 +25,23 @@ add_executable(${PROJECT_NAME}
         gateways/Orders/Order.cpp gateways/Orders/Order.h
         gateways/Orders/OrederGateway.cpp gateways/Orders/OrederGateway.h
         OrderTab.cpp OrderTab.h
-        TabManager.cpp TabManager.h gateways/Snacks/Snacks.cpp gateways/Snacks/Snacks.h gateways/units.h gateways/Snacks/SnackGateway.cpp gateways/Snacks/SnackGateway.h SnackTab.cpp SnackTab.h gateways/Ingredients/Ingredient.cpp gateways/Ingredients/Ingredient.h gateways/Ingredients/IngredientGateway.cpp gateways/Ingredients/IngredientGateway.h IngredientTab.cpp IngredientTab.h gateways/Drinks/Drink.cpp gateways/Drinks/Drink.h gateways/Recipe.cpp gateways/Recipe.h gateways/Drinks/Drinkgateway.cpp gateways/Drinks/Drinkgateway.h DrinksTab.cpp DrinksTab.h gateways/BankDetail/BankDetail.cpp gateways/BankDetail/BankDetail.h gateways/BankDetail/BankDetailgateway.cpp gateways/BankDetail/BankDetailgateway.h BankDetailTab.cpp BankDetailTab.h)
+        TabManager.cpp TabManager.h
+        gateways/Snacks/Snacks.cpp gateways/Snacks/Snacks.h
+        gateways/units.h
+        gateways/Snacks/SnackGateway.cpp gateways/Snacks/SnackGateway.h
+        SnackTab.cpp SnackTab.h
+        gateways/Ingredients/Ingredient.cpp gateways/Ingredients/Ingredient.h
+        gateways/Ingredients/IngredientGateway.cpp gateways/Ingredients/IngredientGateway.h
+        IngredientTab.cpp IngredientTab.h
+        gateways/Drinks/Drink.cpp gateways/Drinks/Drink.h
+        gateways/Recipe.cpp gateways/Recipe.h
+        gateways/Drinks/Drinkgateway.cpp gateways/Drinks/Drinkgateway.h
+        DrinksTab.cpp DrinksTab.h
+        gateways/BankDetail/BankDetail.cpp gateways/BankDetail/BankDetail.h
+        gateways/BankDetail/BankDetailgateway.cpp gateways/BankDetail/BankDetailgateway.h
+        BankDetailTab.cpp BankDetailTab.h
+        gateways/Provider/Provider.cpp gateways/Provider/Provider.h gateways/Provider/ProviderGateway.cpp
+        gateways/Provider/ProviderGateway.h ProviderTab.cpp ProviderTab.h)
 target_link_directories(${PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} nanodbc fmt/include)
 target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} nanodbc fmt)

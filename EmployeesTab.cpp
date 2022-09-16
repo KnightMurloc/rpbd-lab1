@@ -169,9 +169,9 @@ void EmployeesTab::cancel_current() {
     std::cout << "cancel EmployeesTab" << std::endl;
 }
 
-void EmployeesTab::select_by_id(int entry_id) {
-//TODO
-}
+// void EmployeesTab::select_by_id(int entry_id) {
+// //TODO
+// }
 
 void EmployeesTab::find_order() {
     auto entry = dynamic_cast<Entry*>(this->getListBox()->get_selected_row());

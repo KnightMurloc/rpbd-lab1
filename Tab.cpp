@@ -74,3 +74,13 @@ int Tab::select_dialog() {
 
     return -1;
 }
+
+void Tab::select_by_id(int entry_id){
+    for(auto child : listBox->get_children()){
+        auto entry = dynamic_cast<IEntry*>(child);
+        if(entry->get_id() == entry_id){
+            listBox->select_row(*dynamic_cast<Gtk::ListBoxRow*>(entry));
+            break;
+        }
+    }
+}

@@ -18,11 +18,11 @@ const std::string &BankDetail::getCity() const {
     return city;
 }
 
-long long BankDetail::getTin() const {
+std::string BankDetail::getTin() const {
     return tin;
 }
 
-long long BankDetail::getSettlementAccount() const {
+std::string BankDetail::getSettlementAccount() const {
     return settlement_account;
 }
 
@@ -34,10 +34,10 @@ void BankDetail::setCity(const std::string &city) {
     BankDetail::city = city;
 }
 
-void BankDetail::setTin(long long int tin) {
+void BankDetail::setTin(std::string tin) {
     BankDetail::tin = tin;
 }
 
-void BankDetail::setSettlementAccount(long long int settlementAccount) {
+void BankDetail::setSettlementAccount(std::string settlementAccount) {
     settlement_account = settlementAccount;
 }

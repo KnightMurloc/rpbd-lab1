@@ -8,6 +8,8 @@
 #include "Tab.h"
 #include "gateways/BankDetail/BankDetail.h"
 #include "gateways/BankDetail/BankDetailgateway.h"
+#include "glibmm/refptr.h"
+#include "gtkmm/listboxrow.h"
 
 class BankDetailTab : public Tab {
 private:
@@ -22,17 +24,37 @@ private:
 
         explicit Entry(BankDetail detail);
 
+        BankDetail& get_bank_detail();
+
         int get_id() override;
     };
 
     BankDetailgateway gateway;
+
+    Glib::RefPtr<Gtk::Builder> builder;
+
+    Gtk::Box* info_box;
+    Gtk::Entry* name_entry;
+    Gtk::Entry* city_entry;
+    Gtk::Entry* tin_entry;
+    Gtk::Entry* settlement_entry;
+
+    void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
+
+    void select(Gtk::ListBoxRow* row);
+
+    void save_current();
+
+    void create();
+
+    void remove_entry();
+protected:
+    void fill_list(Gtk::ListBox *list) override;
+
 public:
     explicit BankDetailTab(TabManager* manager);
 
-    void select_by_id(int entry_id) override;
-
-protected:
-    void fill_list(Gtk::ListBox *list) override;
+//     void select_by_id(int entry_id) override;
 };
 
 

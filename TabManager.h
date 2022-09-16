@@ -18,7 +18,7 @@ enum class TabNames{
 class TabManager {
 private:
     Gtk::Notebook* tabs_container;
-    std::array<std::unique_ptr<Tab>,7> tabs;
+    std::array<std::unique_ptr<Tab>,8> tabs;
 public:
 
     explicit TabManager(Gtk::Notebook *tabsContainer);

@@ -54,7 +54,7 @@ public:
 
     void cancel_current();
 
-    void select_by_id(int entry_id) override;
+//     void select_by_id(int entry_id) override;
 
 //    int select_dialog() override;
 };

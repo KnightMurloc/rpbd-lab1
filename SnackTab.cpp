@@ -64,7 +64,7 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 void SnackTab::save_current(){
     auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
 
-    Snack snack = entry->get_snack();
+    Snack& snack = entry->get_snack();
 
 
     if(name_entry->get_text().empty()){
@@ -132,9 +132,6 @@ void SnackTab::save_current(){
         }
     );
 
-
-
-
     std::cout << "created" << std::endl;
     for(auto a : created){
         std::cout << a.first << " ";
@@ -159,9 +156,9 @@ void SnackTab::save_current(){
     gateway.save(snack);
 }
 
-void SnackTab::select_by_id(int entry_id) {
-
-}
+// void SnackTab::select_by_id(int entry_id) {
+//
+// }
 
 //int SnackTab::select_dialog() {
 //    return 0;

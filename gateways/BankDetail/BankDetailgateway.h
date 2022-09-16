@@ -12,6 +12,13 @@ class BankDetailgateway : public IGateway<BankDetail> {
 public:
     void save(BankDetail &data) override;
 
+    BankDetail create(
+        std::string bank_name,
+        std::string city,
+        std::string tin,
+        std::string settlement_account
+    );
+
     BankDetail get(int id) override;
 
     void remove(BankDetail &data) override;
