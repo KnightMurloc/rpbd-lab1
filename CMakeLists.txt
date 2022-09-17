@@ -41,7 +41,7 @@ add_executable(${PROJECT_NAME}
         gateways/BankDetail/BankDetailgateway.cpp gateways/BankDetail/BankDetailgateway.h
         BankDetailTab.cpp BankDetailTab.h
         gateways/Provider/Provider.cpp gateways/Provider/Provider.h gateways/Provider/ProviderGateway.cpp
-        gateways/Provider/ProviderGateway.h ProviderTab.cpp ProviderTab.h)
+        gateways/Provider/ProviderGateway.h ProviderTab.cpp ProviderTab.h gateways/Product/Product.cpp gateways/Product/Product.h gateways/Product/ProductGateway.cpp gateways/Product/ProductGateway.h)
 target_link_directories(${PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} nanodbc fmt/include)
 target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} nanodbc fmt)

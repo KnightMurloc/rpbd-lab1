@@ -6,6 +6,7 @@
 #define LAB1_PROVIDER_H
 
 #include <string>
+#include "../BankDetail/BankDetail.h"
 
 class Provider {
 private:
@@ -15,7 +16,7 @@ private:
     std::string phone_number;
     std::string fax;
     std::string email;
-    int bank_detail;
+    int bank_detail_id = -1;
 public:
 
     explicit Provider(int id);
@@ -32,7 +33,8 @@ public:
 
     [[nodiscard]] const std::string &get_email() const;
 
-    [[nodiscard]] int get_bank_detail() const;
+    [[nodiscard]] int get_bank_detail_id() const;
+    [[nodiscard]] BankDetail get_bank_detail();
 
     void set_name(const std::string &name);
 
@@ -44,7 +46,7 @@ public:
 
     void set_email(const std::string &email);
 
-    void set_bank_detail(int bankDetail);
+    void set_bank_detail_id(int bankDetail_id);
 };
 
 

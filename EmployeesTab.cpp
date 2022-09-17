@@ -252,6 +252,7 @@ void EmployeesTab::create() {
 
             find_button_dialog->set_sensitive(false);
 //            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*>(&EmployeesTab::select_order,oreder_link_dialog));
+            //TODO вынести из лямды
             select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order,oreder_link_dialog, get_tab_manager()));
 
 

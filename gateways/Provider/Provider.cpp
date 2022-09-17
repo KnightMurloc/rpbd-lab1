@@ -3,6 +3,7 @@
 //
 
 #include "Provider.h"
+#include "../BankDetail/BankDetailgateway.h"
 
 int Provider::get_id() const {
     return id;
@@ -50,10 +51,24 @@ void Provider::set_email(const std::string &email) {
 
 Provider::Provider(int id) : id(id) {}
 
-int Provider::get_bank_detail() const {
-    return bank_detail;
+int Provider::get_bank_detail_id() const {
+    return bank_detail_id;
 }
 
-void Provider::set_bank_detail(int bankDetail) {
-    bank_detail = bankDetail;
+void Provider::set_bank_detail_id(int bankDetail_id) {
+    bank_detail_id = bankDetail_id;
+}
+
+BankDetail Provider::get_bank_detail(){
+    if(bank_detail_id == -1){
+        throw GatewayException("not found");
+    }
+
+    BankDetailgateway gateway;
+    try{
+        return gateway.get(bank_detail_id);
+    }catch(GatewayException& e){
+        bank_detail_id = -1;
+        throw GatewayException("not found");
+    }
 }

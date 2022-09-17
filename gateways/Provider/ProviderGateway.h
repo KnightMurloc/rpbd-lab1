@@ -12,6 +12,15 @@ class ProviderGateway : IGateway<Provider> {
 public:
     void save(Provider &data) override;
 
+    Provider create(
+        std::string name,
+        std::string post_address,
+        std::string phone_number,
+        std::string fax,
+        std::string email,
+        int bank_detail
+    );
+
     Provider get(int id) override;
 
     void remove(Provider &data) override;

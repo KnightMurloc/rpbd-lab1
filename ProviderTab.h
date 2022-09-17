@@ -8,6 +8,7 @@
 #include "Tab.h"
 #include "gateways/Provider/Provider.h"
 #include "gateways/Provider/ProviderGateway.h"
+#include "gtkmm/builder.h"
 
 class ProviderTab : public Tab {
 private:
@@ -22,7 +23,7 @@ private:
 
         explicit Entry(Provider provider);
 
-        const Provider &get_provider() const;
+        Provider &get_provider();
 
         int get_id() override;
     };
@@ -46,6 +47,13 @@ private:
 
     static void select_deltail(Gtk::Label* label, TabManager* manager);
 
+    void save_current();
+
+    void create();
+
+    void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
+
+    void remove_entry();
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
