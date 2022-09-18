@@ -42,6 +42,9 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&ProductTab::remove_entry));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&ProductTab::select));
+
+    add_clumn_lable("название");
+    add_clumn_lable("цена");
 }
 
 void ProductTab::save_current() {

@@ -47,6 +47,12 @@ ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::create));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&ProviderTab::select));
+
+    add_clumn_lable("название");
+    add_clumn_lable("почтовый адрес");
+    add_clumn_lable("телефон");
+    add_clumn_lable("факс");
+    add_clumn_lable("email");
 }
 
 void ProviderTab::select(Gtk::ListBoxRow* row){

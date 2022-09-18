@@ -18,6 +18,7 @@ private:
     Gtk::Button* remove_button;
 
     Gtk::ListBox* listBox;
+    Gtk::Box* header;
 
     Gtk::ButtonBox* create_top_panel();
 
@@ -36,6 +37,8 @@ protected:
     };
 
     virtual void fill_list(Gtk::ListBox* list) = 0;
+
+    void add_clumn_lable(std::string title);
 public:
     Tab(TabManager* tab_manager);
 

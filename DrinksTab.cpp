@@ -48,6 +48,11 @@ DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinksTab::remove_entry));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&DrinksTab::select));
+
+    add_clumn_lable("название");
+    add_clumn_lable("крепость");
+    add_clumn_lable("размер");
+    add_clumn_lable("ёмкость подачи");
 }
 
 int DrinksTab::Entry::get_id() {

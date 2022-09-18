@@ -33,6 +33,11 @@ BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&BankDetailTab::remove_entry));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&BankDetailTab::select));
+
+    add_clumn_lable("название");
+    add_clumn_lable("город");
+    add_clumn_lable("ИНН");
+    add_clumn_lable("расчётный счёт");
 }
 
 void BankDetailTab::select(Gtk::ListBoxRow* row){

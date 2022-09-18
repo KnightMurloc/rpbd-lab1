@@ -59,6 +59,8 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&SnackTab::select));
 
+    add_clumn_lable("название");
+    add_clumn_lable("размер");
 }
 
 void SnackTab::save_current(){

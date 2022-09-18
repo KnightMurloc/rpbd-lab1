@@ -31,6 +31,11 @@ OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&OrderTab::select));
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&OrderTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&OrderTab::remove));
+
+    add_clumn_lable("причина");
+    add_clumn_lable("номер приказа");
+    add_clumn_lable("дата приказа");
+    add_clumn_lable("должность");
 }
 
 OrderTab::Entry::Entry(const Order &order) : order(order) {

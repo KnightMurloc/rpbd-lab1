@@ -43,6 +43,14 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     fill_list(getListBox());
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
+
+    add_clumn_lable("имя");
+    add_clumn_lable("фамилия");
+    add_clumn_lable("отчество");
+    add_clumn_lable("адрес");
+    add_clumn_lable("дата рождения");
+    add_clumn_lable("зарплата");
+    add_clumn_lable("должность");
 }
 
 void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {

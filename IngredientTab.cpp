@@ -29,6 +29,9 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::create));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&IngredientTab::select));
+
+    add_clumn_lable("название");
+    add_clumn_lable("еденицы");
 }
 
 // void IngredientTab::select_by_id(int entry_id) {

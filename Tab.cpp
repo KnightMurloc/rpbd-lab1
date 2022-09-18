@@ -3,11 +3,55 @@
 //
 
 #include "Tab.h"
+#include "gtkmm/eventbox.h"
+#include "gtkmm/label.h"
+#include "gtkmm/object.h"
+#include <iostream>
 
 Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
     set_orientation(Gtk::ORIENTATION_VERTICAL);
 
     this->add(*create_top_panel());
+
+    header = Gtk::make_managed<Gtk::Box>();
+    header->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+    header->set_homogeneous(true);
+
+    auto cursor = Gdk::Cursor::create(Gdk::CursorType::HAND1);
+
+    auto event_box = Gtk::make_managed<Gtk::EventBox>();
+    event_box->set_hexpand(true);
+
+//     auto label1 = Gtk::make_managed<Gtk::Label>("test1");
+//     label1->add_events(Gdk::POINTER_MOTION_MASK |
+//                            Gdk::POINTER_MOTION_HINT_MASK);
+//     event_box->signal_enter_notify_event().connect([cursor, label1](GdkEventCrossing* event){
+//         label1->get_window()->set_cursor(cursor);
+//        return false;
+//     });
+//
+//     event_box->signal_button_press_event().connect([](GdkEventButton* event){
+//         std::cout << "test" << std::endl;
+//         return false;
+//     });
+
+//     event_box->add(*label1);
+//     auto label2 = Gtk::make_managed<Gtk::Label>("test2");
+//     auto label3 = Gtk::make_managed<Gtk::Label>("test3");
+//     auto label4 = Gtk::make_managed<Gtk::Label>("test4");
+//     auto label5 = Gtk::make_managed<Gtk::Label>("test5");
+//     auto label6 = Gtk::make_managed<Gtk::Label>("test6");
+//     auto label7 = Gtk::make_managed<Gtk::Label>("test7");
+
+//     header->add(*event_box);
+//     header->add(*label2);
+//     header->add(*label3);
+//     header->add(*label4);
+//     header->add(*label5);
+//     header->add(*label6);
+//     header->add(*label7);
+
+
 
     auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
     scroll->set_vexpand(true);
@@ -16,7 +60,11 @@ Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
 
     listBox = Gtk::make_managed<Gtk::ListBox>();
 
-    scroll->add(*listBox);
+    auto box = Gtk::make_managed<Gtk::Box>();
+    box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+    scroll->add(*box);
+    box->add(*header);
+    box->add(*listBox);
 }
 
 Gtk::ButtonBox *Tab::create_top_panel() {
@@ -83,4 +131,9 @@ void Tab::select_by_id(int entry_id){
             break;
         }
     }
+}
+
+void Tab::add_clumn_lable(std::string title){
+    auto lable = Gtk::make_managed<Gtk::Label>(title);
+    header->add(*lable);
 }
