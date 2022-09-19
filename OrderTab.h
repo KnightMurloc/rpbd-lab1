@@ -6,7 +6,7 @@
 #define LAB1_ORDERTAB_H
 
 #include "Tab.h"
-#include "gateways/Orders/OrederGateway.h"
+#include "gateways/Orders/OrderGateway.h"
 #include "gateways/Orders/Order.h"
 
 class OrderTab : public Tab {
@@ -26,7 +26,7 @@ private:
         int get_id() override;
     };
 
-    OrederGateway gateway;
+    OrderGateway gateway;
     Glib::RefPtr<Gtk::Builder> builder;
     Gtk::Box* info_box;
     Gtk::Entry* reason_entry;

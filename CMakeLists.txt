@@ -23,7 +23,7 @@ add_executable(${PROJECT_NAME}
         gateways/DbInstance.cpp gateways/DbInstance.h
         gateways/Employeer/EmployeerGateway.cpp gateways/Employeer/EmployeerGateway.h
         gateways/Orders/Order.cpp gateways/Orders/Order.h
-        gateways/Orders/OrederGateway.cpp gateways/Orders/OrederGateway.h
+        gateways/Orders/OrderGateway.cpp gateways/Orders/OrderGateway.h
         OrderTab.cpp OrderTab.h
         TabManager.cpp TabManager.h
         gateways/Snacks/Snacks.cpp gateways/Snacks/Snacks.h

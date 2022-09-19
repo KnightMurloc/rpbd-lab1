@@ -264,8 +264,9 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
         ing_link->set_text(entry->get_product().get_ingredient().get_name());
         find_button_ing->set_sensitive(true);
 
-        ing_link->set_data("id",new int(entry->get_product().get_ingredient_id()),free);
+        ing_link->set_data("id",new int(entry->get_product().get_ingredient_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException&){
+        ing_link->set_text("none");
         find_button_ing->set_sensitive(false);
         ing_link->set_data("id",nullptr,free);
     }
@@ -277,8 +278,9 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
     try{
         provider_link->set_text(entry->get_product().get_provider().get_name());
         find_button_provider->set_sensitive(true);
-        provider_link->set_data("id", new int(entry->get_product().get_provider_id()),free);
+        provider_link->set_data("id", new int(entry->get_product().get_provider_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException&){
+        provider_link->set_text("none");
         find_button_provider->set_sensitive(false);
         provider_link->set_data("id",nullptr,free);
     }
@@ -289,17 +291,17 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
 void ProductTab::find_ing() {
     int* id = static_cast<int*>(ing_link->get_data("id"));
     if(id)
-        get_tab_manager()->select_on_tab(4,*id);
+        get_tab_manager()->select_on_tab(TabName::INGREDIENTS,*id);
 }
 
 void ProductTab::find_provider() {
     int* id = static_cast<int*>(provider_link->get_data("id"));
     if(id)
-        get_tab_manager()->select_on_tab(7,*id);
+        get_tab_manager()->select_on_tab(TabName::PROVIDER,*id);
 }
 
 void ProductTab::select_ing(Gtk::Label* label, TabManager* manager) {
-    int id = manager->select_dialog(4);
+    int id = manager->select_dialog(TabName::INGREDIENTS);
     if(id != -1){
         try {
             IngredientGateway ingredientGateway;
@@ -307,12 +309,12 @@ void ProductTab::select_ing(Gtk::Label* label, TabManager* manager) {
         }catch(GatewayException&e){
             return;
         }
-        label->set_data("id", new int(id), free);
+        label->set_data("id", new int(id), [](void* data){delete (int*) data;});
     }
 }
 
 void ProductTab::select_provider(Gtk::Label* label, TabManager* manager) {
-    int id = manager->select_dialog(7);
+    int id = manager->select_dialog(TabName::PROVIDER);
     if(id != -1){
         try {
             ProviderGateway providerGateway;
@@ -320,7 +322,7 @@ void ProductTab::select_provider(Gtk::Label* label, TabManager* manager) {
         }catch(GatewayException&e){
             return;
         }
-        label->set_data("id", new int(id), free);
+        label->set_data("id", new int(id), [](void* data){delete (int*) data;});
     }
 }
 

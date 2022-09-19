@@ -2,11 +2,11 @@
 // Created by victor on 08.09.2022.
 //
 
-#include "OrederGateway.h"
+#include "OrderGateway.h"
 #include "../DbInstance.h"
 #include <fmt/format.h>
 
-Order OrederGateway::get(int id) {
+Order OrderGateway::get(int id) {
     auto db = DbInstance::getInstance();
 
     auto response = db.exec("select * from orders where id = " + std::to_string(id));
@@ -23,7 +23,7 @@ Order OrederGateway::get(int id) {
     throw GatewayException("not found");
 }
 
-std::list<Order> OrederGateway::get_all() {
+std::list<Order> OrderGateway::get_all() {
     std::list<Order> result;
 
     auto db = DbInstance::getInstance();
@@ -43,7 +43,7 @@ std::list<Order> OrederGateway::get_all() {
     return result;
 }
 
-Order OrederGateway::create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post) {
+Order OrderGateway::create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post) {
     auto db = DbInstance::getInstance();
 
     auto response =
@@ -66,7 +66,7 @@ Order OrederGateway::create(const std::string &reason, int order_number, const s
     return Order(0);
 }
 
-void OrederGateway::save(Order &data) {
+void OrderGateway::save(Order &data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update orders set"
@@ -83,7 +83,7 @@ void OrederGateway::save(Order &data) {
     db.exec(sql);
 }
 
-void OrederGateway::remove(Order &data) {
+void OrderGateway::remove(Order &data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("delete from orders where id = {};", data.get_id());

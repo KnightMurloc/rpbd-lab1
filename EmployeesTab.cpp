@@ -6,7 +6,7 @@
 #include "Form.h"
 #include <iostream>
 #include <fmt/format.h>
-#include "gateways/Orders/OrederGateway.h"
+#include "gateways/Orders/OrderGateway.h"
 
 EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
@@ -15,7 +15,7 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     builder->get_widget("employees_info", info_box);
     builder->get_widget("first_name_entry", first_name_entry);
     builder->get_widget("last_name_entry", last_name_entry);
-    builder->get_widget("oreder_link", oreder_link);
+    builder->get_widget("oreder_link", order_link);
     builder->get_widget("emp_find_button", find_button);
     builder->get_widget("emp_select_button", select_button);
     builder->get_widget("patronymic_entry", patronymic_entry);
@@ -35,7 +35,7 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
     find_button->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::find_order));
 //    select_button->signal_clicked().connect(sigc::mem_fun<Gtk::Label*>(this,&EmployeesTab::select_order,oreder_link));
-    select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order,oreder_link, get_tab_manager()));
+    select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link, get_tab_manager()));
 
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::remove));
@@ -55,7 +55,6 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
 void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     auto entry = dynamic_cast<Entry*>(entry_row);
-
     if(entry == nullptr){
         return;
     }
@@ -73,19 +72,17 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     }
     first_name_entry->set_text(entry->getEmp().getFirstName());
     last_name_entry->set_text(entry->getEmp().getLastName());
-    //TODO чекать в классе и выкидывать исключение
     if(entry->getEmp().get_movement_id() != -1){
-
         try {
-            oreder_link->set_text(std::to_string(entry->getEmp().get_movement().get_order_number()));
-            oreder_link->set_data("id", new int(entry->getEmp().get_movement().get_id()),free);
+            order_link->set_text(std::to_string(entry->getEmp().get_movement().get_order_number()));
+            order_link->set_data("id", new int(entry->getEmp().get_movement().get_id()), [](void* data){delete (int*) data;});
             find_button->set_sensitive(true);
         } catch (GatewayException&) {
-            oreder_link->set_text("none");
+            order_link->set_text("none");
             find_button->set_sensitive(false);
         }
     }else{
-        oreder_link->set_text("none");
+        order_link->set_text("none");
         find_button->set_sensitive(false);
     }
 
@@ -102,6 +99,9 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
 
 void EmployeesTab::save_current() {
     auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
+    if(entry == nullptr){
+        return;
+    }
 
     Employeer& empl = entry->getEmp();
 
@@ -157,8 +157,8 @@ void EmployeesTab::save_current() {
     empl.setBirthDate(fmt::format("{}-{}-{}",year,month,day));
     empl.setPost(string_to_post(post_combobox->get_active_id()));
 
-    if(oreder_link->get_text() != "none") {
-        int* movement_id = static_cast<int*>(oreder_link->get_data("id"));
+    if(order_link->get_text() != "none") {
+        int* movement_id = static_cast<int*>(order_link->get_data("id"));
         empl.set_movement_id(*movement_id);
     }
 
@@ -177,28 +177,26 @@ void EmployeesTab::cancel_current() {
     std::cout << "cancel EmployeesTab" << std::endl;
 }
 
-// void EmployeesTab::select_by_id(int entry_id) {
-// //TODO
-// }
-
 void EmployeesTab::find_order() {
     auto entry = dynamic_cast<Entry*>(this->getListBox()->get_selected_row());
+    if(entry == nullptr){
+        return;
+    }
 //        this->get_tab_manager()->select_on_tab(1, entry->getEmp().getId());
-    get_tab_manager()->select_on_tab(2, entry->getEmp().get_movement_id());
+    get_tab_manager()->select_on_tab(TabName::ORDER, entry->getEmp().get_movement_id());
 }
 
 void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
-    int id = manager->select_dialog(2);
-    OrederGateway orederGateway;
+    int id = manager->select_dialog(TabName::ORDER);
+    if(id == -1){
+        return;
+    }
+    OrderGateway orderGateway;
     try {
-        label->set_text(std::to_string(orederGateway.get(id).get_order_number()));
-        label->set_data("id", new int(id), free);
+        label->set_text(std::to_string(orderGateway.get(id).get_order_number()));
+        label->set_data("id", new int(id), [](void* data){delete (int*) data;});
     }catch(std::exception&){}
 }
-
-//int EmployeesTab::select_dialog() {
-//    return 0;
-//}
 
 void EmployeesTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder) {
     Gtk::Entry* day_entry;
@@ -228,15 +226,27 @@ void EmployeesTab::create() {
     Gtk::Box* box;
     builder->get_widget("employees_info", box);
 
+    Gtk::Label* order_link_dialog;
+    Gtk::Button* find_button_dialog;
+    Gtk::Button* select_button_dialog;
+
+    builder->get_widget("oreder_link", order_link_dialog);
+    builder->get_widget("emp_find_button", find_button_dialog);
+    builder->get_widget("emp_select_button", select_button_dialog);
+
+    find_button_dialog->set_sensitive(false);
+//            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*>(&EmployeesTab::select_order,oreder_link_dialog));
+    select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link_dialog, get_tab_manager()));
+
     dynamic_cast<Gtk::Container*>(dialog->get_children()[0])->add(*box);
 
     dialog->signal_response().connect([this, dialog, builder](int response){
         if(response == Gtk::RESPONSE_OK) {
             Gtk::Entry* first_name_entry_dialog;
             Gtk::Entry* last_name_entry_dialog;
-            Gtk::Label* oreder_link_dialog; //TODO переименовать
-            Gtk::Button* find_button_dialog;
-            Gtk::Button* select_button_dialog;
+            Gtk::Label* order_link_dialog;
+//             Gtk::Button* find_button_dialog;
+//             Gtk::Button* select_button_dialog;
             Gtk::Entry* patronymic_entry_dialog;
             Gtk::Entry* address_entry_dialog;
             Gtk::Entry* day_entry_dialog;
@@ -247,9 +257,9 @@ void EmployeesTab::create() {
 
             builder->get_widget("first_name_entry", first_name_entry_dialog);
             builder->get_widget("last_name_entry", last_name_entry_dialog);
-            builder->get_widget("oreder_link", oreder_link_dialog);
-            builder->get_widget("emp_find_button", find_button_dialog);
-            builder->get_widget("emp_select_button", select_button_dialog);
+            builder->get_widget("oreder_link", order_link_dialog);
+//             builder->get_widget("emp_find_button", find_button_dialog);
+//             builder->get_widget("emp_select_button", select_button_dialog);
             builder->get_widget("patronymic_entry", patronymic_entry_dialog);
             builder->get_widget("address_entry", address_entry_dialog);
             builder->get_widget("day_entry", day_entry_dialog);
@@ -258,10 +268,9 @@ void EmployeesTab::create() {
             builder->get_widget("salary_entry", salary_entry_dialog);
             builder->get_widget("post_combobox", post_combobox_dialog);
 
-            find_button_dialog->set_sensitive(false);
-//            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*>(&EmployeesTab::select_order,oreder_link_dialog));
-            //TODO вынести из лямды
-            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order,oreder_link_dialog, get_tab_manager()));
+//             find_button_dialog->set_sensitive(false);
+// //            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*>(&EmployeesTab::select_order,oreder_link_dialog));
+//             select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link_dialog, get_tab_manager()));
 
 
             if(first_name_entry_dialog->get_text().empty()){
@@ -308,8 +317,8 @@ void EmployeesTab::create() {
                 return;
             }
             int movement_id;
-            if(oreder_link_dialog->get_text() != "none") {
-                movement_id = *static_cast<int*>(oreder_link_dialog->get_data("id"));
+            if(order_link_dialog->get_text() != "none") {
+                movement_id = *static_cast<int*>(order_link_dialog->get_data("id"));
             }else{
                 movement_id = -1;
             }

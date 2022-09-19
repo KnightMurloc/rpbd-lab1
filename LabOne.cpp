@@ -44,12 +44,3 @@ int LabOne::run() {
     }
     return gtk_app->run(*main_window);
 }
-
-//void LabOne::select_on_tab(int tab_id, int entry_id) {
-//    if(tab_id >= tabs.size()){
-//        return;//TODO выкидывать исключение
-//    }
-//
-//    tabs[tab_id]->select_by_id(entry_id);
-//    tabs_container->set_current_page(tab_id);
-//}

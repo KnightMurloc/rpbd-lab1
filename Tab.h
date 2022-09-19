@@ -47,7 +47,7 @@ public:
 //    virtual int select_dialog() = 0;
     int select_dialog();
 
-
+    void remove_entry_by_id(int id);
 };
 
 inline bool check_date(int day, int month, int year)

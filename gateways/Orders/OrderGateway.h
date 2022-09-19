@@ -2,12 +2,12 @@
 // Created by victor on 08.09.2022.
 //
 
-#ifndef LAB1_OREDERGATEWAY_H
-#define LAB1_OREDERGATEWAY_H
+#ifndef LAB1_ORDERGATEWAY_H
+#define LAB1_ORDERGATEWAY_H
 
 #include "Order.h"
 #include "../Gateway.h"
-class OrederGateway : public IGateway<Order> {
+class OrderGateway : public IGateway<Order> {
 public:
     void save(Order &data) override;
 
@@ -21,4 +21,4 @@ public:
 };
 
 
-#endif //LAB1_OREDERGATEWAY_H
+#endif //LAB1_ORDERGATEWAY_H

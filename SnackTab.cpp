@@ -65,6 +65,9 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
 void SnackTab::save_current(){
     auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
+    if(entry == nullptr){
+        return;
+    }
 
     Snack& snack = entry->get_snack();
 
@@ -158,13 +161,6 @@ void SnackTab::save_current(){
     gateway.save(snack);
 }
 
-// void SnackTab::select_by_id(int entry_id) {
-//
-// }
-
-//int SnackTab::select_dialog() {
-//    return 0;
-//}
 
 void SnackTab::select(Gtk::ListBoxRow* entry_row) {
     auto entry = dynamic_cast<Entry*>(entry_row);
@@ -198,8 +194,8 @@ void SnackTab::select(Gtk::ListBoxRow* entry_row) {
         row->add(*name_ing);
         row->add(*count_ing);
 
-        row->set_data("id", new int(ingredient.get_id()),free);
-        row->set_data("count", new int(std::get<1>(ing)), free);
+        row->set_data("id", new int(ingredient.get_id()),[](void* data){delete (int*) data;});
+        row->set_data("count", new int(std::get<1>(ing)), [](void* data){delete (int*) data;});
 
         ing_list->add(*row);
     }
@@ -218,7 +214,7 @@ void SnackTab::fill_list(Gtk::ListBox* list) {
 }
 
 void SnackTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
-    int ing_id = tab_manager->select_dialog(4);
+    int ing_id = tab_manager->select_dialog(TabName::INGREDIENTS);
     if(ing_id == -1){
         return;
     }
@@ -248,8 +244,8 @@ void SnackTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
         auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient.get_name());
         auto count_ing = Gtk::make_managed<Gtk::Label>(size_entry_dialog.get_text());
 
-        row->set_data("id", new int(ingredient.get_id()),free);
-        row->set_data("count", new int(std::stoi(size_entry_dialog.get_text())), free);
+        row->set_data("id", new int(ingredient.get_id()),[](void* data){delete (int*) data;});
+        row->set_data("count", new int(std::stoi(size_entry_dialog.get_text())), [](void* data){delete (int*) data;});
 
         row->add(*name_ing);
         row->add(*count_ing);

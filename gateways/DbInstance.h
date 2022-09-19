@@ -12,6 +12,13 @@ class DbInstance {
 private:
     nanodbc::connection connection;
     DbInstance();
+
+    bool check_table_exist(std::string table_name);
+    bool check_function_exist(std::string name);
+    bool check_trigger_exist(std::string name);
+    bool check_enum_exist(std::string name);
+
+    void init();
 public:
     static DbInstance& getInstance();
 

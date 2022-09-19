@@ -5,6 +5,7 @@
 #include "ProviderGateway.h"
 #include "../DbInstance.h"
 #include "Provider.h"
+#include "fmt/core.h"
 #include "fmt/format.h"
 
 void ProviderGateway::save(Provider &data) {
@@ -40,6 +41,7 @@ void ProviderGateway::save(Provider &data) {
         int bank_detail){
     auto db = DbInstance::getInstance();
 
+    fmt::print("create {}\n",bank_detail);
     std::string sql = fmt::format(
         "insert into provider(name, post_address, phone_number, fax, email, bank_detail) "
         "values('{}', '{}','{}','{}','{}',{}) returning id;",

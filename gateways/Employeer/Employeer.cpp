@@ -3,7 +3,7 @@
 //
 
 #include "Employeer.h"
-#include "../Orders/OrederGateway.h"
+#include "../Orders/OrderGateway.h"
 
 int Employeer::getId() const {
     return id;
@@ -92,7 +92,7 @@ Order Employeer::get_movement() {
     if(movement_id == -1){
         throw GatewayException("not found");
     }
-    OrederGateway gateway;
+    OrderGateway gateway;
 
     try {
         auto order = gateway.get(movement_id);

@@ -137,3 +137,15 @@ void Tab::add_clumn_lable(std::string title){
     auto lable = Gtk::make_managed<Gtk::Label>(title);
     header->add(*lable);
 }
+
+
+void Tab::remove_entry_by_id(int id){
+    for(auto child : listBox->get_children()){
+        auto entry = dynamic_cast<IEntry*>(child);
+        if(entry->get_id() == id){
+            listBox->remove(*child);
+            break;
+        }
+    }
+}
+

@@ -163,7 +163,6 @@ void IngredientTab::create(){
 
 void IngredientTab::remove_entry(){
     auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-
     if(entry == nullptr){
         return;
     }

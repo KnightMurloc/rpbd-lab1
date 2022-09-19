@@ -5,6 +5,8 @@
 #include "ProviderTab.h"
 
 #include "Form.h"
+#include "TabManager.h"
+#include "fmt/core.h"
 #include "gateways/BankDetail/BankDetail.h"
 #include "gateways/BankDetail/BankDetailgateway.h"
 #include "gateways/Gateway.h"
@@ -81,7 +83,7 @@ void ProviderTab::select(Gtk::ListBoxRow* row){
     try{
         BankDetail detail = entry->get_provider().get_bank_detail();
         detail_link->set_text(detail.getBankName());
-        //TODO сделать так во всех выделения памяти
+
         detail_link->set_data("id",new int(detail.getId()),[](void* data){delete (int*) data;});
     }catch(GatewayException& e){
         detail_link->set_text("none");
@@ -215,11 +217,14 @@ void ProviderTab::create(){
             }
 
             int* d_id_ptr = static_cast<int*>(detail_link_dialog->get_data("id"));
+
             int d_id;
             if(d_id_ptr == nullptr){
                 d_id = -1;
+            }else{
+                d_id = *d_id_ptr;
             }
-
+            fmt::print("create provider {}\n",*d_id_ptr);
 
             Provider provider = gateway.create(
               name_entry_dialog->get_text(),
@@ -257,6 +262,8 @@ void ProviderTab::remove_entry(){
     box->remove(*box->get_children()[0]);
 
     getListBox()->remove(*entry);
+
+    get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider().get_bank_detail_id());
 }
 
 void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
@@ -273,16 +280,22 @@ void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
 
 void ProviderTab::find_detail(){
     int* id = static_cast<int*>(detail_link->get_data("id"));
-    get_tab_manager()->select_on_tab(6,*id);
+    get_tab_manager()->select_on_tab(TabName::BACK_DETAIL,*id);
 }
 
 void ProviderTab::select_deltail(Gtk::Label* label, TabManager* manager){
-    int id = manager->select_dialog(6);
+    int id = manager->select_dialog(TabName::BACK_DETAIL);
+    if(id == -1){
+        fmt::print("not found\n");
+        return;
+    }
     BankDetailgateway detail_gateway;
     try {
         label->set_text(detail_gateway.get(id).getBankName());
         label->set_data("id", new int(id), [](void* data){std::cout << "delete" << std::endl; delete (int*) data;});
-    }catch(std::exception&){}
+    }catch(std::exception&){
+        fmt::print("not exception\n");
+    }
 }
 
 Provider &ProviderTab::Entry::get_provider() {

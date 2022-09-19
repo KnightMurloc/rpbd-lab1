@@ -32,15 +32,22 @@ TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContai
     tabs_container->append_page(*tabs[7], "поставщики");
 }
 
-void TabManager::select_on_tab(int tab_id, int entry_id) {
+void TabManager::select_on_tab(TabName tab_name, int entry_id) {
+    int tab_id = static_cast<int>(tab_name);
     if(tab_id >= tabs.size()){
-        return;//TODO выкидывать исключение
+        return;
     }
 
     tabs[tab_id]->select_by_id(entry_id);
     tabs_container->set_current_page(tab_id);
 }
 
-int TabManager::select_dialog(int tab_id) {
+int TabManager::select_dialog(TabName tab_name) {
+    int tab_id = static_cast<int>(tab_name);
     return tabs[tab_id]->select_dialog();
+}
+
+void TabManager::remove_on_tab(TabName tab_name, int id){
+    int tab_id = static_cast<int>(tab_name);
+    tabs[tab_id]->remove_entry_by_id(id);
 }

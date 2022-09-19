@@ -8,11 +8,15 @@ class TabManager;
 #include "Tab.h"
 
 //TODO использовать enum
-enum class TabNames{
+enum class TabName{
     EMPLOYEES,
     PRODUCT,
     ORDER,
-    SNACK
+    SNACK,
+    INGREDIENTS,
+    DRINKS,
+    BACK_DETAIL,
+    PROVIDER
 };
 
 class TabManager {
@@ -23,9 +27,11 @@ public:
 
     explicit TabManager(Gtk::Notebook *tabsContainer);
 
-    void select_on_tab(int tab_id, int entry_id);
+    void select_on_tab(TabName tab_name, int entry_id);
 
-    int select_dialog(int tab_id);
+    int select_dialog(TabName tab_name);
+
+    void remove_on_tab(TabName tab_name, int id);
 };
 
 

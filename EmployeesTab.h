@@ -39,7 +39,7 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
 
     Gtk::Entry* first_name_entry;
     Gtk::Entry* last_name_entry;
-    Gtk::Label* oreder_link; //TODO переименовать
+    Gtk::Label* order_link;
     Gtk::Button* find_button;
     Gtk::Button* select_button;
     Gtk::Entry* patronymic_entry;
