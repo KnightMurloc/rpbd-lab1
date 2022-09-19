@@ -15,7 +15,7 @@ public:
 
     Drink create(std::string name, int strength, int size, std::string container,std::vector<std::pair<int,int>> ings);
 
-    Drink get(int id) override;
+    std::shared_ptr<Drink> get(int id) override;
 
     void remove(Drink &data) override;
 

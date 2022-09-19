@@ -16,7 +16,7 @@ public:
 
     Snack create(std::string name, int size, std::vector<std::pair<int,int>> ings);
 
-    Snack get(int id) override;
+    std::shared_ptr<Snack> get(int id) override;
 
     void remove(Snack &data) override;
 

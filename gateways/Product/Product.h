@@ -8,6 +8,7 @@
 #include <string>
 #include "../Provider/ProviderGateway.h"
 #include "../Ingredients/IngredientGateway.h"
+#include <memory>
 
 class Product {
 private:
@@ -45,9 +46,9 @@ public:
 
     void set_provider_id(int providerId);
 
-    Ingredient get_ingredient();
+    std::shared_ptr<Ingredient> get_ingredient();
 
-    Provider get_provider();
+    std::shared_ptr<Provider> get_provider();
 
     void set_name(std::string name);
 };

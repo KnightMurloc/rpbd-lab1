@@ -9,23 +9,24 @@
 #include <ctime>
 #include "../posts.h"
 #include "../Orders/Order.h"
+#include "../entity.h"
+#include <memory>
 
-class Employeer {
+class Employeer : public IEntity {
 private:
     int id;
     std::string first_name;
     std::string last_name;
     std::string patronymic;
     std::string address;
-    std::string birth_date; //TODO конвертировать
+    std::string birth_date;
     float salary;
     int movement_id = -1;
     Post post;
 public:
     explicit Employeer(int id);
 
-    //TODO поменять названия методов
-    [[nodiscard]] int getId() const;
+    [[nodiscard]] int get_id() const override;
 
     [[nodiscard]] const std::string &getFirstName() const;
 
@@ -61,7 +62,7 @@ public:
 
     [[nodiscard]] std::string getPostAsString() const;
 
-    [[nodiscard]] Order get_movement();
+    [[nodiscard]] std::shared_ptr<Order> get_movement();
 };
 
 

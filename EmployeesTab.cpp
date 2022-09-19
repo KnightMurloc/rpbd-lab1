@@ -401,5 +401,5 @@ Employeer& EmployeesTab::Entry::getEmp() {
 }
 
 int EmployeesTab::Entry::get_id() {
-    return emp.getId();
+    return emp.get_id();
 }

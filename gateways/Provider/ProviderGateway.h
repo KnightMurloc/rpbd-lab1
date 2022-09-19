@@ -21,7 +21,7 @@ public:
         int bank_detail
     );
 
-    Provider get(int id) override;
+    std::shared_ptr<Provider> get(int id) override;
 
     void remove(Provider &data) override;
 

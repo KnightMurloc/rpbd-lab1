@@ -7,13 +7,29 @@
 
 #include <list>
 #include <string>
+#include <cache.hpp>
+#include <lru_cache_policy.hpp>
+#include <memory>
+
+constexpr std::size_t CACHE_SIZE = 32;
+
+template <typename Key, typename Value>
+using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
 
 template<class T>
 class IGateway{
+protected:
+
+//     constexpr static std::size_t CACHE_SIZE = 256;
+//     lru_cache_t<int, T> cache(32);
+//     caches::fixed_sized_cache<int, T, caches::LRUCachePolicy> cache(CACHE_SIZE);
+//     static std::unique_ptr<lru_cache_t<int,std::shared_ptr<T>>> cache;
+    static lru_cache_t<int,std::shared_ptr<T>> cache;
+
 public:
     virtual void save(T& data) = 0;
 
-    virtual T get(int id) = 0;
+    virtual std::shared_ptr<T> get(int id) = 0;
 
     virtual void remove(T& data) = 0;
 
@@ -36,6 +52,5 @@ public:
 private:
     std::string msg_;
 };
-
 
 #endif //LAB1_GATEWAY_H

@@ -9,6 +9,9 @@
 #include <fmt/format.h>
 #include <utility>
 
+template<>
+lru_cache_t<int,std::shared_ptr<Snack>> IGateway<Snack>::cache(CACHE_SIZE);
+
 void SnackGateway::save(Snack &data) {
     auto db = DbInstance::getInstance();
 
@@ -78,8 +81,29 @@ Snack SnackGateway::create(std::string name, int size, std::vector<std::pair<int
     return Snack(0,0);
 }
 
-Snack SnackGateway::get(int id) {
-    return Snack(0,0);
+std::shared_ptr<Snack> SnackGateway::get(int id) {
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+        auto db = DbInstance::getInstance();
+
+        std::string sql = fmt::format("select * from snacks where id = {};", id);
+
+        auto response = db.exec(sql);
+
+        if(response.next()){
+            Snack snack(response.get<int>(0),response.get<int>(3));
+            snack.set_name(response.get<std::string>(1));
+            snack.set_size(response.get<int>(2));
+
+            auto ptr = std::make_shared<Snack>(snack);
+            cache.Put(id, ptr);
+
+            return ptr;
+        }
+    }
+    throw GatewayException("not found");
 }
 
 void SnackGateway::remove(Snack &data) {
@@ -105,14 +129,6 @@ std::list<Snack> SnackGateway::get_all() {
         Snack snack(response.get<int>(0),response.get<int>(3));
         snack.set_name(response.get<std::string>(1));
         snack.set_size(response.get<int>(2));
-
-//         sql = fmt::format("select ingredient, count from recipe_to_ingredient where recipe = {};", recipe.get_id());
-//
-//         auto recipe_response = db.exec(sql);
-//
-//         while (recipe_response.next()){
-//             recipe.add_ingridient(recipe_response.get<int>(0),recipe_response.get<int>(1));
-//         }
         result.push_back(snack);
     }
 

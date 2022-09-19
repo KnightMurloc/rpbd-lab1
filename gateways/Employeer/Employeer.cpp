@@ -4,8 +4,9 @@
 
 #include "Employeer.h"
 #include "../Orders/OrderGateway.h"
+#include <exception>
 
-int Employeer::getId() const {
+int Employeer::get_id() const {
     return id;
 }
 
@@ -88,9 +89,11 @@ void Employeer::set_movement_id(int movementId) {
     movement_id = movementId;
 }
 
-Order Employeer::get_movement() {
+std::shared_ptr<Order> Employeer::get_movement() {
     if(movement_id == -1){
         throw GatewayException("not found");
+        //throw std::exception();
+     //   throw "test";
     }
     OrderGateway gateway;
 

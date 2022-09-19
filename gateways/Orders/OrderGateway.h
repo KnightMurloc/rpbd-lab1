@@ -13,7 +13,7 @@ public:
 
     Order create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post);
 
-    Order get(int id) override;
+    std::shared_ptr<Order> get(int id) override;
 
     void remove(Order &data) override;
 

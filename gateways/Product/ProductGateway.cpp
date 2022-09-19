@@ -6,7 +6,11 @@
 #include "../DbInstance.h"
 #include "Product.h"
 #include "fmt/format.h"
+#include <memory>
 #include <string>
+
+template<>
+lru_cache_t<int,std::shared_ptr<Product>> IGateway<Product>::cache(CACHE_SIZE);
 
 void ProductGateway::save(Product &data) {
     auto db = DbInstance::getInstance();
@@ -69,8 +73,38 @@ Product ProductGateway::create(
     throw GatewayException("insert erorr");
 }
 
-Product ProductGateway::get(int id) {
-    return Product(0);
+std::shared_ptr<Product> ProductGateway::get(int id) {
+
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+        auto db = DbInstance::getInstance();
+
+        std::string sql = fmt::format("select * from products where id = {};", id);
+
+        auto response = db.exec(sql);
+            if(response.next()){
+                Product product(response.get<int>(0));
+                if(!response.is_null(1)) {
+                    product.set_ingredient_id(response.get<int>(1));
+                }
+                product.set_price(response.get<float>(2));
+                product.set_delivery_terms(response.get<std::string>(3));
+                product.set_payment_terms(response.get<std::string>(4));
+                if(!response.is_null(5)) {
+                    product.set_provider_id(response.get<int>(5));
+                }
+                product.set_name(response.get<std::string>(6));
+
+                auto ptr = std::make_shared<Product>(product);
+                cache.Put(id, ptr);
+
+                return ptr;
+        }
+    }
+
+    throw GatewayException("not found");
 }
 
 void ProductGateway::remove(Product &data) {

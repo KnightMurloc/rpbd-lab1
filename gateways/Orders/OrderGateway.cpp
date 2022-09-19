@@ -5,21 +5,35 @@
 #include "OrderGateway.h"
 #include "../DbInstance.h"
 #include <fmt/format.h>
+#include <memory>
 
-Order OrderGateway::get(int id) {
-    auto db = DbInstance::getInstance();
+template<>
+lru_cache_t<int,std::shared_ptr<Order>> IGateway<Order>::cache(CACHE_SIZE);
 
-    auto response = db.exec("select * from orders where id = " + std::to_string(id));
+std::shared_ptr<Order> OrderGateway::get(int id) {
 
-    if(response.next()){
-        Order order(response.get<int>(0));
-        order.set_reason(response.get<std::string>(1));
-        order.set_order_number(response.get<int>(2));
-        order.set_post(string_to_post(response.get<std::string>(3)));
-        order.set_order_date(response.get<std::string>(4));
-        return order;
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+
+        auto db = DbInstance::getInstance();
+
+        auto response = db.exec("select * from orders where id = " + std::to_string(id));
+
+        if(response.next()){
+            Order order(response.get<int>(0));
+            order.set_reason(response.get<std::string>(1));
+            order.set_order_number(response.get<int>(2));
+            order.set_post(string_to_post(response.get<std::string>(3)));
+            order.set_order_date(response.get<std::string>(4));
+
+            auto ptr = std::make_shared<Order>(order);
+            cache.Put(id, ptr);
+
+            return ptr;
+        }
     }
-
     throw GatewayException("not found");
 }
 

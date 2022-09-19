@@ -16,7 +16,7 @@ public:
 
     Ingredient create(std::string name, Unit unit);
 
-    Ingredient get(int id) override;
+    std::shared_ptr<Ingredient> get(int id) override;
 
     void remove(Ingredient &data) override;
 

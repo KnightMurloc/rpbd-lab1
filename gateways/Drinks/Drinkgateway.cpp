@@ -8,6 +8,9 @@
 #include "fmt/core.h"
 #include <fmt/format.h>
 
+template<>
+lru_cache_t<int,std::shared_ptr<Drink>> IGateway<Drink>::cache(CACHE_SIZE);
+
 void Drinkgateway::save(Drink &data) {
     auto db = DbInstance::getInstance();
 
@@ -45,8 +48,31 @@ void Drinkgateway::save(Drink &data) {
     db.exec("commit;");
 }
 
-Drink Drinkgateway::get(int id) {
-    return Drink(0, 0);
+std::shared_ptr<Drink> Drinkgateway::get(int id) {
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+        auto db = DbInstance::getInstance();
+        std::string sql = fmt::format("select * from drinks where id = {};", id);
+
+        auto response = db.exec(sql);
+
+        if(response.next()){
+            Drink drink(response.get<int>(0),response.get<int>(5));
+
+            drink.setName(response.get<std::string>(1));
+            drink.setStrength(response.get<int>(2));
+            drink.setSize(response.get<int>(3));
+            drink.setContainer(response.get<std::string>(4));
+
+            auto ptr = std::make_shared<Drink>(drink);
+            cache.Put(id, ptr);
+
+            return ptr;
+        }
+    }
+    throw GatewayException("not found");
 }
 
 void Drinkgateway::remove(Drink &data) {

@@ -4,11 +4,43 @@
 
 #include "EmployeerGateway.h"
 #include "../DbInstance.h"
+#include "Employeer.h"
 #include <iostream>
 #include <fmt/format.h>
+#include <memory>
 
-Employeer EmployeerGateway::get(int id) {
-    return Employeer(id);
+template<>
+lru_cache_t<int,std::shared_ptr<Employeer>> IGateway<Employeer>::cache(CACHE_SIZE);
+
+std::shared_ptr<Employeer> EmployeerGateway::get(int id) {
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+        auto db = DbInstance::getInstance();
+        std::string sql = fmt::format("select * from employees where id = {}", id);
+        auto response = db.exec(sql);
+        if(response.next()){
+            Employeer employeer(response.get<int>(0));
+            employeer.setFirstName(response.get<std::string>(1));
+            employeer.setLastName(response.get<std::string>(2));
+            if(!response.is_null(3)) {
+                employeer.setPatronymic(response.get<std::string>(3));
+            }
+            employeer.setAddress(response.get<std::string>(4));
+            employeer.setBirthDate(response.get<std::string>(5));
+            employeer.setSalary(response.get<float>(6));
+            if(!response.is_null(7)) {
+                employeer.set_movement_id(response.get<int>(7));
+            }
+            employeer.setPost(string_to_post(response.get<std::string>(8)));
+
+            auto ptr = std::make_shared<Employeer>(employeer);
+            cache.Put(id, ptr);
+            return ptr;
+        }
+    }
+    throw GatewayException("not found");
 }
 
 std::list<Employeer> EmployeerGateway::get_all() {
@@ -19,7 +51,7 @@ std::list<Employeer> EmployeerGateway::get_all() {
 
     auto response = db.exec("select * from employees;");
 
-    //TODO сдлеать установку id  не публичной
+
     while(response.next()){
         Employeer employeer(response.get<int>(0));
         employeer.setFirstName(response.get<std::string>(1));
@@ -29,19 +61,10 @@ std::list<Employeer> EmployeerGateway::get_all() {
         }
         employeer.setAddress(response.get<std::string>(4));
         employeer.setBirthDate(response.get<std::string>(5));
-//        std::cout << response.get<std::string>(5) << std::endl;
-//        employeer.setBirthDate(response.get<st>(5));
         employeer.setSalary(response.get<float>(6));
         if(!response.is_null(7)) {
             employeer.set_movement_id(response.get<int>(7));
         }
-//        if(response.get<std::string>(8) == "waiter"){
-//            employeer.setPost(Post::waiter);
-//        }else if(response.get<std::string>(8) == "bartender"){
-//            employeer.setPost(Post::bartender);
-//        }else if(response.get<std::string>(8) == "manager"){
-//            employeer.setPost(Post::manager);
-//        }
         employeer.setPost(string_to_post(response.get<std::string>(8)));
         result.push_back(employeer);
     }
@@ -70,7 +93,7 @@ void EmployeerGateway::save(Employeer &data) {
                                   data.getSalary(),
                                   data.get_movement_id(),
                                   post_to_string(data.getPost()),
-                                  data.getId()
+                                  data.get_id()
                                   );
 
     db.exec(sql);

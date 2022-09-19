@@ -7,6 +7,9 @@
 #include "Ingredient.h"
 #include "fmt/format.h"
 
+template<>
+lru_cache_t<int,std::shared_ptr<Ingredient>> IGateway<Ingredient>::cache(CACHE_SIZE);
+
 void IngredientGateway::save(Ingredient &data) {
     auto db = DbInstance::getInstance();
 
@@ -19,19 +22,29 @@ void IngredientGateway::save(Ingredient &data) {
     db.exec(sql);
 }
 
-Ingredient IngredientGateway::get(int id) {
+std::shared_ptr<Ingredient> IngredientGateway::get(int id) {
 
-    auto db = DbInstance::getInstance();
+    auto result = cache.TryGet(id);
 
-    std::string sql = fmt::format("select * from ingredients where id = {};", id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+        auto db = DbInstance::getInstance();
 
-    auto response = db.exec(sql);
+        std::string sql = fmt::format("select * from ingredients where id = {};", id);
 
-    if(response.next()){
-        Ingredient ingredient(response.get<int>(0));
-        ingredient.set_name(response.get<std::string>(1));
-        ingredient.set_unit(string_to_unit(response.get<std::string>(2)));
-        return ingredient;
+        auto response = db.exec(sql);
+
+        if(response.next()){
+            Ingredient ingredient(response.get<int>(0));
+            ingredient.set_name(response.get<std::string>(1));
+            ingredient.set_unit(string_to_unit(response.get<std::string>(2)));
+
+            auto ptr = std::make_shared<Ingredient>(ingredient);
+            cache.Put(id, ptr);
+
+            return ptr;
+        }
     }
     throw GatewayException("not found");
 }

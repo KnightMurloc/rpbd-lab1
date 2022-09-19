@@ -19,7 +19,7 @@ public:
         std::string settlement_account
     );
 
-    BankDetail get(int id) override;
+    std::shared_ptr<BankDetail> get(int id) override;
 
     void remove(BankDetail &data) override;
 

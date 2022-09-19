@@ -5,8 +5,10 @@
 #include "ProviderGateway.h"
 #include "../DbInstance.h"
 #include "Provider.h"
-#include "fmt/core.h"
 #include "fmt/format.h"
+
+template<>
+lru_cache_t<int,std::shared_ptr<Provider>> IGateway<Provider>::cache(CACHE_SIZE);
 
 void ProviderGateway::save(Provider &data) {
     auto db = DbInstance::getInstance();
@@ -70,29 +72,37 @@ void ProviderGateway::save(Provider &data) {
     throw GatewayException("insert error");
 }
 
-Provider ProviderGateway::get(int id) {
-    auto db = DbInstance::getInstance();
+std::shared_ptr<Provider> ProviderGateway::get(int id) {
 
-    std::string sql = fmt::format("select * from provider where id = {};",id);
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
+    }else{
+        auto db = DbInstance::getInstance();
 
-    auto response = db.exec(sql);
+        std::string sql = fmt::format("select * from provider where id = {};",id);
 
-    if(response.next()){
-        Provider provider(response.get<int>(0));
-        provider.set_name(response.get<std::string>(1));
-        provider.set_post_address(response.get<std::string>(2));
-        provider.set_phone_number(response.get<std::string>(3));
-        provider.set_fax(response.get<std::string>(4));
-        provider.set_email(response.get<std::string>(5));
-        if(response.is_null(6)){
-            provider.set_bank_detail_id(-1);
-        }else{
-            provider.set_bank_detail_id(response.get<int>(6));
+        auto response = db.exec(sql);
+
+        if(response.next()){
+            Provider provider(response.get<int>(0));
+            provider.set_name(response.get<std::string>(1));
+            provider.set_post_address(response.get<std::string>(2));
+            provider.set_phone_number(response.get<std::string>(3));
+            provider.set_fax(response.get<std::string>(4));
+            provider.set_email(response.get<std::string>(5));
+            if(response.is_null(6)){
+                provider.set_bank_detail_id(-1);
+            }else{
+                provider.set_bank_detail_id(response.get<int>(6));
+            }
+
+            auto ptr = std::make_shared<Provider>(provider);
+            cache.Put(id, ptr);
+
+            return ptr;
         }
-
-        return provider;
     }
-
     throw GatewayException("not found");
 }
 

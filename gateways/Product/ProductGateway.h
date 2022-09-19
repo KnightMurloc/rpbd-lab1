@@ -21,7 +21,7 @@ public:
         std::string name
     );
 
-    Product get(int id) override;
+    std::shared_ptr<Product> get(int id) override;
 
     void remove(Product &data) override;
 

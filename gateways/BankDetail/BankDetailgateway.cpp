@@ -7,6 +7,10 @@
 #include "BankDetail.h"
 #include <iostream>
 #include <fmt/format.h>
+#include <memory>
+
+template<>
+lru_cache_t<int,std::shared_ptr<BankDetail>> IGateway<BankDetail>::cache(CACHE_SIZE);
 
 void BankDetailgateway::save(BankDetail &data) {
     auto db = DbInstance::getInstance();
@@ -61,27 +65,33 @@ BankDetail BankDetailgateway::create(
     return BankDetail(0);
 }
 
-BankDetail BankDetailgateway::get(int id) {
+std::shared_ptr<BankDetail> BankDetailgateway::get(int id) {
 
-    auto db = DbInstance::getInstance();
-
-    std::string sql = fmt::format("select * from bank_detail where id = {};", id);
-
-    auto response = db.exec(sql);
-
-    if(response.next()){
-        BankDetail detail(response.get<int>(0));
-        detail.setBankName(response.get<std::string>(1));
-        detail.setCity(response.get<std::string>(2));
-        detail.setTin(response.get<std::string>(3));
-        detail.setSettlementAccount(response.get<std::string>(4));
-
-        return detail;
+    auto result = cache.TryGet(id);
+    if(result.second){
+        return (*result.first).second;
     }else{
-        throw GatewayException("not found");
+        auto db = DbInstance::getInstance();
+
+        std::string sql = fmt::format("select * from bank_detail where id = {};", id);
+
+        auto response = db.exec(sql);
+
+        if(response.next()){
+            BankDetail detail(response.get<int>(0));
+            detail.setBankName(response.get<std::string>(1));
+            detail.setCity(response.get<std::string>(2));
+            detail.setTin(response.get<std::string>(3));
+            detail.setSettlementAccount(response.get<std::string>(4));
+
+            auto ptr = std::make_shared<BankDetail>(detail);
+            cache.Put(id, ptr);
+
+            return ptr;
+        }
     }
 
-    return BankDetail(0);
+    throw GatewayException("not found");
 }
 
 void BankDetailgateway::remove(BankDetail &data) {

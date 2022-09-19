@@ -59,7 +59,7 @@ void Provider::set_bank_detail_id(int bankDetail_id) {
     bank_detail_id = bankDetail_id;
 }
 
-BankDetail Provider::get_bank_detail(){
+std::shared_ptr<BankDetail> Provider::get_bank_detail(){
     if(bank_detail_id == -1){
         throw GatewayException("not found");
     }

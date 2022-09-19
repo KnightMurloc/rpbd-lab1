@@ -7,6 +7,7 @@
 
 #include <string>
 #include "../BankDetail/BankDetail.h"
+#include <memory>
 
 class Provider {
 private:
@@ -34,7 +35,7 @@ public:
     [[nodiscard]] const std::string &get_email() const;
 
     [[nodiscard]] int get_bank_detail_id() const;
-    [[nodiscard]] BankDetail get_bank_detail();
+    [[nodiscard]] std::shared_ptr<BankDetail> get_bank_detail();
 
     void set_name(const std::string &name);
 

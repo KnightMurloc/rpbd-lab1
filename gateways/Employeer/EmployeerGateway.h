@@ -8,6 +8,7 @@
 #include "../Gateway.h"
 #include "Employeer.h"
 
+
 class EmployeerGateway : public IGateway<Employeer> {
 public:
 
@@ -26,7 +27,7 @@ public:
 
     void remove(Employeer &data) override;
 
-    Employeer get(int id) override;
+    std::shared_ptr<Employeer> get(int id) override;
 
     std::list<Employeer> get_all() override;
 };

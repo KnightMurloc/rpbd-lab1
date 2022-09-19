@@ -50,7 +50,7 @@ void Product::set_provider_id(int providerId) {
     provider_id = providerId;
 }
 
-Ingredient Product::get_ingredient() {
+std::shared_ptr<Ingredient> Product::get_ingredient() {
     if(ingredient_id == -1){
         throw GatewayException("not found");
     }
@@ -64,7 +64,7 @@ Ingredient Product::get_ingredient() {
     }
 }
 
-Provider Product::get_provider() {
+std::shared_ptr<Provider> Product::get_provider() {
     if(provider_id == -1){
         throw GatewayException("not found");
     }
