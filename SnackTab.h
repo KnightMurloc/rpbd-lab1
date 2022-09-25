@@ -12,15 +12,15 @@
 class SnackTab : public Tab {
 private:
     class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        Snack snack;
+        std::shared_ptr<Snack> snack;
 
     public:
         Gtk::Label* name_label;
         Gtk::Label* size_label;
 
-        explicit Entry(Snack snack);
+        explicit Entry(std::shared_ptr<Snack> snack);
 
-        Snack &get_snack();
+        std::shared_ptr<Snack> get_snack();
 
         int get_id() override;
     };

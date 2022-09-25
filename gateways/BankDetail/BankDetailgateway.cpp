@@ -12,7 +12,7 @@
 template<>
 lru_cache_t<int,std::shared_ptr<BankDetail>> IGateway<BankDetail>::cache(CACHE_SIZE);
 
-void BankDetailgateway::save(BankDetail &data) {
+void BankDetailgateway::save(std::shared_ptr<BankDetail> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update bank_detail set"
@@ -21,17 +21,17 @@ void BankDetailgateway::save(BankDetail &data) {
         " tin = {},"
         " settlement_account = {}"
         " where id = {};",
-        data.getBankName(),
-        data.getCity(),
-        data.getTin(),
-        data.getSettlementAccount(),
-        data.getId()
+        data->getBankName(),
+        data->getCity(),
+        data->getTin(),
+        data->getSettlementAccount(),
+        data->get_id()
     );
 
     db.exec(sql);
 }
 
-BankDetail BankDetailgateway::create(
+std::shared_ptr<BankDetail> BankDetailgateway::create(
     std::string bank_name,
     std::string city,
     std::string tin,
@@ -59,10 +59,14 @@ BankDetail BankDetailgateway::create(
         detail.setCity(city);
         detail.setTin(tin);
         detail.setSettlementAccount(settlement_account);
-        return detail;
+
+        auto ptr = std::make_shared<BankDetail>(detail);
+        cache.Put(detail.get_id(), ptr);
+
+        return ptr;
     }
 
-    return BankDetail(0);
+    throw GatewayException("create error");
 }
 
 std::shared_ptr<BankDetail> BankDetailgateway::get(int id) {
@@ -94,18 +98,18 @@ std::shared_ptr<BankDetail> BankDetailgateway::get(int id) {
     throw GatewayException("not found");
 }
 
-void BankDetailgateway::remove(BankDetail &data) {
+void BankDetailgateway::remove(std::shared_ptr<BankDetail> data) {
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("delete from bank_detail where id = {};", data.getId());
+    std::string sql = fmt::format("delete from bank_detail where id = {};", data->get_id());
 
     db.exec(sql);
 }
 
-std::list<BankDetail> BankDetailgateway::get_all() {
+std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_all() {
     auto db = DbInstance::getInstance();
 
-    std::list<BankDetail> result;
+    std::list<std::shared_ptr<BankDetail>> result;
 
     auto response = db.exec("select * from bank_detail;");
 
@@ -116,7 +120,7 @@ std::list<BankDetail> BankDetailgateway::get_all() {
         detail.setTin(response.get<std::string>(3));
         detail.setSettlementAccount(response.get<std::string>(4));
 
-        result.push_back(detail);
+        result.push_back(std::make_shared<BankDetail>(detail));
     }
 
     return result;

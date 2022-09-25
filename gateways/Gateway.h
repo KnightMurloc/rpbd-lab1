@@ -27,13 +27,13 @@ protected:
     static lru_cache_t<int,std::shared_ptr<T>> cache;
 
 public:
-    virtual void save(T& data) = 0;
+    virtual void save(std::shared_ptr<T> data) = 0;
 
     virtual std::shared_ptr<T> get(int id) = 0;
 
-    virtual void remove(T& data) = 0;
+    virtual void remove(std::shared_ptr<T> data) = 0;
 
-    virtual std::list<T> get_all() = 0;
+    virtual std::list<std::shared_ptr<T>> get_all() = 0;
 };
 
 class GatewayException : public std::exception {

@@ -6,6 +6,7 @@
 #define LAB1_PRODUCTTAB_H
 
 #include <gtkmm.h>
+#include <memory>
 #include "Tab.h"
 #include "gateways/Product/ProductGateway.h"
 #include "gtkmm/entry.h"
@@ -13,15 +14,15 @@
 class ProductTab : public Tab {
 private:
     class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        Product product;
+        std::shared_ptr<Product> product;
 
     public:
         Gtk::Label* name_label;
         Gtk::Label* price_label;
 
-        explicit Entry(Product product);
+        explicit Entry(std::shared_ptr<Product> product);
 
-        Product &get_product();
+        std::shared_ptr<Product> get_product();
 
         int get_id() override;
     };

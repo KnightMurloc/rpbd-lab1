@@ -7,27 +7,28 @@
 #include "Drink.h"
 #include "fmt/core.h"
 #include <fmt/format.h>
+#include <memory>
 
 template<>
 lru_cache_t<int,std::shared_ptr<Drink>> IGateway<Drink>::cache(CACHE_SIZE);
 
-void Drinkgateway::save(Drink &data) {
+void Drinkgateway::save(std::shared_ptr<Drink> data) {
     auto db = DbInstance::getInstance();
 
     db.exec("begin transaction;");
 
     std::string sql = fmt::format("update drinks set name = '{}', strength = {}, size = {}, container = '{}' where id = {}",
-        data.getName(),
-        data.getStrength(),
-        data.getSize(),
-        data.getContainer(),
-        data.getId()
+        data->getName(),
+        data->getStrength(),
+        data->getSize(),
+        data->getContainer(),
+        data->get_id()
     );
 
     db.exec(sql);
 
-    auto rm_ing = data.getRecipe().get_removed_ingridients();
-    auto new_ing = data.getRecipe().get_new_ingridients();
+    auto rm_ing = data->getRecipe().get_removed_ingridients();
+    auto new_ing = data->getRecipe().get_new_ingridients();
 
     for(auto ing : rm_ing){
         sql = fmt::format("delete from recipe_to_ingredient where ingredient = {};",
@@ -38,7 +39,7 @@ void Drinkgateway::save(Drink &data) {
 
     for(auto ing : new_ing){
         sql = fmt::format("insert into recipe_to_ingredient(recipe, ingredient, count) values({},{},{});",
-            data.getRecipe().get_id(),
+            data->getRecipe().get_id(),
             std::get<0>(ing),
             std::get<1>(ing)
         );
@@ -75,17 +76,18 @@ std::shared_ptr<Drink> Drinkgateway::get(int id) {
     throw GatewayException("not found");
 }
 
-void Drinkgateway::remove(Drink &data) {
+void Drinkgateway::remove(std::shared_ptr<Drink> data) {
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("delete from drinks where id = {};", data.getId());
+    std::string sql = fmt::format("delete from drinks where id = {};", data->get_id());
+    cache.Remove(data->get_id());
     db.exec(sql);
 }
 
-std::list<Drink> Drinkgateway::get_all() {
+std::list<std::shared_ptr<Drink>> Drinkgateway::get_all() {
     auto db = DbInstance::getInstance();
 
-    std::list<Drink> result;
+    std::list<std::shared_ptr<Drink>> result;
 
     auto response = db.exec("select * from drinks;");
 
@@ -97,18 +99,18 @@ std::list<Drink> Drinkgateway::get_all() {
         drink.setSize(response.get<int>(3));
         drink.setContainer(response.get<std::string>(4));
 
-        result.push_back(drink);
+        result.push_back(std::make_shared<Drink>(drink));
     }
 
     return result;
 }
 
-std::list<std::pair<int,int>> Drinkgateway::get_ingredients(Drink& data){
+std::list<std::pair<int,int>> Drinkgateway::get_ingredients(std::shared_ptr<Drink> data){
     auto db = DbInstance::getInstance();
 
 
     std::string sql = fmt::format("select * from recipe_to_ingredient where recipe = {};",
-       data.getRecipe().get_id()
+       data->getRecipe().get_id()
     );
 
     auto response = db.exec(sql);
@@ -121,7 +123,7 @@ std::list<std::pair<int,int>> Drinkgateway::get_ingredients(Drink& data){
     return result;
 }
 
-Drink Drinkgateway::create(std::string name, int strength, int size, std::string container,std::vector<std::pair<int,int>> ings){
+std::shared_ptr<Drink> Drinkgateway::create(std::string name, int strength, int size, std::string container,std::vector<std::pair<int,int>> ings){
     auto db = DbInstance::getInstance();
 
     db.exec("begin transaction;");
@@ -132,7 +134,7 @@ Drink Drinkgateway::create(std::string name, int strength, int size, std::string
         r_id = response.get<int>(0);
     }else{
         db.exec("rollback;");
-        return Drink(0,0);
+        throw GatewayException("create error");
     }
 
     sql = fmt::format("insert into drinks(name, strength, size, container, recipes)"
@@ -161,9 +163,9 @@ Drink Drinkgateway::create(std::string name, int strength, int size, std::string
             db.exec(sql);
         }
         db.exec("commit;");
-        return drink;
+        return std::make_shared<Drink>(drink);
     }
     db.exec("rollback;");
 
-    return Drink(0,0);
+    throw GatewayException("create error");
 }

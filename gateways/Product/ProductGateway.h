@@ -10,9 +10,9 @@
 
 class ProductGateway : public IGateway<Product> {
 public:
-    void save(Product &data) override;
+    void save(std::shared_ptr<Product> data) override;
 
-    Product create(
+    std::shared_ptr<Product> create(
         int ingredient_id,
         float price,
         std::string delivery_terms,
@@ -23,9 +23,9 @@ public:
 
     std::shared_ptr<Product> get(int id) override;
 
-    void remove(Product &data) override;
+    void remove(std::shared_ptr<Product> data) override;
 
-    std::list<Product> get_all() override;
+    std::list<std::shared_ptr<Product>> get_all() override;
 };
 
 

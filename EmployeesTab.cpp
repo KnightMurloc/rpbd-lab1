@@ -63,19 +63,18 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
     //replace box
-
     if(box->get_children().empty() || box->get_children()[0]->get_name() != "employees_info"){
         if(!box->get_children().empty()){
             box->remove(*box->get_children()[0]);
         }
         box->add(*info_box);
     }
-    first_name_entry->set_text(entry->getEmp().getFirstName());
-    last_name_entry->set_text(entry->getEmp().getLastName());
-    if(entry->getEmp().get_movement_id() != -1){
+    first_name_entry->set_text(entry->get_emp()->getFirstName());
+    last_name_entry->set_text(entry->get_emp()->getLastName());
+    if(entry->get_emp()->get_movement_id() != -1){
         try {
-            order_link->set_text(std::to_string(entry->getEmp().get_movement().get_order_number()));
-            order_link->set_data("id", new int(entry->getEmp().get_movement().get_id()), [](void* data){delete (int*) data;});
+            order_link->set_text(std::to_string(entry->get_emp()->get_movement()->get_order_number()));
+            order_link->set_data("id", new int(entry->get_emp()->get_movement()->get_id()), [](void* data){delete (int*) data;});
             find_button->set_sensitive(true);
         } catch (GatewayException&) {
             order_link->set_text("none");
@@ -86,15 +85,15 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
         find_button->set_sensitive(false);
     }
 
-    patronymic_entry->set_text(entry->getEmp().getPatronymic());
-    address_entry->set_text(entry->getEmp().getAddress());
+    patronymic_entry->set_text(entry->get_emp()->getPatronymic());
+    address_entry->set_text(entry->get_emp()->getAddress());
     tm date{};
-    strptime(entry->getEmp().getBirthDate().c_str(), "%Y-%m-%d", &date);
+    strptime(entry->get_emp()->getBirthDate().c_str(), "%Y-%m-%d", &date);
     day_entry->set_text(std::to_string(date.tm_mday));
     month_entry->set_text(std::to_string(date.tm_mon + 1));
     year_entry->set_text(std::to_string(date.tm_year + 1900));
-    salary_entry->set_text(fmt::format("{}",entry->getEmp().getSalary()));
-    post_combobox->set_active_id(entry->getEmp().getPostAsString());
+    salary_entry->set_text(fmt::format("{}",entry->get_emp()->getSalary()));
+    post_combobox->set_active_id(entry->get_emp()->getPostAsString());
 }
 
 void EmployeesTab::save_current() {
@@ -103,7 +102,7 @@ void EmployeesTab::save_current() {
         return;
     }
 
-    Employeer& empl = entry->getEmp();
+    auto empl = entry->get_emp();
 
     if(first_name_entry->get_text().empty()){
         Gtk::MessageDialog message("не указано имя");
@@ -149,28 +148,28 @@ void EmployeesTab::save_current() {
         return;
     }
 
-    empl.setFirstName(first_name_entry->get_text());
-    empl.setLastName(last_name_entry->get_text());
-    empl.setPatronymic(patronymic_entry->get_text());
-    empl.setAddress(address_entry->get_text());
-    empl.setSalary(salary);
-    empl.setBirthDate(fmt::format("{}-{}-{}",year,month,day));
-    empl.setPost(string_to_post(post_combobox->get_active_id()));
+    empl->setFirstName(first_name_entry->get_text());
+    empl->setLastName(last_name_entry->get_text());
+    empl->setPatronymic(patronymic_entry->get_text());
+    empl->setAddress(address_entry->get_text());
+    empl->setSalary(salary);
+    empl->setBirthDate(fmt::format("{}-{}-{}",year,month,day));
+    empl->setPost(string_to_post(post_combobox->get_active_id()));
 
     if(order_link->get_text() != "none") {
         int* movement_id = static_cast<int*>(order_link->get_data("id"));
-        empl.set_movement_id(*movement_id);
+        empl->set_movement_id(*movement_id);
     }
 
     gateway.save(empl);
 
-    entry->first_name->set_text(empl.getFirstName());
-    entry->last_name->set_text(empl.getLastName());
-    entry->patronymic->set_text(empl.getPatronymic());
-    entry->address->set_text(empl.getAddress());
-    entry->birth_date->set_text(empl.getBirthDate());
-    entry->salary->set_text(std::to_string(empl.getSalary()));
-    entry->post->set_text(empl.getPostAsString());
+    entry->first_name->set_text(empl->getFirstName());
+    entry->last_name->set_text(empl->getLastName());
+    entry->patronymic->set_text(empl->getPatronymic());
+    entry->address->set_text(empl->getAddress());
+    entry->birth_date->set_text(empl->getBirthDate());
+    entry->salary->set_text(std::to_string(empl->getSalary()));
+    entry->post->set_text(empl->getPostAsString());
 }
 
 void EmployeesTab::cancel_current() {
@@ -183,7 +182,7 @@ void EmployeesTab::find_order() {
         return;
     }
 //        this->get_tab_manager()->select_on_tab(1, entry->getEmp().getId());
-    get_tab_manager()->select_on_tab(TabName::ORDER, entry->getEmp().get_movement_id());
+    get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement_id());
 }
 
 void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
@@ -193,7 +192,7 @@ void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
     }
     OrderGateway orderGateway;
     try {
-        label->set_text(std::to_string(orderGateway.get(id).get_order_number()));
+        label->set_text(std::to_string(orderGateway.get(id)->get_order_number()));
         label->set_data("id", new int(id), [](void* data){delete (int*) data;});
     }catch(std::exception&){}
 }
@@ -323,7 +322,7 @@ void EmployeesTab::create() {
                 movement_id = -1;
             }
 
-            Employeer empl = gateway.create(
+            auto empl = gateway.create(
                     first_name_entry_dialog->get_text(),
                     last_name_entry_dialog->get_text(),
                     patronymic_entry_dialog->get_text(),
@@ -354,7 +353,7 @@ void EmployeesTab::remove() {
         return;
     }
 
-    gateway.remove(entry->getEmp());
+    gateway.remove(entry->get_emp());
 
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -372,18 +371,18 @@ void EmployeesTab::fill_list(Gtk::ListBox* list) {
     }
 }
 
-EmployeesTab::Entry::Entry(const Employeer &emp) : emp(emp) {
+EmployeesTab::Entry::Entry(std::shared_ptr<Employeer> emp) : emp(emp) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
 
-    first_name = Gtk::make_managed<Gtk::Label>(emp.getFirstName());
-    last_name = Gtk::make_managed<Gtk::Label>(emp.getLastName());
-    patronymic = Gtk::make_managed<Gtk::Label>(emp.getPatronymic());
-    address = Gtk::make_managed<Gtk::Label>(emp.getAddress());
-    birth_date = Gtk::make_managed<Gtk::Label>(emp.getBirthDate());
-    salary = Gtk::make_managed<Gtk::Label>( fmt::format("{}",emp.getSalary()));
-    post = Gtk::make_managed<Gtk::Label>(emp.getPostAsString());
+    first_name = Gtk::make_managed<Gtk::Label>(emp->getFirstName());
+    last_name = Gtk::make_managed<Gtk::Label>(emp->getLastName());
+    patronymic = Gtk::make_managed<Gtk::Label>(emp->getPatronymic());
+    address = Gtk::make_managed<Gtk::Label>(emp->getAddress());
+    birth_date = Gtk::make_managed<Gtk::Label>(emp->getBirthDate());
+    salary = Gtk::make_managed<Gtk::Label>( fmt::format("{}",emp->getSalary()));
+    post = Gtk::make_managed<Gtk::Label>(emp->getPostAsString());
 
     box->add(*first_name);
     box->add(*last_name);
@@ -396,10 +395,10 @@ EmployeesTab::Entry::Entry(const Employeer &emp) : emp(emp) {
     this->add(*box);
 }
 
-Employeer& EmployeesTab::Entry::getEmp() {
+std::shared_ptr<Employeer> EmployeesTab::Entry::get_emp() {
     return emp;
 }
 
 int EmployeesTab::Entry::get_id() {
-    return emp.get_id();
+    return emp->get_id();
 }

@@ -6,11 +6,12 @@
 #include "../DbInstance.h"
 #include "Provider.h"
 #include "fmt/format.h"
+#include <memory>
 
 template<>
 lru_cache_t<int,std::shared_ptr<Provider>> IGateway<Provider>::cache(CACHE_SIZE);
 
-void ProviderGateway::save(Provider &data) {
+void ProviderGateway::save(std::shared_ptr<Provider> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format(
@@ -22,19 +23,19 @@ void ProviderGateway::save(Provider &data) {
         " email = '{}',"
         " bank_detail = {}"
         " where id = {};",
-        data.get_name(),
-        data.get_post_address(),
-        data.get_phone_number(),
-        data.get_fax(),
-        data.get_email(),
-        data.get_bank_detail_id() == -1 ? "NULL" : std::to_string(data.get_bank_detail_id()),
-        data.get_id()
+        data->get_name(),
+        data->get_post_address(),
+        data->get_phone_number(),
+        data->get_fax(),
+        data->get_email(),
+        data->get_bank_detail_id() == -1 ? "NULL" : std::to_string(data->get_bank_detail_id()),
+        data->get_id()
     );
 
     db.exec(sql);
 }
 
- Provider ProviderGateway::create(
+std::shared_ptr<Provider> ProviderGateway::create(
         std::string name,
         std::string post_address,
         std::string phone_number,
@@ -66,7 +67,11 @@ void ProviderGateway::save(Provider &data) {
         provider.set_email(email);
         provider.set_bank_detail_id(bank_detail);
 
-        return provider;
+        auto ptr = std::make_shared<Provider>(provider);
+
+        cache.Put(ptr->get_id(),ptr);
+
+        return ptr;
     }
 
     throw GatewayException("insert error");
@@ -106,15 +111,17 @@ std::shared_ptr<Provider> ProviderGateway::get(int id) {
     throw GatewayException("not found");
 }
 
-void ProviderGateway::remove(Provider &data) {
+void ProviderGateway::remove(std::shared_ptr<Provider> data) {
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("delete from provider where id = {};", data.get_id());
+    std::string sql = fmt::format("delete from provider where id = {};", data->get_id());
+
+    cache.Remove(data->get_id());
 
     db.exec(sql);
 }
 
-std::list<Provider> ProviderGateway::get_all() {
+std::list<std::shared_ptr<Provider>> ProviderGateway::get_all() {
 
     auto db = DbInstance::getInstance();
 
@@ -122,7 +129,7 @@ std::list<Provider> ProviderGateway::get_all() {
 
     auto response = db.exec(sql);
 
-    std::list<Provider> result;
+    std::list<std::shared_ptr<Provider>> result;
 
     while(response.next()){
         Provider provider(response.get<int>(0));
@@ -137,7 +144,11 @@ std::list<Provider> ProviderGateway::get_all() {
             provider.set_bank_detail_id(response.get<int>(6));
         }
 
-        result.push_back(provider);
+        auto ptr = std::make_shared<Provider>(provider);
+
+        cache.Put(ptr->get_id(),ptr);
+
+        result.push_back(ptr);
     }
 
     return result;

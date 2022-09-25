@@ -38,15 +38,15 @@ OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
     add_clumn_lable("должность");
 }
 
-OrderTab::Entry::Entry(const Order &order) : order(order) {
+OrderTab::Entry::Entry(std::shared_ptr<Order> order) : order(order) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
 
-    reason_label = Gtk::make_managed<Gtk::Label>(order.get_reason());
-    order_number_label = Gtk::make_managed<Gtk::Label>(std::to_string(order.get_order_number()));
-    order_date_label = Gtk::make_managed<Gtk::Label>(order.get_order_date());
-    post_label = Gtk::make_managed<Gtk::Label>(order.get_post_as_string());
+    reason_label = Gtk::make_managed<Gtk::Label>(order->get_reason());
+    order_number_label = Gtk::make_managed<Gtk::Label>(std::to_string(order->get_order_number()));
+    order_date_label = Gtk::make_managed<Gtk::Label>(order->get_order_date());
+    post_label = Gtk::make_managed<Gtk::Label>(order->get_post_as_string());
 
     box->add(*reason_label);
     box->add(*order_number_label);
@@ -56,12 +56,12 @@ OrderTab::Entry::Entry(const Order &order) : order(order) {
     this->add(*box);
 }
 
-Order& OrderTab::Entry::get_order() {
+std::shared_ptr<Order> OrderTab::Entry::get_order() {
     return order;
 }
 
 int OrderTab::Entry::get_id() {
-    return order.get_id();
+    return order->get_id();
 }
 
 void OrderTab::select(Gtk::ListBoxRow *entry_row) {
@@ -81,12 +81,12 @@ void OrderTab::select(Gtk::ListBoxRow *entry_row) {
         }
         box->add(*info_box);
     }
-    reason_entry->set_text(entry->get_order().get_reason());
-    order_number_entry->set_text(std::to_string(entry->get_order().get_order_number()));
-    post_combobox->set_active_id(entry->get_order().get_post_as_string());
+    reason_entry->set_text(entry->get_order()->get_reason());
+    order_number_entry->set_text(std::to_string(entry->get_order()->get_order_number()));
+    post_combobox->set_active_id(entry->get_order()->get_post_as_string());
 
     tm date{};
-    strptime(entry->get_order().get_order_date().c_str(), "%Y-%m-%d", &date);
+    strptime(entry->get_order()->get_order_date().c_str(), "%Y-%m-%d", &date);
     day_entry->set_text(std::to_string(date.tm_mday));
     month_entry->set_text(std::to_string(date.tm_mon + 1));
     year_entry->set_text(std::to_string(date.tm_year + 1900));
@@ -129,19 +129,19 @@ void OrderTab::save_current() {
         return;
     }
 
-    Order& order = entry->get_order();
+    auto order = entry->get_order();
 
-    order.set_reason(reason_entry->get_text());
-    order.set_order_number(std::stoi(order_number_entry->get_text()));
-    order.set_post(string_to_post(post_combobox->get_active_id()));
-    order.set_order_date(fmt::format("{}-{}-{}",year,month, day));
+    order->set_reason(reason_entry->get_text());
+    order->set_order_number(std::stoi(order_number_entry->get_text()));
+    order->set_post(string_to_post(post_combobox->get_active_id()));
+    order->set_order_date(fmt::format("{}-{}-{}",year,month, day));
 
     gateway.save(order);
 
-    entry->reason_label->set_text(order.get_reason());
-    entry->order_number_label->set_text(std::to_string(order.get_order_number()));
-    entry->order_date_label->set_text(order.get_order_date());
-    entry->post_label->set_text(order.get_post_as_string());
+    entry->reason_label->set_text(order->get_reason());
+    entry->order_number_label->set_text(std::to_string(order->get_order_number()));
+    entry->order_date_label->set_text(order->get_order_date());
+    entry->post_label->set_text(order->get_post_as_string());
 }
 
 void OrderTab::cancel_current() {
@@ -231,7 +231,7 @@ void OrderTab::create(){
                     return;
                 }
 
-                Order order = gateway.create(
+                auto order = gateway.create(
                         reason_entry_dialog->get_text(),
                         std::stoi(order_number_entry_dialog->get_text()),
                         fmt::format("{}-{}-{}",year, month, day),

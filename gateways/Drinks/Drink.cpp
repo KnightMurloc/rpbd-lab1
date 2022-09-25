@@ -42,6 +42,6 @@ void Drink::setContainer(const std::string &container) {
     Drink::container = container;
 }
 
-int Drink::getId() const {
+int Drink::get_id() const {
     return id;
 }

@@ -10,9 +10,9 @@
 
 class ProviderGateway : IGateway<Provider> {
 public:
-    void save(Provider &data) override;
+    void save(std::shared_ptr<Provider> data) override;
 
-    Provider create(
+    std::shared_ptr<Provider> create(
         std::string name,
         std::string post_address,
         std::string phone_number,
@@ -23,9 +23,9 @@ public:
 
     std::shared_ptr<Provider> get(int id) override;
 
-    void remove(Provider &data) override;
+    void remove(std::shared_ptr<Provider> data) override;
 
-    std::list<Provider> get_all() override;
+    std::list<std::shared_ptr<Provider>> get_all() override;
 };
 
 

@@ -3,9 +3,13 @@
 //
 
 #include "Tab.h"
+#include "gtkmm/enums.h"
 #include "gtkmm/eventbox.h"
 #include "gtkmm/label.h"
 #include "gtkmm/object.h"
+#include "gtkmm/searchbar.h"
+#include "gtkmm/searchentry.h"
+#include "gtkmm/stockid.h"
 #include <iostream>
 
 Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
@@ -53,18 +57,39 @@ Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
 
 
 
-    auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
+    scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
     scroll->set_vexpand(true);
+
+//     scroll->signal_edge_reached().connect([](Gtk::PositionType type){
+//         std::cout << (int) type << std::endl;
+//     });
 
     this->add(*scroll);
 
     listBox = Gtk::make_managed<Gtk::ListBox>();
+    listBox->set_vexpand(true);
 
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_VERTICAL);
     scroll->add(*box);
+
+    auto bottom_box = Gtk::make_managed<Gtk::Box>();
+    bottom_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+
+    search_entry = Gtk::make_managed<Gtk::SearchEntry>();
+    search_entry->set_vexpand(false);
+    search_entry->set_hexpand(true);
+
+    stop_search = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-cancel"));
+//     stop_search->set_label("");
+
+
     box->add(*header);
     box->add(*listBox);
+    bottom_box->add(*search_entry);
+    bottom_box->add(*stop_search);
+
+    this->add(*bottom_box);
 }
 
 Gtk::ButtonBox *Tab::create_top_panel() {

@@ -12,7 +12,7 @@
 template<>
 lru_cache_t<int,std::shared_ptr<Product>> IGateway<Product>::cache(CACHE_SIZE);
 
-void ProductGateway::save(Product &data) {
+void ProductGateway::save(std::shared_ptr<Product> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format(
@@ -24,19 +24,19 @@ void ProductGateway::save(Product &data) {
         " provider = {},"
         " name = '{}'"
         " where id = {};",
-        data.get_ingredient_id(),
-        data.get_price(),
-        data.get_delivery_terms(),
-        data.get_payment_terms(),
-        data.get_provider_id(),
-        data.get_name(),
-        data.get_id()
+        data->get_ingredient_id(),
+        data->get_price(),
+        data->get_delivery_terms(),
+        data->get_payment_terms(),
+        data->get_provider_id(),
+        data->get_name(),
+        data->get_id()
     );
 
     db.exec(sql);
 }
 
-Product ProductGateway::create(
+std::shared_ptr<Product> ProductGateway::create(
     int ingredient_id,
     float price,
     std::string delivery_terms,
@@ -67,10 +67,14 @@ Product ProductGateway::create(
         product.set_provider_id(provider_id);
         product.set_name(name);
 
-        return product;
+        auto ptr = std::make_shared<Product>(product);
+
+        cache.Put(ptr->get_id(), ptr);
+
+        return ptr;
     }
 
-    throw GatewayException("insert erorr");
+    throw GatewayException("create erorr");
 }
 
 std::shared_ptr<Product> ProductGateway::get(int id) {
@@ -107,19 +111,21 @@ std::shared_ptr<Product> ProductGateway::get(int id) {
     throw GatewayException("not found");
 }
 
-void ProductGateway::remove(Product &data) {
+void ProductGateway::remove(std::shared_ptr<Product> data) {
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("delete from products where id = {};",data.get_id());
+    std::string sql = fmt::format("delete from products where id = {};",data->get_id());
+
+    cache.Remove(data->get_id());
 
     db.exec(sql);
 }
 
-std::list<Product> ProductGateway::get_all() {
+std::list<std::shared_ptr<Product>> ProductGateway::get_all() {
 
     auto db = DbInstance::getInstance();
 
-    std::list<Product> result;
+    std::list<std::shared_ptr<Product>> result;
 
     auto response = db.exec("select * from products;");
 
@@ -136,7 +142,11 @@ std::list<Product> ProductGateway::get_all() {
         }
         product.set_name(response.get<std::string>(6));
 
-        result.push_back(product);
+        auto ptr = std::make_shared<Product>(product);
+
+        cache.Put(ptr->get_id(), ptr);
+
+        result.push_back(ptr);
     }
 
     return result;

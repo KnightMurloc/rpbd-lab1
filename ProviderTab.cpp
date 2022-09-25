@@ -74,17 +74,17 @@ void ProviderTab::select(Gtk::ListBoxRow* row){
         box->add(*info_box);
     }
 
-    name_entry->set_text(entry->get_provider().get_name());
-    address_entry->set_text(entry->get_provider().get_post_address());
-    entry_number->set_text(entry->get_provider().get_phone_number());
-    fax_entry->set_text(entry->get_provider().get_fax());
-    email_entry->set_text(entry->get_provider().get_email());
+    name_entry->set_text(entry->get_provider()->get_name());
+    address_entry->set_text(entry->get_provider()->get_post_address());
+    entry_number->set_text(entry->get_provider()->get_phone_number());
+    fax_entry->set_text(entry->get_provider()->get_fax());
+    email_entry->set_text(entry->get_provider()->get_email());
 
     try{
-        BankDetail detail = entry->get_provider().get_bank_detail();
-        detail_link->set_text(detail.getBankName());
+        std::shared_ptr<BankDetail> detail = entry->get_provider()->get_bank_detail();
+        detail_link->set_text(detail->getBankName());
 
-        detail_link->set_data("id",new int(detail.getId()),[](void* data){delete (int*) data;});
+        detail_link->set_data("id",new int(detail->get_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException& e){
         detail_link->set_text("none");
         detail_link->set_data("id",nullptr,[](void* data){delete (int*) data;});
@@ -98,7 +98,7 @@ void ProviderTab::save_current(){
         return;
     }
 
-    auto& provider = entry->get_provider();
+    auto provider = entry->get_provider();
 
     if(name_entry->get_text().empty()){
         Gtk::MessageDialog message("не указано имя");
@@ -130,23 +130,23 @@ void ProviderTab::save_current(){
         return;
     }
 
-    provider.set_name(name_entry->get_text());
-    provider.set_post_address(address_entry->get_text());
-    provider.set_phone_number(entry_number->get_text());
-    provider.set_fax(fax_entry->get_text());
-    provider.set_email(email_entry->get_text());
+    provider->set_name(name_entry->get_text());
+    provider->set_post_address(address_entry->get_text());
+    provider->set_phone_number(entry_number->get_text());
+    provider->set_fax(fax_entry->get_text());
+    provider->set_email(email_entry->get_text());
     int* d_id = static_cast<int*>(detail_link->get_data("id"));
 
     if(d_id)
-        provider.set_bank_detail_id(*d_id);
+        provider->set_bank_detail_id(*d_id);
 
     gateway.save(provider);
 
-    entry->name_label->set_text(provider.get_name());
-    entry->post_address_label->set_text(provider.get_post_address());
-    entry->phone_number_label->set_text(provider.get_phone_number());
-    entry->fax_label->set_text(provider.get_fax());
-    entry->email_label->set_text(provider.get_email());
+    entry->name_label->set_text(provider->get_name());
+    entry->post_address_label->set_text(provider->get_post_address());
+    entry->phone_number_label->set_text(provider->get_phone_number());
+    entry->fax_label->set_text(provider->get_fax());
+    entry->email_label->set_text(provider->get_email());
 }
 
 void ProviderTab::create(){
@@ -226,7 +226,7 @@ void ProviderTab::create(){
             }
             fmt::print("create provider {}\n",*d_id_ptr);
 
-            Provider provider = gateway.create(
+            auto provider = gateway.create(
               name_entry_dialog->get_text(),
               address_entry_dialog->get_text(),
               entry_number_dialog->get_text(),
@@ -263,7 +263,7 @@ void ProviderTab::remove_entry(){
 
     getListBox()->remove(*entry);
 
-    get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider().get_bank_detail_id());
+    get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail_id());
 }
 
 void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
@@ -291,27 +291,27 @@ void ProviderTab::select_deltail(Gtk::Label* label, TabManager* manager){
     }
     BankDetailgateway detail_gateway;
     try {
-        label->set_text(detail_gateway.get(id).getBankName());
+        label->set_text(detail_gateway.get(id)->getBankName());
         label->set_data("id", new int(id), [](void* data){std::cout << "delete" << std::endl; delete (int*) data;});
     }catch(std::exception&){
         fmt::print("not exception\n");
     }
 }
 
-Provider &ProviderTab::Entry::get_provider() {
+std::shared_ptr<Provider> ProviderTab::Entry::get_provider() {
     return provider;
 }
 
-ProviderTab::Entry::Entry(Provider provider) : provider(std::move(provider)) {
+ProviderTab::Entry::Entry(std::shared_ptr<Provider> provider) : provider(provider) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
 
-    name_label = Gtk::make_managed<Gtk::Label>(this->provider.get_name());
-    post_address_label = Gtk::make_managed<Gtk::Label>(this->provider.get_post_address());
-    phone_number_label = Gtk::make_managed<Gtk::Label>(this->provider.get_phone_number());
-    fax_label = Gtk::make_managed<Gtk::Label>(this->provider.get_fax());
-    email_label = Gtk::make_managed<Gtk::Label>(this->provider.get_email());
+    name_label = Gtk::make_managed<Gtk::Label>(this->provider->get_name());
+    post_address_label = Gtk::make_managed<Gtk::Label>(this->provider->get_post_address());
+    phone_number_label = Gtk::make_managed<Gtk::Label>(this->provider->get_phone_number());
+    fax_label = Gtk::make_managed<Gtk::Label>(this->provider->get_fax());
+    email_label = Gtk::make_managed<Gtk::Label>(this->provider->get_email());
 
     box->add(*name_label);
     box->add(*post_address_label);
@@ -323,7 +323,7 @@ ProviderTab::Entry::Entry(Provider provider) : provider(std::move(provider)) {
 }
 
 int ProviderTab::Entry::get_id() {
-    return provider.get_id();
+    return provider->get_id();
 }
 
 // void ProviderTab::select_by_id(int entry_id) {

@@ -12,9 +12,9 @@
 class EmployeerGateway : public IGateway<Employeer> {
 public:
 
-    void save(Employeer &data) override;
+    void save(std::shared_ptr<Employeer> data) override;
 
-    Employeer create(
+    std::shared_ptr<Employeer> create(
             std::string first_name,
             std::string last_name,
             std::string patronymic,
@@ -22,14 +22,13 @@ public:
             std::string birth_date,
             float salary,
             int movement_id,
-            Post post
-            );
+            Post post);
 
-    void remove(Employeer &data) override;
+    void remove(std::shared_ptr<Employeer> data) override;
 
     std::shared_ptr<Employeer> get(int id) override;
 
-    std::list<Employeer> get_all() override;
+    std::list<std::shared_ptr<Employeer>> get_all() override;
 };
 
 

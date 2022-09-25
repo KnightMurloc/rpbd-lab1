@@ -12,19 +12,19 @@
 template<>
 lru_cache_t<int,std::shared_ptr<Snack>> IGateway<Snack>::cache(CACHE_SIZE);
 
-void SnackGateway::save(Snack &data) {
+void SnackGateway::save(std::shared_ptr<Snack> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update snacks set name = '{}', size = {} where id = {}",
-        data.get_name(),
-        data.get_size(),
-        data.get_id()
+        data->get_name(),
+        data->get_size(),
+        data->get_id()
     );
 
     db.exec(sql);
 
-    auto rm_ing = data.get_recipe().get_removed_ingridients();
-    auto new_ing = data.get_recipe().get_new_ingridients();
+    auto rm_ing = data->get_recipe().get_removed_ingridients();
+    auto new_ing = data->get_recipe().get_new_ingridients();
 
     for(auto ing : rm_ing){
         sql = fmt::format("delete from recipe_to_ingredient where ingredient = {};",
@@ -35,7 +35,7 @@ void SnackGateway::save(Snack &data) {
 
     for(auto ing : new_ing){
         sql = fmt::format("insert into recipe_to_ingredient(recipe, ingredient, count) values({},{},{});",
-            data.get_recipe().get_id(),
+            data->get_recipe().get_id(),
             std::get<0>(ing),
             std::get<1>(ing)
         );
@@ -43,7 +43,7 @@ void SnackGateway::save(Snack &data) {
     }
 }
 
-Snack SnackGateway::create(std::string name, int size, std::vector<std::pair<int,int>> ings){
+std::shared_ptr<Snack> SnackGateway::create(std::string name, int size, std::vector<std::pair<int,int>> ings){
     auto db = DbInstance::getInstance();
 
     db.exec("begin transaction;");
@@ -53,7 +53,8 @@ Snack SnackGateway::create(std::string name, int size, std::vector<std::pair<int
     if(response.next()){
         r_id = response.get<int>(0);
     }else{
-        return Snack(0,0);
+        db.exec("rollback;");
+        throw GatewayException("create error");
     }
 
     sql = fmt::format("insert into snacks(name, size, recipes) values('{}',{},{}) returning id;",name,size,r_id);
@@ -74,11 +75,15 @@ Snack SnackGateway::create(std::string name, int size, std::vector<std::pair<int
             db.exec(sql);
         }
 
-        db.exec("commit;");
-        return snack;
-    }
+        auto ptr = std::make_shared<Snack>(snack);
 
-    return Snack(0,0);
+        cache.Put(ptr->get_id(), ptr);
+
+        db.exec("commit;");
+        return ptr;
+    }
+    db.exec("rollback;");
+    throw GatewayException("create error");
 }
 
 std::shared_ptr<Snack> SnackGateway::get(int id) {
@@ -106,16 +111,16 @@ std::shared_ptr<Snack> SnackGateway::get(int id) {
     throw GatewayException("not found");
 }
 
-void SnackGateway::remove(Snack &data) {
+void SnackGateway::remove(std::shared_ptr<Snack> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("delete from snacks where id = {};",
-            data.get_id());
+            data->get_id());
 
     db.exec(sql);
 }
 
-std::list<Snack> SnackGateway::get_all() {
+std::list<std::shared_ptr<Snack>> SnackGateway::get_all() {
 
     auto db = DbInstance::getInstance();
 
@@ -123,23 +128,28 @@ std::list<Snack> SnackGateway::get_all() {
 
     auto response = db.exec(sql);
 
-    std::list<Snack> result;
+    std::list<std::shared_ptr<Snack>> result;
 
     while(response.next()){
         Snack snack(response.get<int>(0),response.get<int>(3));
         snack.set_name(response.get<std::string>(1));
         snack.set_size(response.get<int>(2));
-        result.push_back(snack);
+
+        auto ptr = std::make_shared<Snack>(snack);
+
+        cache.Put(ptr->get_id(),ptr);
+
+        result.push_back(ptr);
     }
 
     return result;
 }
 
-std::list<std::pair<int,int>> SnackGateway::get_ingredients(Snack& data){
+std::list<std::pair<int,int>> SnackGateway::get_ingredients(std::shared_ptr<Snack> data){
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("select ingredient, count from recipe_to_ingredient where recipe = {};",
-        data.get_recipe().get_id()
+        data->get_recipe().get_id()
     );
 
     auto response = db.exec(sql);

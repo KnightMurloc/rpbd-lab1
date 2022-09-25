@@ -4,6 +4,7 @@
 
 #include "OrderGateway.h"
 #include "../DbInstance.h"
+#include "Order.h"
 #include <fmt/format.h>
 #include <memory>
 
@@ -37,8 +38,8 @@ std::shared_ptr<Order> OrderGateway::get(int id) {
     throw GatewayException("not found");
 }
 
-std::list<Order> OrderGateway::get_all() {
-    std::list<Order> result;
+std::list<std::shared_ptr<Order>> OrderGateway::get_all() {
+    std::list<std::shared_ptr<Order>> result;
 
     auto db = DbInstance::getInstance();
 
@@ -51,13 +52,17 @@ std::list<Order> OrderGateway::get_all() {
         order.set_post(string_to_post(response.get<std::string>(3)));
         order.set_order_date(response.get<std::string>(4));
 
-        result.push_back(order);
+        auto ptr = std::make_shared<Order>(order);
+
+        cache.Put(ptr->get_id(), ptr);
+
+        result.push_back(ptr);
     }
 
     return result;
 }
 
-Order OrderGateway::create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post) {
+std::shared_ptr<Order> OrderGateway::create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post) {
     auto db = DbInstance::getInstance();
 
     auto response =
@@ -74,13 +79,18 @@ Order OrderGateway::create(const std::string &reason, int order_number, const st
         order.set_order_number(order_number);
         order.set_order_date(order_date);
         order.set_post(string_to_post(post));
-        return order;
+
+        auto ptr = std::make_shared<Order>(order);
+
+        cache.Put(ptr->get_id(),ptr);
+
+        return ptr;
     }
 
-    return Order(0);
+    throw GatewayException("create error");
 }
 
-void OrderGateway::save(Order &data) {
+void OrderGateway::save(std::shared_ptr<Order> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update orders set"
@@ -89,18 +99,20 @@ void OrderGateway::save(Order &data) {
                                   " order_date = '{}',"
                                   " post = '{}'"
                                   " where id = {};",
-                                  data.get_reason(),
-                                  data.get_order_number(),
-                                  data.get_order_date(),
-                                  data.get_post_as_string(),
-                                  data.get_id());
+                                  data->get_reason(),
+                                  data->get_order_number(),
+                                  data->get_order_date(),
+                                  data->get_post_as_string(),
+                                  data->get_id());
     db.exec(sql);
 }
 
-void OrderGateway::remove(Order &data) {
+void OrderGateway::remove(std::shared_ptr<Order> data) {
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("delete from orders where id = {};", data.get_id());
+    std::string sql = fmt::format("delete from orders where id = {};", data->get_id());
+
+    cache.Remove(data->get_id());
 
     db.exec(sql);
 }

@@ -4,6 +4,7 @@
 
 #include "SnackTab.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <iostream>
@@ -69,7 +70,7 @@ void SnackTab::save_current(){
         return;
     }
 
-    Snack& snack = entry->get_snack();
+    auto snack = entry->get_snack();
 
 
     if(name_entry->get_text().empty()){
@@ -140,19 +141,19 @@ void SnackTab::save_current(){
     std::cout << "created" << std::endl;
     for(auto a : created){
         std::cout << a.first << " ";
-        snack.get_recipe().add_ingridient(a.first,a.second);
+        snack->get_recipe().add_ingridient(a.first,a.second);
     }
     std::cout << std::endl;
 
     std::cout << "removed" << std::endl;
     for(auto a : removed){
         std::cout <<  a.first << " ";
-        snack.get_recipe().remove_ingridient(a.first);
+        snack->get_recipe().remove_ingridient(a.first);
     }
     std::cout << std::endl;
 
-    snack.set_name(name_entry->get_text());
-    snack.set_size(std::stoi(size_entry->get_text()));
+    snack->set_name(name_entry->get_text());
+    snack->set_size(std::stoi(size_entry->get_text()));
 
 
     entry->name_label->set_text(name_entry->get_text());
@@ -184,24 +185,24 @@ void SnackTab::select(Gtk::ListBoxRow* entry_row) {
     }
 
     for(auto& ing : gateway.get_ingredients(entry->get_snack())){
-        Ingredient ingredient = ingredientGateway.get(std::get<0>(ing));
+        std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(std::get<0>(ing));
         auto row = Gtk::make_managed<Gtk::Box>();
         row->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         row->set_homogeneous(true);
 
-        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient.get_name());
+        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient->get_name());
         auto count_ing = Gtk::make_managed<Gtk::Label>(std::to_string(std::get<1>(ing)));
         row->add(*name_ing);
         row->add(*count_ing);
 
-        row->set_data("id", new int(ingredient.get_id()),[](void* data){delete (int*) data;});
+        row->set_data("id", new int(ingredient->get_id()),[](void* data){delete (int*) data;});
         row->set_data("count", new int(std::get<1>(ing)), [](void* data){delete (int*) data;});
 
         ing_list->add(*row);
     }
 
-    name_entry->set_text(entry->get_snack().get_name());
-    size_entry->set_text(std::to_string(entry->get_snack().get_size()));
+    name_entry->set_text(entry->get_snack()->get_name());
+    size_entry->set_text(std::to_string(entry->get_snack()->get_size()));
     ing_list->show_all();
 }
 
@@ -235,16 +236,16 @@ void SnackTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
 
     if(dialog.run() == Gtk::RESPONSE_OK){
         IngredientGateway ingredientGateway;
-        Ingredient ingredient = ingredientGateway.get(ing_id);
+        std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(ing_id);
 
         auto row = Gtk::make_managed<Gtk::Box>();
         row->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         row->set_homogeneous(true);
 
-        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient.get_name());
+        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient->get_name());
         auto count_ing = Gtk::make_managed<Gtk::Label>(size_entry_dialog.get_text());
 
-        row->set_data("id", new int(ingredient.get_id()),[](void* data){delete (int*) data;});
+        row->set_data("id", new int(ingredient->get_id()),[](void* data){delete (int*) data;});
         row->set_data("count", new int(std::stoi(size_entry_dialog.get_text())), [](void* data){delete (int*) data;});
 
         row->add(*name_ing);
@@ -332,7 +333,7 @@ void SnackTab::create(){
                 ings.push_back(std::make_pair(*id, *count));
             }
 
-            Snack snack = gateway.create(name_entry_dialog->get_text(),std::stoi(size_entry_dialog->get_text()),ings);
+            auto snack = gateway.create(name_entry_dialog->get_text(),std::stoi(size_entry_dialog->get_text()),ings);
 
             auto entry = Gtk::make_managed<Entry>(snack);
 
@@ -365,7 +366,7 @@ void SnackTab::remove_entry() {
     getListBox()->remove(*entry);
 }
 
-SnackTab::Entry::Entry(Snack snack) : snack(std::move(snack)) {
+SnackTab::Entry::Entry(std::shared_ptr<Snack> snack) : snack(snack) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
@@ -373,9 +374,9 @@ SnackTab::Entry::Entry(Snack snack) : snack(std::move(snack)) {
     name_label = Gtk::make_managed<Gtk::Label>();
     size_label = Gtk::make_managed<Gtk::Label>();
 
-    std::cout << this->snack.get_name() << std::endl;
-    name_label->set_text(this->snack.get_name());
-    size_label->set_text(std::to_string(this->snack.get_size()));
+//     std::cout << this->snack->get_name() << std::endl;
+    name_label->set_text(this->snack->get_name());
+    size_label->set_text(std::to_string(this->snack->get_size()));
 
     box->add(*name_label);
     box->add(*size_label);
@@ -384,10 +385,10 @@ SnackTab::Entry::Entry(Snack snack) : snack(std::move(snack)) {
     this->show_all();
 }
 
-Snack &SnackTab::Entry::get_snack() {
+std::shared_ptr<Snack> SnackTab::Entry::get_snack() {
     return snack;
 }
 
 int SnackTab::Entry::get_id() {
-    return snack.get_id();
+    return snack->get_id();
 }

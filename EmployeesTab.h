@@ -12,7 +12,7 @@
 class EmployeesTab : public Tab {
 private:
 class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        Employeer emp;
+        std::shared_ptr<Employeer> emp;
 
     public:
         Gtk::Label* first_name;
@@ -24,9 +24,9 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
         Gtk::Label* post;
 
     public:
-        explicit Entry(const Employeer &emp);
+        explicit Entry(std::shared_ptr<Employeer> emp);
 
-        Employeer& getEmp();
+        std::shared_ptr<Employeer> get_emp();
 
     int get_id() override;
 };

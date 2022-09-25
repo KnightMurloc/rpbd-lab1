@@ -12,16 +12,16 @@
 class OrderTab : public Tab {
 private:
     class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        Order order;
+        std::shared_ptr<Order> order;
     public:
         Gtk::Label* reason_label;
         Gtk::Label* order_number_label;
         Gtk::Label* order_date_label;
         Gtk::Label* post_label;
 
-        explicit Entry(const Order &order);
+        explicit Entry(std::shared_ptr<Order> order);
 
-        Order& get_order();
+        std::shared_ptr<Order> get_order();
 
         int get_id() override;
     };

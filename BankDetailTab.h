@@ -14,7 +14,7 @@
 class BankDetailTab : public Tab {
 private:
     class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        BankDetail detail;
+        std::shared_ptr<BankDetail> detail;
     public:
 
         Gtk::Label* name_label;
@@ -22,9 +22,9 @@ private:
         Gtk::Label* tin_label;
         Gtk::Label* account_label;
 
-        explicit Entry(BankDetail detail);
+        explicit Entry(std::shared_ptr<BankDetail> detail);
 
-        BankDetail& get_bank_detail();
+        std::shared_ptr<BankDetail> get_bank_detail();
 
         int get_id() override;
     };

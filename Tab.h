@@ -5,6 +5,8 @@
 #ifndef LAB1_TAB_H
 #define LAB1_TAB_H
 
+#include "gtkmm/button.h"
+#include "gtkmm/searchentry.h"
 #include <gtkmm.h>
 #include <memory>
 class Tab;
@@ -12,6 +14,7 @@ class Tab;
 
 class Tab : public Gtk::Box {
 private:
+
     TabManager* tab_manager;
 
     Gtk::Button* add_button;
@@ -23,6 +26,12 @@ private:
     Gtk::ButtonBox* create_top_panel();
 
 protected:
+    int first_id;
+    int last_id;
+    Gtk::ScrolledWindow* scroll;
+    Gtk::SearchEntry* search_entry;
+    Gtk::Button* stop_search;
+
     TabManager* get_tab_manager() const;
 
     Gtk::Button *getAddButton() const;
@@ -36,9 +45,17 @@ protected:
         virtual int get_id() = 0;
     };
 
+    template<typename T>
+    class ISearch{
+    public:
+        virtual std::list<std::shared_ptr<T>> get_great_then(int id, int count) = 0;
+        virtual std::list<std::shared_ptr<T>> get_less_then(int id, int count) = 0;
+    };
+
     virtual void fill_list(Gtk::ListBox* list) = 0;
 
     void add_clumn_lable(std::string title);
+
 public:
     Tab(TabManager* tab_manager);
 

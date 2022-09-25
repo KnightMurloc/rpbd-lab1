@@ -57,10 +57,10 @@ void BankDetailTab::select(Gtk::ListBoxRow* row){
         box->add(*info_box);
     }
 
-    name_entry->set_text(entry->get_bank_detail().getBankName());
-    city_entry->set_text(entry->get_bank_detail().getCity());
-    tin_entry->set_text(entry->get_bank_detail().getTin());
-    settlement_entry->set_text(entry->get_bank_detail().getSettlementAccount());
+    name_entry->set_text(entry->get_bank_detail()->getBankName());
+    city_entry->set_text(entry->get_bank_detail()->getCity());
+    tin_entry->set_text(entry->get_bank_detail()->getTin());
+    settlement_entry->set_text(entry->get_bank_detail()->getSettlementAccount());
 }
 
 void BankDetailTab::save_current(){
@@ -93,17 +93,17 @@ void BankDetailTab::save_current(){
         return;
     }
 
-    auto& detail = entry->get_bank_detail();
+    auto detail = entry->get_bank_detail();
 
-    detail.setBankName(name_entry->get_text());
-    detail.setCity(city_entry->get_text());
-    detail.setTin(tin_entry->get_text());
-    detail.setSettlementAccount(settlement_entry->get_text());
+    detail->setBankName(name_entry->get_text());
+    detail->setCity(city_entry->get_text());
+    detail->setTin(tin_entry->get_text());
+    detail->setSettlementAccount(settlement_entry->get_text());
 
     gateway.save(detail);
 
-    entry->name_label->set_text(detail.getBankName());
-    entry->city_label->set_text(detail.getCity());
+    entry->name_label->set_text(detail->getBankName());
+    entry->city_label->set_text(detail->getCity());
     entry->tin_label->set_text(tin_entry->get_text());
     entry->account_label->set_text(settlement_entry->get_text().substr(0,10));
 }
@@ -158,7 +158,7 @@ void BankDetailTab::create(){
                 return;
             }
 
-            BankDetail detail = gateway.create(
+            auto detail = gateway.create(
               name_entry_dialog->get_text(),
               city_entry_dialog->get_text(),
               tin_entry_dialog->get_text(),
@@ -206,17 +206,17 @@ void BankDetailTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
 }
 
 int BankDetailTab::Entry::get_id() {
-    return detail.getId();
+    return detail->get_id();
 }
 
-BankDetailTab::Entry::Entry(BankDetail detail) : detail(detail) {
+BankDetailTab::Entry::Entry(std::shared_ptr<BankDetail> detail) : detail(detail) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
-    name_label = Gtk::make_managed<Gtk::Label>(this->detail.getBankName());
-    city_label = Gtk::make_managed<Gtk::Label>(this->detail.getCity());
-    tin_label = Gtk::make_managed<Gtk::Label>(this->detail.getTin());
-    account_label = Gtk::make_managed<Gtk::Label>(this->detail.getSettlementAccount());
+    name_label = Gtk::make_managed<Gtk::Label>(this->detail->getBankName());
+    city_label = Gtk::make_managed<Gtk::Label>(this->detail->getCity());
+    tin_label = Gtk::make_managed<Gtk::Label>(this->detail->getTin());
+    account_label = Gtk::make_managed<Gtk::Label>(this->detail->getSettlementAccount());
 
     box->add(*name_label);
     box->add(*city_label);
@@ -238,6 +238,6 @@ void BankDetailTab::fill_list(Gtk::ListBox *list) {
 
 }
 
-BankDetail& BankDetailTab::Entry::get_bank_detail(){
+std::shared_ptr<BankDetail> BankDetailTab::Entry::get_bank_detail(){
     return detail;
 }

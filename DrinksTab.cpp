@@ -56,18 +56,18 @@ DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
 }
 
 int DrinksTab::Entry::get_id() {
-    return drink.getId();
+    return drink->get_id();
 }
 
-DrinksTab::Entry::Entry(const Drink &drink) : drink(drink) {
+DrinksTab::Entry::Entry(std::shared_ptr<Drink> drink) : drink(drink) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
 
-    name_label = Gtk::make_managed<Gtk::Label>(drink.getName());
-    strength_label = Gtk::make_managed<Gtk::Label>(std::to_string(drink.getStrength()));
-    size_label = Gtk::make_managed<Gtk::Label>(std::to_string(drink.getSize()));
-    container_label = Gtk::make_managed<Gtk::Label>(drink.getContainer());
+    name_label = Gtk::make_managed<Gtk::Label>(drink->getName());
+    strength_label = Gtk::make_managed<Gtk::Label>(std::to_string(drink->getStrength()));
+    size_label = Gtk::make_managed<Gtk::Label>(std::to_string(drink->getSize()));
+    container_label = Gtk::make_managed<Gtk::Label>(drink->getContainer());
 
     box->add(*name_label);
     box->add(*strength_label);
@@ -95,33 +95,33 @@ void DrinksTab::select(Gtk::ListBoxRow* row){
         box->add(*info_box);
     }
 
-    auto drink = entry->getDrink();
+    auto drink = entry->get_drink();
     for(auto child : ing_list->get_children()){
         ing_list->remove(*child);
     }
     IngredientGateway ingredientGateway;
     for(auto ing : gateway.get_ingredients(drink)){
-        Ingredient ingredient = ingredientGateway.get(std::get<0>(ing));
+        std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(std::get<0>(ing));
         auto row = Gtk::make_managed<Gtk::Box>();
         row->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         row->set_homogeneous(true);
 
-        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient.get_name());
+        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient->get_name());
         auto count_ing = Gtk::make_managed<Gtk::Label>(std::to_string(std::get<1>(ing)));
         row->add(*name_ing);
         row->add(*count_ing);
 
-        row->set_data("id", new int(ingredient.get_id()),[](void* data){delete (int*) data;});
+        row->set_data("id", new int(ingredient->get_id()),[](void* data){delete (int*) data;});
         row->set_data("count", new int(std::get<1>(ing)), [](void* data){delete (int*) data;});
 
         ing_list->add(*row);
     }
     ing_list->show_all();
 
-    name_entry->set_text(drink.getName());
-    strength_entry->set_text(std::to_string(drink.getStrength()));
-    size_entry->set_text(std::to_string(drink.getSize()));
-    container_entry->set_text(drink.getContainer());
+    name_entry->set_text(drink->getName());
+    strength_entry->set_text(std::to_string(drink->getStrength()));
+    size_entry->set_text(std::to_string(drink->getSize()));
+    container_entry->set_text(drink->getContainer());
 
 }
 
@@ -147,16 +147,16 @@ void DrinksTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
 
     if(dialog.run() == Gtk::RESPONSE_OK){
         IngredientGateway ingredientGateway;
-        Ingredient ingredient = ingredientGateway.get(ing_id);
+        std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(ing_id);
 
         auto row = Gtk::make_managed<Gtk::Box>();
         row->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         row->set_homogeneous(true);
 
-        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient.get_name());
+        auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient->get_name());
         auto count_ing = Gtk::make_managed<Gtk::Label>(size_entry_dialog.get_text());
 
-        row->set_data("id", new int(ingredient.get_id()),[](void* data){delete (int*) data;});
+        row->set_data("id", new int(ingredient->get_id()),[](void* data){delete (int*) data;});
         row->set_data("count", new int(std::stoi(size_entry_dialog.get_text())), [](void* data){delete (int*) data;});
 
         row->add(*name_ing);
@@ -169,7 +169,7 @@ void DrinksTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
 void DrinksTab::save_current(){
     auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
 
-    Drink& drink = entry->getDrink();
+    auto drink = entry->get_drink();
 
     if(name_entry->get_text().empty()){
         Gtk::MessageDialog message("не указано имя");
@@ -252,28 +252,28 @@ void DrinksTab::save_current(){
 //     std::cout << "created" << std::endl;
     for(auto a : created){
 //         std::cout << a.first << " ";
-        drink.getRecipe().add_ingridient(a.first,a.second);
+        drink->getRecipe().add_ingridient(a.first,a.second);
     }
 //     std::cout << std::endl;
 
 //     std::cout << "removed" << std::endl;
     for(auto a : removed){
 //         std::cout <<  a.first << " ";
-        drink.getRecipe().remove_ingridient(a.first);
+        drink->getRecipe().remove_ingridient(a.first);
     }
 //     std::cout << std::endl;
 
-    drink.setName(name_entry->get_text());
-    drink.setStrength(std::stoi(strength_entry->get_text()));
-    drink.setSize(std::stoi(size_entry->get_text()));
-    drink.setContainer(container_entry->get_text());
+    drink->setName(name_entry->get_text());
+    drink->setStrength(std::stoi(strength_entry->get_text()));
+    drink->setSize(std::stoi(size_entry->get_text()));
+    drink->setContainer(container_entry->get_text());
 
     gateway.save(drink);
 
-    entry->name_label->set_text(drink.getName());
+    entry->name_label->set_text(drink->getName());
     entry->strength_label->set_text(strength_entry->get_text());
     entry->size_label->set_text(size_entry->get_text());
-    entry->container_label->set_text(drink.getContainer());
+    entry->container_label->set_text(drink->getContainer());
 
 }
 
@@ -376,7 +376,11 @@ void DrinksTab::create(){
                 ings.push_back(std::make_pair(*id, *count));
             }
 
-            Drink drink = gateway.create(name_entry_dialog->get_text(),std::stoi(strength_entry_dialog->get_text()),std::stoi(size_entry_dialog->get_text()),container_entry_dialog->get_text(),ings);
+            auto drink = gateway.create(
+                name_entry_dialog->get_text(),
+                std::stoi(strength_entry_dialog->get_text()),
+                std::stoi(size_entry_dialog->get_text()),
+                container_entry_dialog->get_text(),ings);
 
             auto entry = Gtk::make_managed<Entry>(drink);
 
@@ -396,12 +400,12 @@ void DrinksTab::remove_entry(){
         return;
     }
 
-    gateway.remove(entry->getDrink());
+    gateway.remove(entry->get_drink());
 
     getListBox()->remove(*entry);
 }
 
-Drink &DrinksTab::Entry::getDrink() {
+std::shared_ptr<Drink> DrinksTab::Entry::get_drink() {
     return drink;
 }
 

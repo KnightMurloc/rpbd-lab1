@@ -10,9 +10,9 @@
 
 class BankDetailgateway : public IGateway<BankDetail> {
 public:
-    void save(BankDetail &data) override;
+    void save(std::shared_ptr<BankDetail> data) override;
 
-    BankDetail create(
+    std::shared_ptr<BankDetail> create(
         std::string bank_name,
         std::string city,
         std::string tin,
@@ -21,9 +21,9 @@ public:
 
     std::shared_ptr<BankDetail> get(int id) override;
 
-    void remove(BankDetail &data) override;
+    void remove(std::shared_ptr<BankDetail> data) override;
 
-    std::list<BankDetail> get_all() override;
+    std::list<std::shared_ptr<BankDetail>> get_all() override;
 };
 
 

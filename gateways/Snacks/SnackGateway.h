@@ -12,17 +12,17 @@
 
 class SnackGateway : IGateway<Snack> {
 public:
-    void save(Snack &data) override;
+    void save(std::shared_ptr<Snack> data) override;
 
-    Snack create(std::string name, int size, std::vector<std::pair<int,int>> ings);
+    std::shared_ptr<Snack> create(std::string name, int size, std::vector<std::pair<int,int>> ings);
 
     std::shared_ptr<Snack> get(int id) override;
 
-    void remove(Snack &data) override;
+    void remove(std::shared_ptr<Snack> data) override;
 
-    std::list<Snack> get_all() override;
+    std::list<std::shared_ptr<Snack>> get_all() override;
 
-    std::list<std::pair<int,int>> get_ingredients(Snack& data);
+    std::list<std::pair<int,int>> get_ingredients(std::shared_ptr<Snack> data);
 };
 
 #endif //LAB1_SNACKGATEWAY_H

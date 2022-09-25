@@ -13,7 +13,7 @@
 class DrinksTab : public Tab {
 private:
     class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        Drink drink;
+        std::shared_ptr<Drink> drink;
     public:
 
         Gtk::Label* name_label;
@@ -21,9 +21,9 @@ private:
         Gtk::Label* size_label;
         Gtk::Label* container_label;
 
-        Entry(const Drink &drink);
+        Entry(std::shared_ptr<Drink> drink);
 
-        Drink &getDrink();
+        std::shared_ptr<Drink> get_drink();
 
         int get_id() override;
     };

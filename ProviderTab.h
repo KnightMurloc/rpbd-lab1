@@ -13,7 +13,7 @@
 class ProviderTab : public Tab {
 private:
     class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
-        Provider provider;
+        std::shared_ptr<Provider> provider;
     public:
         Gtk::Label* name_label;
         Gtk::Label* post_address_label;
@@ -21,9 +21,9 @@ private:
         Gtk::Label* fax_label;
         Gtk::Label* email_label;
 
-        explicit Entry(Provider provider);
+        explicit Entry(std::shared_ptr<Provider> provider);
 
-        Provider &get_provider();
+        std::shared_ptr<Provider> get_provider();
 
         int get_id() override;
     };

@@ -6,6 +6,7 @@
 #include "Form.h"
 #include "gateways/Product/Product.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <fmt/format.h>
@@ -77,7 +78,7 @@ void ProductTab::save_current() {
         return;
     }
 
-    auto& product = entry->get_product();
+    auto product = entry->get_product();
 
     int* i_id_ptr = static_cast<int*>(ing_link->get_data("id"));
     int i_id = -1;
@@ -91,16 +92,16 @@ void ProductTab::save_current() {
         p_id = *p_id_ptr;
     }
 
-    product.set_ingredient_id(i_id);
-    product.set_price(std::stof(price_entry->get_text()));
-    product.set_delivery_terms(delivery_terms_entry->get_text());
-    product.set_payment_terms(payment_terms_entry->get_text());
-    product.set_provider_id(p_id);
-    product.set_name(name_entry->get_text());
+    product->set_ingredient_id(i_id);
+    product->set_price(std::stof(price_entry->get_text()));
+    product->set_delivery_terms(delivery_terms_entry->get_text());
+    product->set_payment_terms(payment_terms_entry->get_text());
+    product->set_provider_id(p_id);
+    product->set_name(name_entry->get_text());
 
     gateway.save(product);
 
-    entry->name_label->set_text(product.get_name());
+    entry->name_label->set_text(product->get_name());
     entry->price_label->set_text(price_entry->get_text());
 }
 
@@ -193,7 +194,7 @@ void ProductTab::create(){
                 p_id = *p_id_ptr;
             }
 
-            Product product = gateway.create(
+            auto product = gateway.create(
               i_id,
               std::stof(price_entry_dialog->get_text()),
               delivery_terms_entry_dialog->get_text(),
@@ -261,31 +262,31 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
     }
 
     try{
-        ing_link->set_text(entry->get_product().get_ingredient().get_name());
+        ing_link->set_text(entry->get_product()->get_ingredient()->get_name());
         find_button_ing->set_sensitive(true);
 
-        ing_link->set_data("id",new int(entry->get_product().get_ingredient_id()),[](void* data){delete (int*) data;});
+        ing_link->set_data("id",new int(entry->get_product()->get_ingredient_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException&){
         ing_link->set_text("none");
         find_button_ing->set_sensitive(false);
         ing_link->set_data("id",nullptr,free);
     }
 
-    price_entry->set_text(fmt::format("{}",entry->get_product().get_price()));
-    delivery_terms_entry->set_text(entry->get_product().get_delivery_terms());
-    payment_terms_entry->set_text(entry->get_product().get_payment_terms());
+    price_entry->set_text(fmt::format("{}",entry->get_product()->get_price()));
+    delivery_terms_entry->set_text(entry->get_product()->get_delivery_terms());
+    payment_terms_entry->set_text(entry->get_product()->get_payment_terms());
 
     try{
-        provider_link->set_text(entry->get_product().get_provider().get_name());
+        provider_link->set_text(entry->get_product()->get_provider()->get_name());
         find_button_provider->set_sensitive(true);
-        provider_link->set_data("id", new int(entry->get_product().get_provider_id()),[](void* data){delete (int*) data;});
+        provider_link->set_data("id", new int(entry->get_product()->get_provider_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException&){
         provider_link->set_text("none");
         find_button_provider->set_sensitive(false);
         provider_link->set_data("id",nullptr,free);
     }
 
-    name_entry->set_text(entry->get_product().get_name());
+    name_entry->set_text(entry->get_product()->get_name());
 }
 
 void ProductTab::find_ing() {
@@ -305,7 +306,7 @@ void ProductTab::select_ing(Gtk::Label* label, TabManager* manager) {
     if(id != -1){
         try {
             IngredientGateway ingredientGateway;
-            label->set_text(ingredientGateway.get(id).get_name());
+            label->set_text(ingredientGateway.get(id)->get_name());
         }catch(GatewayException&e){
             return;
         }
@@ -318,7 +319,7 @@ void ProductTab::select_provider(Gtk::Label* label, TabManager* manager) {
     if(id != -1){
         try {
             ProviderGateway providerGateway;
-            label->set_text(providerGateway.get(id).get_name());
+            label->set_text(providerGateway.get(id)->get_name());
         }catch(GatewayException&e){
             return;
         }
@@ -334,13 +335,13 @@ void ProductTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
 }
 
 
-ProductTab::Entry::Entry(Product product) : product(std::move(product)) {
+ProductTab::Entry::Entry(std::shared_ptr<Product> product) : product(std::move(product)) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
 
-    name_label = Gtk::make_managed<Gtk::Label>(this->product.get_name());
-    price_label = Gtk::make_managed<Gtk::Label>(fmt::format("{}",this->product.get_price()));
+    name_label = Gtk::make_managed<Gtk::Label>(this->product->get_name());
+    price_label = Gtk::make_managed<Gtk::Label>(fmt::format("{}",this->product->get_price()));
 //     provider_label = Gtk::make_managed<Gtk::Label>("none");
 
 //     try{
@@ -353,10 +354,10 @@ ProductTab::Entry::Entry(Product product) : product(std::move(product)) {
     this->add(*box);
 }
 
-Product &ProductTab::Entry::get_product() {
+std::shared_ptr<Product> ProductTab::Entry::get_product() {
     return product;
 }
 
 int ProductTab::Entry::get_id() {
-    return product.get_id();
+    return product->get_id();
 }

@@ -11,17 +11,17 @@
 
 class Drinkgateway : public IGateway<Drink> {
 public:
-    void save(Drink &data) override;
+    void save(std::shared_ptr<Drink> data) override;
 
-    Drink create(std::string name, int strength, int size, std::string container,std::vector<std::pair<int,int>> ings);
+    std::shared_ptr<Drink> create(std::string name, int strength, int size, std::string container,std::vector<std::pair<int,int>> ings);
 
     std::shared_ptr<Drink> get(int id) override;
 
-    void remove(Drink &data) override;
+    void remove(std::shared_ptr<Drink> data) override;
 
-    std::list<Drink> get_all() override;
+    std::list<std::shared_ptr<Drink>> get_all() override;
 
-    std::list<std::pair<int,int>> get_ingredients(Drink& data);
+    std::list<std::pair<int,int>> get_ingredients(std::shared_ptr<Drink> data);
 };
 
 

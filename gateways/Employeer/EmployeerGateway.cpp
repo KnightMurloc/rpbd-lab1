@@ -43,14 +43,13 @@ std::shared_ptr<Employeer> EmployeerGateway::get(int id) {
     throw GatewayException("not found");
 }
 
-std::list<Employeer> EmployeerGateway::get_all() {
+std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_all() {
 
-    std::list<Employeer> result;
+    std::list<std::shared_ptr<Employeer>> result;
 
     auto db = DbInstance::getInstance();
 
     auto response = db.exec("select * from employees;");
-
 
     while(response.next()){
         Employeer employeer(response.get<int>(0));
@@ -66,13 +65,16 @@ std::list<Employeer> EmployeerGateway::get_all() {
             employeer.set_movement_id(response.get<int>(7));
         }
         employeer.setPost(string_to_post(response.get<std::string>(8)));
-        result.push_back(employeer);
+
+        auto ptr = std::make_shared<Employeer>(employeer);
+        cache.Put(ptr->get_id(), ptr);
+        result.push_back(ptr);
     }
 
     return result;
 }
 
-void EmployeerGateway::save(Employeer &data) {
+void EmployeerGateway::save(std::shared_ptr<Employeer> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update employees set"
@@ -85,21 +87,21 @@ void EmployeerGateway::save(Employeer &data) {
                                   " movement = {},"
                                   " post = '{}'"
                                   " where id = {};",
-                                  data.getFirstName(),
-                                  data.getLastName(),
-                                  data.getPatronymic(),
-                                  data.getAddress(),
-                                  data.getBirthDate(),
-                                  data.getSalary(),
-                                  data.get_movement_id(),
-                                  post_to_string(data.getPost()),
-                                  data.get_id()
+                                  data->getFirstName(),
+                                  data->getLastName(),
+                                  data->getPatronymic(),
+                                  data->getAddress(),
+                                  data->getBirthDate(),
+                                  data->getSalary(),
+                                  data->get_movement_id(),
+                                  post_to_string(data->getPost()),
+                                  data->get_id()
                                   );
 
     db.exec(sql);
 }
 
-Employeer
+std::shared_ptr<Employeer>
 EmployeerGateway::create(std::string first_name, std::string last_name, std::string patronymic, std::string address,
                          std::string birth_date, float salary, int movement_id, Post post) {
     auto db = DbInstance::getInstance();
@@ -127,12 +129,23 @@ EmployeerGateway::create(std::string first_name, std::string last_name, std::str
         empl.setSalary(salary);
         empl.set_movement_id(movement_id);
         empl.setPost(post);
-        return empl;
+
+        auto ptr = std::make_shared<Employeer>(empl);
+
+        cache.Put(ptr->get_id(), ptr);
+
+        return ptr;
     }
 
-    return Employeer(0);
+    throw GatewayException("create error");
 }
 
-void EmployeerGateway::remove(Employeer &data) {
-    
+void EmployeerGateway::remove(std::shared_ptr<Employeer> data) {
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("delete employees where id = {};", data->get_id());
+
+    db.exec(sql);
+
+    cache.Remove(data->get_id());
 }

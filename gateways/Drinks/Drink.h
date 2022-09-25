@@ -7,8 +7,9 @@
 
 #include <string>
 #include "../Recipe.h"
+#include "../entity.h"
 
-class Drink {
+class Drink : public IEntity {
 private:
     int id;
     std::string name;
@@ -19,7 +20,7 @@ private:
 public:
     Drink(int id, int r_id);
 
-    int getId() const;
+    int get_id() const;
 
     [[nodiscard]] const std::string &getName() const;
 

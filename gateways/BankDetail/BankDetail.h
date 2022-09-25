@@ -6,8 +6,9 @@
 #define LAB1_BANKDETAIL_H
 
 #include <string>
+#include "../entity.h"
 
-class BankDetail {
+class BankDetail : public IEntity {
 private:
     int id;
     std::string bank_name;
@@ -17,7 +18,7 @@ private:
 public:
     explicit BankDetail(int id);
 
-    [[nodiscard]] int getId() const;
+    [[nodiscard]] int get_id() const;
 
     [[nodiscard]] const std::string &getBankName() const;
 

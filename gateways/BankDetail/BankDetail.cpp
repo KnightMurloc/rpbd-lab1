@@ -6,7 +6,7 @@
 
 BankDetail::BankDetail(int id) : id(id) {}
 
-int BankDetail::getId() const {
+int BankDetail::get_id() const {
     return id;
 }
 
