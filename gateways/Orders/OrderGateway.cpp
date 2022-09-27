@@ -116,3 +116,45 @@ void OrderGateway::remove(std::shared_ptr<Order> data) {
 
     db.exec(sql);
 }
+
+std::list<std::shared_ptr<Order>> OrderGateway::get_great_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from orders where id > {} order by id limit {}",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Order>> result;
+
+    while(response.next()){
+        auto order = std::make_shared<Order>(response.get<int>(0));
+        order->set_reason(response.get<std::string>(1));
+        order->set_order_number(response.get<int>(2));
+        order->set_post(string_to_post(response.get<std::string>(3)));
+        order->set_order_date(response.get<std::string>(4));
+        cache.Put(order->get_id(), order);
+        result.push_back(order);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Order>> OrderGateway::get_less_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from orders where id < {} order by id DESC limit {};",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Order>> result;
+
+    while(response.next()){
+        auto order = std::make_shared<Order>(response.get<int>(0));
+        order->set_reason(response.get<std::string>(1));
+        order->set_order_number(response.get<int>(2));
+        order->set_post(string_to_post(response.get<std::string>(3)));
+        order->set_order_date(response.get<std::string>(4));
+        cache.Put(order->get_id(), order);
+        result.push_back(order);
+    }
+    return result;
+}

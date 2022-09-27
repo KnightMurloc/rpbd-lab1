@@ -392,3 +392,59 @@ std::shared_ptr<Snack> SnackTab::Entry::get_snack() {
 int SnackTab::Entry::get_id() {
     return snack->get_id();
 }
+
+bool SnackTab::scroll_up(){
+//         first_id = last_id;
+//         auto data = gateway.get_great_then_by_id(last_id,20);
+//         if(data.empty()){
+//             return false;
+//         }
+//         for(const auto& ing : data){
+//             if(ing->get_id() > last_id){
+//                 last_id = ing->get_id();
+//             }
+//             auto entry = Gtk::make_managed<Entry>(ing);
+//             getListBox()->add(*entry);
+//         }
+//
+//         auto rows = getListBox()->get_children();
+//         if(rows.size() > 40){
+//
+//             for(int i = 0; i < rows.size() - 40; i++){
+//                 fmt::print("removed\n");
+//                 getListBox()->remove(*rows[i]);
+//             }
+//         }
+//         getListBox()->show_all();
+//         scroll->get_vadjustment()->set_value(500);
+        return true;
+}
+
+bool SnackTab::scroll_down(){
+//         last_id = first_id;
+//         auto data = gateway.get_less_then_by_id(first_id,20);
+//         if(data.empty()){
+//             return false;
+//         }
+//         for(const auto& ing : data){
+//             if(ing->get_id() < first_id){
+//                 first_id = ing->get_id();
+//             }
+//             auto entry = Gtk::make_managed<Entry>(ing);
+//             getListBox()->insert(*entry,0);
+//         }
+//
+//         auto rows = getListBox()->get_children();
+//         if(rows.size() > 40){
+//             for(int i = rows.size() - 1; i >= 40; i--){
+//                 fmt::print("removed\n");
+//                 getListBox()->remove(*rows[i]);
+//             }
+//         }
+//         getListBox()->show_all();
+//
+//         scroll->get_vadjustment()->set_value(100);
+
+        return true;
+}
+

@@ -65,7 +65,7 @@ private:
 
     void save();
 
-    void scroll_event(Gtk::PositionType type);
+//     void scroll_event(Gtk::PositionType type);
 
     void search();
 
@@ -73,6 +73,8 @@ private:
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
+    bool scroll_down() override;
+    bool scroll_up() override;
 public:
 
     explicit IngredientTab(TabManager* tab_manager);

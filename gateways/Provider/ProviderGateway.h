@@ -26,6 +26,9 @@ public:
     void remove(std::shared_ptr<Provider> data) override;
 
     std::list<std::shared_ptr<Provider>> get_all() override;
+
+    std::list<std::shared_ptr<Provider>> get_great_then_by_id(int min, int count);
+    std::list<std::shared_ptr<Provider>> get_less_then_by_id(int max, int count);
 };
 
 

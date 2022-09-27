@@ -54,9 +54,13 @@ private:
     void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
 
     void remove_entry();
+
+//     void scroll_event(Gtk::PositionType type);
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
+    bool scroll_down() override;
+    bool scroll_up() override;
 public:
     ProviderTab(TabManager* manager);
 

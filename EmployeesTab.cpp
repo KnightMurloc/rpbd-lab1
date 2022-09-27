@@ -6,9 +6,14 @@
 #include "Form.h"
 #include <iostream>
 #include <fmt/format.h>
+#include <memory>
 #include "gateways/Orders/OrderGateway.h"
+#include "gtkmm/enums.h"
+#include "sigc++/functors/mem_fun.h"
 
 EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
+
+    current_search = std::make_unique<DefaultSearch>(&gateway);
 
     builder = Gtk::Builder::create_from_file("../employeer_menu.glade");
 
@@ -40,7 +45,11 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::remove));
 
+    search_entry->signal_activate().connect(sigc::mem_fun(this,&EmployeesTab::search));
+    stop_search->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::search_stop));
+
     fill_list(getListBox());
+//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&EmployeesTab::scroll_event));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
 
@@ -51,6 +60,21 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     add_clumn_lable("дата рождения");
     add_clumn_lable("зарплата");
     add_clumn_lable("должность");
+}
+
+void EmployeesTab::search(){
+    std::string str = search_entry->get_text();
+    std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
+    current_search = std::make_unique<NameSearch>(&gateway,str );
+    fill_list(getListBox());
+    getListBox()->show_all();
+
+}
+
+void EmployeesTab::search_stop(){
+    current_search = std::make_unique<DefaultSearch>(&gateway);
+    fill_list(getListBox());
+    getListBox()->show_all();
 }
 
 void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
@@ -364,7 +388,12 @@ void EmployeesTab::remove() {
 }
 
 void EmployeesTab::fill_list(Gtk::ListBox* list) {
-    auto data = gateway.get_all();
+
+    for(auto child : getListBox()->get_children()){
+        getListBox()->remove(*child);
+    }
+
+    auto data = current_search->get_great_then(0,20);
     for(auto& emp : data){
         auto entry = Gtk::make_managed<Entry>(emp);
         list->append(*entry);
@@ -401,4 +430,87 @@ std::shared_ptr<Employeer> EmployeesTab::Entry::get_emp() {
 
 int EmployeesTab::Entry::get_id() {
     return emp->get_id();
+}
+
+bool EmployeesTab::scroll_down(){
+        first_id = last_id;
+        auto data = current_search->get_great_then(last_id,20);
+        if(data.empty()){
+            return false;
+        }
+        for(const auto& ing : data){
+            if(ing->get_id() > last_id){
+                last_id = ing->get_id();
+            }
+            auto entry = Gtk::make_managed<Entry>(ing);
+            getListBox()->add(*entry);
+        }
+
+        auto rows = getListBox()->get_children();
+        if(rows.size() > 40){
+
+            for(int i = 0; i < rows.size() - 40; i++){
+                fmt::print("removed\n");
+                getListBox()->remove(*rows[i]);
+            }
+        }
+        getListBox()->show_all();
+        scroll->get_vadjustment()->set_value(500);
+        return true;
+}
+
+bool EmployeesTab::scroll_up(){
+        last_id = first_id;
+        auto data = current_search->get_less_then(first_id,20);
+        if(data.empty()){
+            return false;
+        }
+        for(const auto& ing : data){
+            if(ing->get_id() < first_id){
+                first_id = ing->get_id();
+            }
+            auto entry = Gtk::make_managed<Entry>(ing);
+            getListBox()->insert(*entry,0);
+        }
+
+        auto rows = getListBox()->get_children();
+        if(rows.size() > 40){
+            for(int i = rows.size() - 1; i >= 40; i--){
+                fmt::print("removed\n");
+                getListBox()->remove(*rows[i]);
+            }
+        }
+        getListBox()->show_all();
+
+        scroll->get_vadjustment()->set_value(100);
+
+        return true;
+}
+
+// void EmployeesTab::scroll_event(Gtk::PositionType type){
+//     if(type == Gtk::POS_BOTTOM){
+//         scroll_down();
+//     }else if(type == Gtk::POS_TOP){
+//         scroll_up();
+//     }
+// }
+
+EmployeesTab::DefaultSearch::DefaultSearch(EmployeerGateway* gateway) : gateway(gateway) {};
+
+std::list<std::shared_ptr<Employeer>> EmployeesTab::DefaultSearch::get_great_then(int id, int count){
+    return gateway->get_great_then_by_id(id,count);
+}
+
+std::list<std::shared_ptr<Employeer>> EmployeesTab::DefaultSearch::get_less_then(int id, int count){
+    return gateway->get_less_then_by_id(id,count);
+}
+
+EmployeesTab::NameSearch::NameSearch(EmployeerGateway* gateway, std::string name) : gateway(gateway), name(name){}
+
+std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_great_then(int id, int count){
+    return gateway->get_great_then_by_name(name,id,count);
+}
+
+std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_less_then(int id, int count){
+    return gateway->get_less_then_by_name(name,id,count);
 }

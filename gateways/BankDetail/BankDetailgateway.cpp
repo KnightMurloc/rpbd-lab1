@@ -125,3 +125,45 @@ std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_all() {
 
     return result;
 }
+
+std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_great_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from orders where id > {} order by id limit {}",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<BankDetail>> result;
+
+    while(response.next()){
+        auto detail = std::make_shared<BankDetail>(response.get<int>(0));
+        detail->setBankName(response.get<std::string>(1));
+        detail->setCity(response.get<std::string>(2));
+        detail->setTin(response.get<std::string>(3));
+        detail->setSettlementAccount(response.get<std::string>(4));
+        cache.Put(detail->get_id(), detail);
+        result.push_back(detail);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_less_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from orders where id < {} order by id DESC limit {};",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<BankDetail>> result;
+
+    while(response.next()){
+        auto detail = std::make_shared<BankDetail>(response.get<int>(0));
+        detail->setBankName(response.get<std::string>(1));
+        detail->setCity(response.get<std::string>(2));
+        detail->setTin(response.get<std::string>(3));
+        detail->setSettlementAccount(response.get<std::string>(4));
+        cache.Put(detail->get_id(), detail);
+        result.push_back(detail);
+    }
+    return result;
+}

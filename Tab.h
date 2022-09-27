@@ -12,6 +12,18 @@
 class Tab;
 #include "TabManager.h"
 
+class IEntry {
+public:
+    virtual int get_id() = 0;
+};
+
+class IList{
+public:
+    virtual IEntry* get_selected() = 0;
+
+
+};
+
 class Tab : public Gtk::Box {
 private:
 
@@ -25,6 +37,7 @@ private:
 
     Gtk::ButtonBox* create_top_panel();
 
+    void scroll_event(Gtk::PositionType type);
 protected:
     int first_id;
     int last_id;
@@ -40,11 +53,6 @@ protected:
 
     Gtk::ListBox *getListBox() const;
 
-    class IEntry {
-    public:
-        virtual int get_id() = 0;
-    };
-
     template<typename T>
     class ISearch{
     public:
@@ -56,6 +64,8 @@ protected:
 
     void add_clumn_lable(std::string title);
 
+    virtual bool scroll_down() = 0;
+    virtual bool scroll_up() = 0;
 public:
     Tab(TabManager* tab_manager);
 

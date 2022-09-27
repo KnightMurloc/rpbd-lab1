@@ -32,7 +32,7 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 //     last_id = gateway.get_max();
 
     this->fill_list(getListBox());
-    scroll->signal_edge_reached().connect(sigc::mem_fun(this,&IngredientTab::scroll_event));
+//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&IngredientTab::scroll_event));
 
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::remove_entry));
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::create));
@@ -81,13 +81,114 @@ void IngredientTab::fill_list(Gtk::ListBox* list) {
     fmt::print("{}\n", last_id);
 }
 
-void IngredientTab::scroll_event(Gtk::PositionType type){
-    if(type == Gtk::PositionType::POS_BOTTOM){
+// void IngredientTab::scroll_event(Gtk::PositionType type){
+//     if(type == Gtk::PositionType::POS_BOTTOM){
+//         scroll_down();
+// //         first_id = last_id;
+// //         auto data = current_search->get_great_then(last_id,20);
+// //         if(data.empty()){
+// // //             goto end;
+// // //             return false;
+// //         }
+// //         for(const auto& ing : data){
+// //             if(ing->get_id() > last_id){
+// //                 last_id = ing->get_id();
+// //             }
+// //             auto entry = Gtk::make_managed<Entry>(ing);
+// //             getListBox()->add(*entry);
+// //         }
+// //
+// //         auto rows = getListBox()->get_children();
+// //         if(rows.size() > 40){
+// //
+// //             for(int i = 0; i < rows.size() - 40; i++){
+// //                 fmt::print("removed\n");
+// //                 getListBox()->remove(*rows[i]);
+// //             }
+// //         }
+// //         getListBox()->show_all();
+// //         scroll->get_vadjustment()->set_value(500);
+//
+// //     fmt::print("{} - {}\n",scroll->get_vadjustment()->get_lower(),scroll->get_vadjustment()->get_upper());
+//
+//     }else if(type == Gtk::PositionType::POS_TOP){
+//         scroll_up();
+// //         last_id = first_id;
+// //         auto data = current_search->get_less_then(first_id,20);
+// //         if(data.empty()){
+// // //             goto end;
+// // //             return false;
+// // //             return;
+// //         }
+// //         for(const auto& ing : data){
+// //             if(ing->get_id() < first_id){
+// //                 first_id = ing->get_id();
+// //             }
+// //
+// //             auto entry = Gtk::make_managed<Entry>(ing);
+// //             fmt::print("name: {}\n", entry->get_ingredient()->get_name());
+// // //             getListBox()->add(*entry);
+// //             getListBox()->insert(*entry,0);
+// //         }
+// //
+// //         auto rows = getListBox()->get_children();
+// //         if(rows.size() > 40){
+// //             for(int i = rows.size() - 1; i >= 40; i--){
+// //                 fmt::print("removed\n");
+// //                 getListBox()->remove(*rows[i]);
+// //             }
+// //         }
+// //         getListBox()->show_all();
+// //
+// //         scroll->get_vadjustment()->set_value(100);
+//
+// //         fmt::print("{} - {}\n",scroll->get_vadjustment()->get_lower(),scroll->get_vadjustment()->get_upper());
+//
+// //         scroll->get_vadjustment()->set
+//     }
+//     //TODO убрать
+// // end:
+// //     auto rows = getListBox()->get_children();
+// //     fmt::print("rows: {}\n", rows.size());
+// //     return true;
+// }
+
+bool IngredientTab::scroll_up(){
+        //test
+        last_id = first_id;
+        auto data = current_search->get_less_then(first_id,20);
+        if(data.empty()){
+            return false;
+        }
+        for(const auto& ing : data){
+            if(ing->get_id() < first_id){
+                first_id = ing->get_id();
+            }
+
+            auto entry = Gtk::make_managed<Entry>(ing);
+            fmt::print("name: {}\n", entry->get_ingredient()->get_name());
+            getListBox()->insert(*entry,0);
+        }
+
+        auto rows = getListBox()->get_children();
+        if(rows.size() > 40){
+            for(int i = rows.size() - 1; i >= 40; i--){
+                fmt::print("removed\n");
+                getListBox()->remove(*rows[i]);
+            }
+        }
+        getListBox()->show_all();
+
+        scroll->get_vadjustment()->set_value(100);
+        return true;
+}
+
+bool IngredientTab::scroll_down(){
         first_id = last_id;
         auto data = current_search->get_great_then(last_id,20);
         if(data.empty()){
-            goto end;
-//             return;
+//             goto end;
+            return false;
         }
         for(const auto& ing : data){
             if(ing->get_id() > last_id){
@@ -108,46 +209,9 @@ void IngredientTab::scroll_event(Gtk::PositionType type){
         getListBox()->show_all();
         scroll->get_vadjustment()->set_value(500);
 
-//     fmt::print("{} - {}\n",scroll->get_vadjustment()->get_lower(),scroll->get_vadjustment()->get_upper());
-
-    }else if(type == Gtk::PositionType::POS_TOP){
-        last_id = first_id;
-        auto data = current_search->get_less_then(first_id,20);
-        if(data.empty()){
-            goto end;
-//             return;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() < first_id){
-                first_id = ing->get_id();
-            }
-
-            auto entry = Gtk::make_managed<Entry>(ing);
-            fmt::print("name: {}\n", entry->get_ingredient()->get_name());
-//             getListBox()->add(*entry);
-            getListBox()->insert(*entry,0);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-            for(int i = rows.size() - 1; i >= 40; i--){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-
-        scroll->get_vadjustment()->set_value(100);
-
-//         fmt::print("{} - {}\n",scroll->get_vadjustment()->get_lower(),scroll->get_vadjustment()->get_upper());
-
-//         scroll->get_vadjustment()->set
-    }
-    //TODO убрать
-end:
-    auto rows = getListBox()->get_children();
-    fmt::print("rows: {}\n", rows.size());
+        return true;
 }
+
 
 //int IngredientTab::select_dialog() {
 //    Gtk::Dialog dialog;

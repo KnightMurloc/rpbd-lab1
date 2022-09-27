@@ -153,3 +153,57 @@ std::list<std::shared_ptr<Provider>> ProviderGateway::get_all() {
 
     return result;
 }
+
+std::list<std::shared_ptr<Provider>> ProviderGateway::get_great_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from provider where id > {} order by id limit {}",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Provider>> result;
+
+    while(response.next()){
+        auto provider = std::make_shared<Provider>(response.get<int>(0));
+        provider->set_name(response.get<std::string>(1));
+        provider->set_post_address(response.get<std::string>(2));
+        provider->set_phone_number(response.get<std::string>(3));
+        provider->set_fax(response.get<std::string>(4));
+        provider->set_email(response.get<std::string>(5));
+        if(response.is_null(6)){
+            provider->set_bank_detail_id(-1);
+        }else{
+            provider->set_bank_detail_id(response.get<int>(6));
+        }
+        cache.Put(provider->get_id(), provider);
+        result.push_back(provider);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Provider>> ProviderGateway::get_less_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from provider where id < {} order by id DESC limit {};",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Provider>> result;
+
+    while(response.next()){
+        auto provider = std::make_shared<Provider>(response.get<int>(0));
+        provider->set_name(response.get<std::string>(1));
+        provider->set_post_address(response.get<std::string>(2));
+        provider->set_phone_number(response.get<std::string>(3));
+        provider->set_fax(response.get<std::string>(4));
+        provider->set_email(response.get<std::string>(5));
+        if(response.is_null(6)){
+            provider->set_bank_detail_id(-1);
+        }else{
+            provider->set_bank_detail_id(response.get<int>(6));
+        }
+        cache.Put(provider->get_id(), provider);
+        result.push_back(provider);
+    }
+    return result;
+}

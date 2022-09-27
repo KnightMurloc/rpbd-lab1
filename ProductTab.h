@@ -62,9 +62,13 @@ private:
     static void select_provider(Gtk::Label* label, TabManager* manager);
 
     static void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
+
+//     void scroll_event(Gtk::PositionType type);
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
+    bool scroll_down() override;
+    bool scroll_up() override;
 public:
     explicit ProductTab(TabManager* tab_manager);
 

@@ -169,3 +169,47 @@ std::shared_ptr<Drink> Drinkgateway::create(std::string name, int strength, int 
 
     throw GatewayException("create error");
 }
+
+std::list<std::shared_ptr<Drink>> Drinkgateway::get_great_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from drinks where id > {} order by id limit {}",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Drink>> result;
+
+    while(response.next()){
+        auto drink = std::make_shared<Drink>(response.get<int>(0),response.get<int>(5));
+        drink->setName(response.get<std::string>(1));
+        drink->setStrength(response.get<int>(2));
+        drink->setSize(response.get<int>(3));
+        drink->setContainer(response.get<std::string>(4));
+
+        cache.Put(drink->get_id(), drink);
+        result.push_back(drink);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Drink>> Drinkgateway::get_less_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from drinks where id < {} order by id DESC limit {};",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Drink>> result;
+
+    while(response.next()){
+        auto drink = std::make_shared<Drink>(response.get<int>(0),response.get<int>(5));
+        drink->setName(response.get<std::string>(1));
+        drink->setStrength(response.get<int>(2));
+        drink->setSize(response.get<int>(3));
+        drink->setContainer(response.get<std::string>(4));
+
+        cache.Put(drink->get_id(), drink);
+        result.push_back(drink);
+    }
+    return result;
+}

@@ -5,6 +5,7 @@
 #include "IngredientGateway.h"
 #include "../DbInstance.h"
 #include "Ingredient.h"
+#include "fmt/core.h"
 #include "fmt/format.h"
 
 template<>

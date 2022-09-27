@@ -149,3 +149,129 @@ void EmployeerGateway::remove(std::shared_ptr<Employeer> data) {
 
     cache.Remove(data->get_id());
 }
+
+std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_great_then_by_id(int id, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from employees where id > {} order by id limit {}",id,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Employeer>> result;
+
+    while(response.next()){
+        auto empl = std::make_shared<Employeer>(response.get<int>(0));
+        empl->setFirstName(response.get<std::string>(1));
+        empl->setLastName(response.get<std::string>(2));
+        if(!response.is_null(3)) {
+            empl->setPatronymic(response.get<std::string>(3));
+        }
+        empl->setAddress(response.get<std::string>(4));
+        empl->setBirthDate(response.get<std::string>(5));
+        empl->setSalary(response.get<float>(6));
+        if(!response.is_null(7)) {
+            empl->set_movement_id(response.get<int>(7));
+        }
+        empl->setPost(string_to_post(response.get<std::string>(8)));
+        cache.Put(empl->get_id(), empl);
+        result.push_back(empl);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_less_then_by_id(int id, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from employees where id < {} order by id DESC limit {};",id,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Employeer>> result;
+
+    while(response.next()){
+        auto empl = std::make_shared<Employeer>(response.get<int>(0));
+        empl->setFirstName(response.get<std::string>(1));
+        empl->setLastName(response.get<std::string>(2));
+        if(!response.is_null(3)) {
+            empl->setPatronymic(response.get<std::string>(3));
+        }
+        empl->setAddress(response.get<std::string>(4));
+        empl->setBirthDate(response.get<std::string>(5));
+        empl->setSalary(response.get<float>(6));
+        if(!response.is_null(7)) {
+            empl->set_movement_id(response.get<int>(7));
+        }
+        empl->setPost(string_to_post(response.get<std::string>(8)));
+        cache.Put(empl->get_id(), empl);
+        result.push_back(empl);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_great_then_by_name(std::string name, int id, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format(
+        "select * from employees where ("
+        "    lower(first_name) like '%{0}%'"
+        " or lower(last_name) like '%{0}%'"
+        " or lower(patronymic) like '%{0}%'"
+        " ) and id > {1} order by id DESC limit {2};", name,id,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Employeer>> result;
+
+    while(response.next()){
+        auto empl = std::make_shared<Employeer>(response.get<int>(0));
+        empl->setFirstName(response.get<std::string>(1));
+        empl->setLastName(response.get<std::string>(2));
+        if(!response.is_null(3)) {
+            empl->setPatronymic(response.get<std::string>(3));
+        }
+        empl->setAddress(response.get<std::string>(4));
+        empl->setBirthDate(response.get<std::string>(5));
+        empl->setSalary(response.get<float>(6));
+        if(!response.is_null(7)) {
+            empl->set_movement_id(response.get<int>(7));
+        }
+        empl->setPost(string_to_post(response.get<std::string>(8)));
+        cache.Put(empl->get_id(), empl);
+        result.push_back(empl);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_less_then_by_name(std::string name, int id, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format(
+        "select * from employees where ("
+        "    lower(first_name) like '%{0}%'"
+        " or lower(last_name) like '%{0}%'"
+        " or lower(patronymic) like '%{0}%'"
+        " ) and id < {1} order by id DESC limit {2};", name,id,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Employeer>> result;
+
+    while(response.next()){
+        auto empl = std::make_shared<Employeer>(response.get<int>(0));
+        empl->setFirstName(response.get<std::string>(1));
+        empl->setLastName(response.get<std::string>(2));
+        if(!response.is_null(3)) {
+            empl->setPatronymic(response.get<std::string>(3));
+        }
+        empl->setAddress(response.get<std::string>(4));
+        empl->setBirthDate(response.get<std::string>(5));
+        empl->setSalary(response.get<float>(6));
+        if(!response.is_null(7)) {
+            empl->set_movement_id(response.get<int>(7));
+        }
+        empl->setPost(string_to_post(response.get<std::string>(8)));
+        cache.Put(empl->get_id(), empl);
+        result.push_back(empl);
+    }
+    return result;
+}

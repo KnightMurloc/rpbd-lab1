@@ -29,6 +29,12 @@ public:
     std::shared_ptr<Employeer> get(int id) override;
 
     std::list<std::shared_ptr<Employeer>> get_all() override;
+
+    std::list<std::shared_ptr<Employeer>> get_great_then_by_name(std::string name,int id, int count);
+    std::list<std::shared_ptr<Employeer>> get_less_then_by_name(std::string name,int id, int count);
+
+    std::list<std::shared_ptr<Employeer>> get_great_then_by_id(int min, int count);
+    std::list<std::shared_ptr<Employeer>> get_less_then_by_id(int max, int count);
 };
 
 

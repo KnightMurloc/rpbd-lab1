@@ -5,6 +5,7 @@
 #include "ProductTab.h"
 #include "Form.h"
 #include "gateways/Product/Product.h"
+#include "sigc++/functors/mem_fun.h"
 
 #include <memory>
 #include <string>
@@ -43,6 +44,8 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&ProductTab::remove_entry));
 
     getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&ProductTab::select));
+
+//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&ProductTab::scroll_event));
 
     add_clumn_lable("название");
     add_clumn_lable("цена");
@@ -237,9 +240,17 @@ void ProductTab::cancel_current() {
 }
 
 void ProductTab::fill_list(Gtk::ListBox* list) {
-    for(const auto& product : gateway.get_all()){
-        auto entry = Gtk::make_managed<Entry>(product);
+    for(auto child : getListBox()->get_children()){
+        getListBox()->remove(*child);
+    }
 
+    first_id = 0;
+    last_id = -1;
+    for(const auto& ing : gateway.get_great_then_by_id(0,20)){
+        if(ing->get_id() > last_id){
+            last_id = ing->get_id();
+        }
+        auto entry = Gtk::make_managed<Entry>(ing);
         list->add(*entry);
     }
 }
@@ -360,4 +371,67 @@ std::shared_ptr<Product> ProductTab::Entry::get_product() {
 
 int ProductTab::Entry::get_id() {
     return product->get_id();
+}
+
+// void ProductTab::scroll_event(Gtk::PositionType type){
+//     if(type == Gtk::PositionType::POS_BOTTOM){
+//         scroll_down();
+//     }else if(type == Gtk::PositionType::POS_TOP){
+//         scroll_up();
+//     }
+// }
+
+bool ProductTab::scroll_down(){
+        first_id = last_id;
+        auto data = gateway.get_great_then_by_id(last_id,20);
+        if(data.empty()){
+            return false;
+        }
+        for(const auto& ing : data){
+            if(ing->get_id() > last_id){
+                last_id = ing->get_id();
+            }
+            auto entry = Gtk::make_managed<Entry>(ing);
+            getListBox()->add(*entry);
+        }
+
+        auto rows = getListBox()->get_children();
+        if(rows.size() > 40){
+
+            for(int i = 0; i < rows.size() - 40; i++){
+                fmt::print("removed\n");
+                getListBox()->remove(*rows[i]);
+            }
+        }
+        getListBox()->show_all();
+        scroll->get_vadjustment()->set_value(500);
+        return true;
+}
+
+bool ProductTab::scroll_up(){
+        last_id = first_id;
+        auto data = gateway.get_less_then_by_id(first_id,20);
+        if(data.empty()){
+            return false;
+        }
+        for(const auto& ing : data){
+            if(ing->get_id() < first_id){
+                first_id = ing->get_id();
+            }
+            auto entry = Gtk::make_managed<Entry>(ing);
+            getListBox()->insert(*entry,0);
+        }
+
+        auto rows = getListBox()->get_children();
+        if(rows.size() > 40){
+            for(int i = rows.size() - 1; i >= 40; i--){
+                fmt::print("removed\n");
+                getListBox()->remove(*rows[i]);
+            }
+        }
+        getListBox()->show_all();
+
+        scroll->get_vadjustment()->set_value(100);
+
+        return true;
 }

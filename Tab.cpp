@@ -10,6 +10,7 @@
 #include "gtkmm/searchbar.h"
 #include "gtkmm/searchentry.h"
 #include "gtkmm/stockid.h"
+#include "sigc++/functors/mem_fun.h"
 #include <iostream>
 
 Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
@@ -59,6 +60,7 @@ Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
 
     scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
     scroll->set_vexpand(true);
+    scroll->signal_edge_reached().connect(sigc::mem_fun(this,&Tab::scroll_event));
 
 //     scroll->signal_edge_reached().connect([](Gtk::PositionType type){
 //         std::cout << (int) type << std::endl;
@@ -149,13 +151,21 @@ int Tab::select_dialog() {
 }
 
 void Tab::select_by_id(int entry_id){
-    for(auto child : listBox->get_children()){
-        auto entry = dynamic_cast<IEntry*>(child);
-        if(entry->get_id() == entry_id){
-            listBox->select_row(*dynamic_cast<Gtk::ListBoxRow*>(entry));
-            break;
+
+    fill_list(getListBox());
+
+    bool find = true;
+
+    do{
+        for(auto child : listBox->get_children()){
+            auto entry = dynamic_cast<IEntry*>(child);
+            if(entry->get_id() == entry_id){
+                listBox->select_row(*dynamic_cast<Gtk::ListBoxRow*>(entry));
+                find = false;
+                break;
+            }
         }
-    }
+    }while(scroll_down() && find);
 }
 
 void Tab::add_clumn_lable(std::string title){
@@ -174,3 +184,10 @@ void Tab::remove_entry_by_id(int id){
     }
 }
 
+void Tab::scroll_event(Gtk::PositionType type){
+    if(type == Gtk::PositionType::POS_BOTTOM){
+        scroll_down();
+    }else if(type == Gtk::PositionType::POS_TOP){
+        scroll_up();
+    }
+}

@@ -151,3 +151,57 @@ std::list<std::shared_ptr<Product>> ProductGateway::get_all() {
 
     return result;
 }
+
+std::list<std::shared_ptr<Product>> ProductGateway::get_great_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from products where id > {} order by id limit {}",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Product>> result;
+
+    while(response.next()){
+        auto product = std::make_shared<Product>(response.get<int>(0));
+        if(!response.is_null(1)) {
+            product->set_ingredient_id(response.get<int>(1));
+        }
+        product->set_price(response.get<float>(2));
+        product->set_delivery_terms(response.get<std::string>(3));
+        product->set_payment_terms(response.get<std::string>(4));
+        if(!response.is_null(5)) {
+            product->set_provider_id(response.get<int>(5));
+        }
+        product->set_name(response.get<std::string>(6));
+        cache.Put(product->get_id(), product);
+        result.push_back(product);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Product>> ProductGateway::get_less_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from products where id < {} order by id DESC limit {};",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Product>> result;
+
+    while(response.next()){
+        auto product = std::make_shared<Product>(response.get<int>(0));
+        if(!response.is_null(1)) {
+            product->set_ingredient_id(response.get<int>(1));
+        }
+        product->set_price(response.get<float>(2));
+        product->set_delivery_terms(response.get<std::string>(3));
+        product->set_payment_terms(response.get<std::string>(4));
+        if(!response.is_null(5)) {
+            product->set_provider_id(response.get<int>(5));
+        }
+        product->set_name(response.get<std::string>(6));
+        cache.Put(product->get_id(), product);
+        result.push_back(product);
+    }
+    return result;
+}

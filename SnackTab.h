@@ -51,6 +51,8 @@ private:
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
+    bool scroll_down() override;
+    bool scroll_up() override;
 public:
     explicit SnackTab(TabManager* tab_manager);
 

@@ -7,6 +7,7 @@
 
 #include <gtkmm.h>
 #include "Tab.h"
+#include "gateways/Employeer/Employeer.h"
 #include "gateways/Employeer/EmployeerGateway.h"
 
 class EmployeesTab : public Tab {
@@ -23,7 +24,6 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
         Gtk::Label* salary;
         Gtk::Label* post;
 
-    public:
         explicit Entry(std::shared_ptr<Employeer> emp);
 
         std::shared_ptr<Employeer> get_emp();
@@ -31,9 +31,31 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
     int get_id() override;
 };
 
+    class DefaultSearch : public ISearch<Employeer> {
+    private:
+        EmployeerGateway* gateway;
+    public:
+        DefaultSearch(EmployeerGateway* gateway);
+        std::list<std::shared_ptr<Employeer>> get_great_then(int id, int count);
+        std::list<std::shared_ptr<Employeer>> get_less_then(int id, int count);
+    };
+
+    class NameSearch : public ISearch<Employeer> {
+    private:
+        EmployeerGateway* gateway;
+        std::string name;
+    public:
+        NameSearch(EmployeerGateway* gateway, std::string name);
+        std::list<std::shared_ptr<Employeer>> get_great_then(int id, int count);
+        std::list<std::shared_ptr<Employeer>> get_less_then(int id, int count);
+    };
+
     Glib::RefPtr<Gtk::Builder> builder;
 
     EmployeerGateway gateway;
+
+    std::unique_ptr<ISearch<Employeer>> current_search;
+
 
     Gtk::Box* info_box;
 
@@ -62,9 +84,16 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
 
     void remove();
 
+//     void scroll_event(Gtk::PositionType type);
+
+    void search();
+
+    void search_stop();
 protected:
     void fill_list(Gtk::ListBox* list) override;
 
+    bool scroll_down() override;
+    bool scroll_up() override;
 public:
     explicit EmployeesTab(TabManager* tab_manager);
 
