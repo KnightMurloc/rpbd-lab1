@@ -52,7 +52,8 @@ private:
     Gtk::ComboBoxText* unit_combo;
 
 //    std::unique_ptr<ISearch<Ingredient>> current_search;
-    std::unique_ptr<EntityList<Ingredient,Entry>> list;
+//     std::unique_ptr<EntityList<Ingredient,Entry>> list;
+    EntityList<Ingredient,Entry>* list;
 
 //     std::function<std::list<std::shared_ptr<Ingredient>(int,int)>> get_data;
 //     std::function<void(int,int)> get_data;
@@ -72,10 +73,10 @@ private:
 
     void search_stop();
 protected:
-    void fill_list(Gtk::ListBox* list) override;
+//     void fill_list(Gtk::ListBox* list) override;
 
-    bool scroll_down() override;
-    bool scroll_up() override;
+//     bool scroll_down() override;
+//     bool scroll_up() override;
 
     IList* create_list() override;
 public:

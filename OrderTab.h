@@ -27,7 +27,8 @@ private:
     };
 
     OrderGateway gateway;
-    std::unique_ptr<EntityList<Order,Entry>> list;
+//     std::unique_ptr<EntityList<Order,Entry>> list;
+    EntityList<Order,Entry>* list;
 
     Glib::RefPtr<Gtk::Builder> builder;
     Gtk::Box* info_box;
@@ -48,10 +49,10 @@ private:
 
 //     void scroll_event(Gtk::PositionType type);
 protected:
-    void fill_list(Gtk::ListBox* list) override;
+//     void fill_list(Gtk::ListBox* list) override;
 
-    bool scroll_down() override;
-    bool scroll_up() override;
+//     bool scroll_down() override;
+//     bool scroll_up() override;
 
     IList* create_list() override;
 public:

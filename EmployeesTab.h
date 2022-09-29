@@ -55,8 +55,9 @@ class Entry : public Gtk::ListBoxRow, public IEntry {
     EmployeerGateway gateway;
 
 //    std::unique_ptr<ISearch<Employeer>> current_search;
-    std::unique_ptr<EntityList<Employeer,Entry>> list;
+//     std::unique_ptr<EntityList<Employeer,Entry>> list;
 
+    EntityList<Employeer,Entry>* list;
 
     Gtk::Box* info_box;
 
@@ -91,10 +92,10 @@ class Entry : public Gtk::ListBoxRow, public IEntry {
 
     void search_stop();
 protected:
-    void fill_list(Gtk::ListBox* list) override;
+//     void fill_list(Gtk::ListBox* list) override;
 
-    bool scroll_down() override;
-    bool scroll_up() override;
+//     bool scroll_down() override;
+//     bool scroll_up() override;
 
     IList* create_list() override;
 

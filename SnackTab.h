@@ -26,7 +26,8 @@ private:
     };
 
     SnackGateway gateway;
-    std::unique_ptr<EntityList<Snack,Entry>> list;
+//     std::unique_ptr<EntityList<Snack,Entry>> list;
+    EntityList<Snack,Entry>* list;
     Glib::RefPtr<Gtk::Builder> builder;
 
     Gtk::Box* info_box;
@@ -50,10 +51,10 @@ private:
 
     void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
 protected:
-    void fill_list(Gtk::ListBox* list) override;
+//     void fill_list(Gtk::ListBox* list) override;
 
-    bool scroll_down() override;
-    bool scroll_up() override;
+//     bool scroll_down() override;
+//     bool scroll_up() override;
 
     IList* create_list() override;
 public:

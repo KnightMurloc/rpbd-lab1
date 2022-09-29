@@ -52,12 +52,12 @@ public:
 
 protected:
 
-    virtual void fill_list(Gtk::ListBox* list) = 0;
+//     virtual void fill_list(Gtk::ListBox* list) = 0;
 
-    void add_clumn_lable(std::string title);
+//     void add_clumn_lable(std::string title);
 
-    virtual bool scroll_down() = 0;
-    virtual bool scroll_up() = 0;
+//     virtual bool scroll_down() = 0;
+//     virtual bool scroll_up() = 0;
 
     virtual IList* create_list() = 0;
 public:

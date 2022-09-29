@@ -20,8 +20,9 @@
 
 ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
 
-    list = std::make_unique<EntityList<Provider,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<Provider,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<Provider,Entry>*>(create_list());
+    set_list(list);
 
     builder = Gtk::Builder::create_from_file("../provider_menu.glade");
 
@@ -55,11 +56,11 @@ ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&ProviderTab::select));
 
-    add_clumn_lable("название");
-    add_clumn_lable("почтовый адрес");
-    add_clumn_lable("телефон");
-    add_clumn_lable("факс");
-    add_clumn_lable("email");
+//     add_clumn_lable("название");
+//     add_clumn_lable("почтовый адрес");
+//     add_clumn_lable("телефон");
+//     add_clumn_lable("факс");
+//     add_clumn_lable("email");
 }
 
 void ProviderTab::select(Gtk::ListBoxRow* row){
@@ -343,7 +344,7 @@ int ProviderTab::Entry::get_id() {
 //     }
 // }
 
-void ProviderTab::fill_list(Gtk::ListBox* list) {
+// void ProviderTab::fill_list(Gtk::ListBox* list) {
 //    for(auto child : getListBox()->get_children()){
 //        getListBox()->remove(*child);
 //    }
@@ -362,9 +363,9 @@ void ProviderTab::fill_list(Gtk::ListBox* list) {
 //         auto entry = Gtk::make_managed<Entry>(provider);
 //         list->add(*entry);
 //     }
-}
+// }
 
-bool ProviderTab::scroll_down(){
+// bool ProviderTab::scroll_down(){
 //        first_id = last_id;
 //        auto data = gateway.get_great_then_by_id(last_id,20);
 //        if(data.empty()){
@@ -388,10 +389,10 @@ bool ProviderTab::scroll_down(){
 //        }
 //        getListBox()->show_all();
 //        scroll->get_vadjustment()->set_value(500);
-        return true;
-}
+//         return true;
+// }
 
-bool ProviderTab::scroll_up(){
+// bool ProviderTab::scroll_up(){
 //        last_id = first_id;
 //        auto data = gateway.get_less_then_by_id(first_id,20);
 //        if(data.empty()){
@@ -416,9 +417,18 @@ bool ProviderTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 
-        return true;
-}
+//         return true;
+// }
 
 IList* ProviderTab::create_list(){
-    return Gtk::make_managed<EntityList<Provider,Entry>>(&gateway);
+
+    auto list = Gtk::make_managed<EntityList<Provider,Entry>>(&gateway);
+
+    list->add_column_title("название");
+    list->add_column_title("почтовый адрес");
+    list->add_column_title("телефон");
+    list->add_column_title("факс");
+    list->add_column_title("email");
+
+    return list;
 }

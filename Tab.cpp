@@ -187,10 +187,10 @@ void Tab::select_by_id(int entry_id){
    }while(list->scroll_down());
 }
 
-void Tab::add_clumn_lable(std::string title){
-    auto lable = Gtk::make_managed<Gtk::Label>(title);
-//    header->add(*lable);
-}
+// void Tab::add_clumn_lable(std::string title){
+//     auto lable = Gtk::make_managed<Gtk::Label>(title);
+// //    header->add(*lable);
+// }
 
 
 void Tab::remove_entry_by_id(int id){

@@ -10,8 +10,9 @@
 
 OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-    list = std::make_unique<EntityList<Order,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<Order,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<Order,Entry>*>(create_list());
+    set_list(list);
 //    this->fill_list(getListBox());
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&OrderTab::scroll_event));
 
@@ -36,10 +37,10 @@ OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&OrderTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&OrderTab::remove));
 
-    add_clumn_lable("причина");
-    add_clumn_lable("номер приказа");
-    add_clumn_lable("дата приказа");
-    add_clumn_lable("должность");
+//     add_clumn_lable("причина");
+//     add_clumn_lable("номер приказа");
+//     add_clumn_lable("дата приказа");
+//     add_clumn_lable("должность");
 }
 
 OrderTab::Entry::Entry(std::shared_ptr<Order> order) : order(order) {
@@ -364,7 +365,7 @@ void OrderTab::remove() {
    list->remove_entity(entry);
 }
 
-void OrderTab::fill_list(Gtk::ListBox* list) {
+// void OrderTab::fill_list(Gtk::ListBox* list) {
 //    first_id = 0;
 //    last_id = -1;
 //    for(auto child : getListBox()->get_children()){
@@ -378,7 +379,7 @@ void OrderTab::fill_list(Gtk::ListBox* list) {
 //        auto entry = Gtk::make_managed<Entry>(ing);
 //        list->add(*entry);
 //    }
-}
+// }
 
 // void OrderTab::scroll_event(Gtk::PositionType type){
 //     if(type == Gtk::PositionType::POS_BOTTOM){
@@ -452,7 +453,7 @@ void OrderTab::fill_list(Gtk::ListBox* list) {
 //     getListBox()->show_all();
 // }
 
-bool OrderTab::scroll_up(){
+// bool OrderTab::scroll_up(){
 //        last_id = first_id;
 //        auto data = gateway.get_less_then_by_id(first_id,20);
 //        if(data.empty()){
@@ -477,10 +478,10 @@ bool OrderTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 
-        return true;
-}
+//         return true;
+// }
 
-bool OrderTab::scroll_down(){
+// bool OrderTab::scroll_down(){
 //         fmt::print("scroll_down\n");
 //        fmt::print("scroll_up\n");
 //        first_id = last_id;
@@ -507,9 +508,17 @@ bool OrderTab::scroll_down(){
 //        getListBox()->show_all();
 //        scroll->get_vadjustment()->set_value(500);
 
-        return true;
-}
+//         return true;
+// }
 
 IList* OrderTab::create_list(){
-    return Gtk::make_managed<EntityList<Order,Entry>>(&gateway);
+
+    auto list = Gtk::make_managed<EntityList<Order,Entry>>(&gateway);
+
+    list->add_column_title("причина");
+    list->add_column_title("номер приказа");
+    list->add_column_title("дата приказа");
+    list->add_column_title("должность");
+
+    return list;
 }

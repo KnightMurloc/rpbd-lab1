@@ -15,8 +15,8 @@
 IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 
 //    current_search = std::make_unique<DefaultSearch>(&gateway);
-    list = std::make_unique<EntityList<Ingredient,Entry>>(&gateway);
-    set_list(list.get());
+    list = dynamic_cast<EntityList<Ingredient,Entry>*>(create_list());
+    set_list(list);
 
     builder = Gtk::Builder::create_from_file("../ingridient_menu.glade");
 
@@ -41,10 +41,10 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&IngredientTab::select));
 
-    add_clumn_lable("название");
-    add_clumn_lable("еденицы");
+//     add_clumn_lable("название");
+//     add_clumn_lable("еденицы");
 
-   list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list.get()));
+//    list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list.get()));
 
 //    stop_search->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::search_stop));
 //     fmt::print("{} : {}\n",first_id,last_id);
@@ -75,7 +75,7 @@ void IngredientTab::search_stop(){
 //    getListBox()->show_all();
 }
 
-void IngredientTab::fill_list(Gtk::ListBox* list) {
+// void IngredientTab::fill_list(Gtk::ListBox* list) {
 //
 //    for(auto child : getListBox()->get_children()){
 //        getListBox()->remove(*child);
@@ -91,7 +91,7 @@ void IngredientTab::fill_list(Gtk::ListBox* list) {
 //        list->add(*entry);
 //    }
 //    fmt::print("{}\n", last_id);
-}
+// }
 
 // void IngredientTab::scroll_event(Gtk::PositionType type){
 //     if(type == Gtk::PositionType::POS_BOTTOM){
@@ -165,7 +165,7 @@ void IngredientTab::fill_list(Gtk::ListBox* list) {
 // //     return true;
 // }
 
-bool IngredientTab::scroll_up(){
+// bool IngredientTab::scroll_up(){
         //test
 //        last_id = first_id;
 //        auto data = current_search->get_less_then(first_id,20);
@@ -193,10 +193,10 @@ bool IngredientTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 //        return true;
-    return true;
-}
+//     return true;
+// }
 
-bool IngredientTab::scroll_down(){
+// bool IngredientTab::scroll_down(){
 //        first_id = last_id;
 //        auto data = current_search->get_great_then(last_id,20);
 //        if(data.empty()){
@@ -223,8 +223,8 @@ bool IngredientTab::scroll_down(){
 //        scroll->get_vadjustment()->set_value(500);
 //
 //        return true;
-    return true;
-}
+//     return true;
+// }
 
 
 //int IngredientTab::select_dialog() {
@@ -406,5 +406,9 @@ IList* IngredientTab::create_list(){
 
     auto list = Gtk::make_managed<EntityList<Ingredient,Entry>>(&gateway);
     list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list));
+
+    list->add_column_title("название");
+    list->add_column_title("еденицы");
+
     return list;
 }

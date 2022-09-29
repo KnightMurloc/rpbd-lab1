@@ -13,8 +13,9 @@
 
 DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
 
-    list = std::make_unique<EntityList<Drink,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<Drink,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<Drink,Entry>*>(create_list());
+    set_list(list);
 
     builder = Gtk::Builder::create_from_file("../drink_menu.glade");
 
@@ -50,12 +51,12 @@ DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinksTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinksTab::remove_entry));
 
-   list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&DrinksTab::select));
+//    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&DrinksTab::select));
 
-    add_clumn_lable("название");
-    add_clumn_lable("крепость");
-    add_clumn_lable("размер");
-    add_clumn_lable("ёмкость подачи");
+//     add_clumn_lable("название");
+//     add_clumn_lable("крепость");
+//     add_clumn_lable("размер");
+//     add_clumn_lable("ёмкость подачи");
 }
 
 int DrinksTab::Entry::get_id() {
@@ -424,15 +425,15 @@ std::shared_ptr<Drink> DrinksTab::Entry::get_drink() {
 //
 // }
 
-void DrinksTab::fill_list(Gtk::ListBox *list) {
-    for(const auto& drink : gateway.get_all()){
-        auto entry = Gtk::make_managed<Entry>(drink);
+// void DrinksTab::fill_list(Gtk::ListBox *list) {
+//     for(const auto& drink : gateway.get_all()){
+//         auto entry = Gtk::make_managed<Entry>(drink);
+//
+//         list->append(*entry);
+//     }
+// }
 
-        list->append(*entry);
-    }
-}
-
-bool DrinksTab::scroll_down(){
+// bool DrinksTab::scroll_down(){
 //        first_id = last_id;
 //        auto data = gateway.get_great_then_by_id(last_id,20);
 //        if(data.empty()){
@@ -457,10 +458,10 @@ bool DrinksTab::scroll_down(){
 //        getListBox()->show_all();
 //        scroll->get_vadjustment()->set_value(500);
 //        return true;
-    return true;
-}
+//     return true;
+// }
 
-bool DrinksTab::scroll_up(){
+// bool DrinksTab::scroll_up(){
 //        last_id = first_id;
 //        auto data = gateway.get_less_then_by_id(first_id,20);
 //        if(data.empty()){
@@ -484,9 +485,17 @@ bool DrinksTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 
-        return true;
-}
+//         return true;
+// }
 
 IList* DrinksTab::create_list(){
-    return Gtk::make_managed<EntityList<Drink,Entry>>(&gateway);
+
+    auto list = Gtk::make_managed<EntityList<Drink,Entry>>(&gateway);
+
+    list->add_column_title("название");
+    list->add_column_title("крепость");
+    list->add_column_title("размер");
+    list->add_column_title("ёмкость подачи");
+
+    return list;
 }

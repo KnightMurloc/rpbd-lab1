@@ -15,8 +15,9 @@
 
 EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-    list = std::make_unique<EntityList<Employeer,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<Employeer,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<Employeer,Entry>*>(create_list());
+    set_list(list);
     list->show_all();
 
 //    current_search = std::make_unique<DefaultSearch>(&gateway);
@@ -51,7 +52,7 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::remove));
 
-   list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list.get()));
+//    list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list.get()));
 //    stop_search->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::search_stop));
 
 //    fill_list(getListBox());
@@ -63,13 +64,13 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
 
 
-    add_clumn_lable("имя");
-    add_clumn_lable("фамилия");
-    add_clumn_lable("отчество");
-    add_clumn_lable("адрес");
-    add_clumn_lable("дата рождения");
-    add_clumn_lable("зарплата");
-    add_clumn_lable("должность");
+//     add_clumn_lable("имя");
+//     add_clumn_lable("фамилия");
+//     add_clumn_lable("отчество");
+//     add_clumn_lable("адрес");
+//     add_clumn_lable("дата рождения");
+//     add_clumn_lable("зарплата");
+//     add_clumn_lable("должность");
 }
 
 //TODO устанавливать gateway в листе
@@ -405,7 +406,7 @@ void EmployeesTab::remove() {
    list->remove_entity(entry);
 }
 
-void EmployeesTab::fill_list(Gtk::ListBox* list) {
+// void EmployeesTab::fill_list(Gtk::ListBox* list) {
 
 //    for(auto child : getListBox()->get_children()){
 //        getListBox()->remove(*child);
@@ -416,7 +417,7 @@ void EmployeesTab::fill_list(Gtk::ListBox* list) {
 //        auto entry = Gtk::make_managed<Entry>(emp);
 //        list->append(*entry);
 //    }
-}
+// }
 
 EmployeesTab::Entry::Entry(std::shared_ptr<Employeer> emp) : emp(emp) {
     auto box = Gtk::make_managed<Gtk::Box>();
@@ -450,7 +451,7 @@ int EmployeesTab::Entry::get_id() {
     return emp->get_id();
 }
 
-bool EmployeesTab::scroll_down(){
+// bool EmployeesTab::scroll_down(){
 //        first_id = last_id;
 //        auto data = current_search->get_great_then(last_id,20);
 //        if(data.empty()){
@@ -474,10 +475,10 @@ bool EmployeesTab::scroll_down(){
 //        }
 //        getListBox()->show_all();
 //        scroll->get_vadjustment()->set_value(500);
-        return true;
-}
+//         return true;
+// }
 //
-bool EmployeesTab::scroll_up(){
+// bool EmployeesTab::scroll_up(){
 //        last_id = first_id;
 //        auto data = current_search->get_less_then(first_id,20);
 //        if(data.empty()){
@@ -502,8 +503,8 @@ bool EmployeesTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 //
-        return true;
-}
+//         return true;
+// }
 
 // void EmployeesTab::scroll_event(Gtk::PositionType type){
 //     if(type == Gtk::POS_BOTTOM){
@@ -538,6 +539,14 @@ IList* EmployeesTab::create_list(){
     auto list = Gtk::make_managed<EntityList<Employeer,Entry>>(&gateway);
 
     list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list));
+
+    list->add_column_title("имя");
+    list->add_column_title("фамилия");
+    list->add_column_title("отчество");
+    list->add_column_title("адрес");
+    list->add_column_title("дата рождения");
+    list->add_column_title("зарплата");
+    list->add_column_title("должность");
 
     return list;
 }

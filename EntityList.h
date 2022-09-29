@@ -95,7 +95,7 @@ public:
 
     void remove_row(Gtk::Widget* widget) override;
 
-//     void add_column_title(std::string title);
+    void add_column_title(std::string title);
 };
 
 #include "EntityList.inc"

@@ -15,8 +15,9 @@
 BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
 //    this->fill_list(getListBox());
 
-    list = std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<BankDetail,Entry>*>(create_list());
+    set_list(list);
 
     builder = Gtk::Builder::create_from_file("../bank_detail_menu.glade");
 
@@ -39,10 +40,10 @@ BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&BankDetailTab::select));
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&BankDetailTab::scroll_event));
 
-    add_clumn_lable("название");
-    add_clumn_lable("город");
-    add_clumn_lable("ИНН");
-    add_clumn_lable("расчётный счёт");
+//     add_clumn_lable("название");
+//     add_clumn_lable("город");
+//     add_clumn_lable("ИНН");
+//     add_clumn_lable("расчётный счёт");
 }
 
 void BankDetailTab::select(Gtk::ListBoxRow* row){
@@ -237,12 +238,12 @@ BankDetailTab::Entry::Entry(std::shared_ptr<BankDetail> detail) : detail(detail)
 // //    fill_list(getListBox());
 // }
 
-void BankDetailTab::fill_list(Gtk::ListBox *list) {
-    for(auto& data : gateway.get_great_then_by_id(0,20)){
-        auto entry = Gtk::make_managed<Entry>(data);
-        list->append(*entry);
-    }
-}
+// void BankDetailTab::fill_list(Gtk::ListBox *list) {
+//     for(auto& data : gateway.get_great_then_by_id(0,20)){
+//         auto entry = Gtk::make_managed<Entry>(data);
+//         list->append(*entry);
+//     }
+// }
 
 std::shared_ptr<BankDetail> BankDetailTab::Entry::get_bank_detail(){
     return detail;
@@ -256,7 +257,7 @@ std::shared_ptr<BankDetail> BankDetailTab::Entry::get_bank_detail(){
 //     }
 // }
 
-bool BankDetailTab::scroll_down(){
+// bool BankDetailTab::scroll_down(){
 //        first_id = last_id;
 //        auto data = gateway.get_great_then_by_id(last_id,20);
 //        if(data.empty()){
@@ -280,10 +281,10 @@ bool BankDetailTab::scroll_down(){
 //        }
 //        getListBox()->show_all();
 //        scroll->get_vadjustment()->set_value(500);
-        return true;
-}
+//         return true;
+// }
 
-bool BankDetailTab::scroll_up(){
+// bool BankDetailTab::scroll_up(){
 //        last_id = first_id;
 //        auto data = gateway.get_less_then_by_id(first_id,20);
 //        if(data.empty()){
@@ -308,10 +309,17 @@ bool BankDetailTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 //
-        return true;
-}
+//         return true;
+// }
 
 IList* BankDetailTab::create_list(){
 //     return std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
-    return Gtk::make_managed<EntityList<BankDetail,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<BankDetail,Entry>>(&gateway);
+
+    list->add_column_title("название");
+    list->add_column_title("город");
+    list->add_column_title("ИНН");
+    list->add_column_title("расчётный счёт");
+
+    return list;
 }

@@ -23,8 +23,9 @@
 
 SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-    list = std::make_unique<EntityList<Snack,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<Snack,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<Snack,Entry>*>(create_list());
+    set_list(list);
 
     builder = Gtk::Builder::create_from_file("../snack_menu.glade");
 
@@ -63,8 +64,8 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&SnackTab::select));
 
-    add_clumn_lable("название");
-    add_clumn_lable("размер");
+//     add_clumn_lable("название");
+//     add_clumn_lable("размер");
 }
 
 void SnackTab::save_current(){
@@ -209,13 +210,13 @@ void SnackTab::select(Gtk::ListBoxRow* entry_row) {
     ing_list->show_all();
 }
 
-void SnackTab::fill_list(Gtk::ListBox* list) {
-    auto data = gateway.get_all();
-    for(auto& snack : data){
-        auto entry = Gtk::make_managed<Entry>(snack);
-        list->append(*entry);
-    }
-}
+// void SnackTab::fill_list(Gtk::ListBox* list) {
+//     auto data = gateway.get_all();
+//     for(auto& snack : data){
+//         auto entry = Gtk::make_managed<Entry>(snack);
+//         list->append(*entry);
+//     }
+// }
 
 void SnackTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
     int ing_id = tab_manager->select_dialog(TabName::INGREDIENTS);
@@ -396,7 +397,7 @@ int SnackTab::Entry::get_id() {
     return snack->get_id();
 }
 
-bool SnackTab::scroll_up(){
+// bool SnackTab::scroll_up(){
 //         first_id = last_id;
 //         auto data = gateway.get_great_then_by_id(last_id,20);
 //         if(data.empty()){
@@ -420,10 +421,10 @@ bool SnackTab::scroll_up(){
 //         }
 //         getListBox()->show_all();
 //         scroll->get_vadjustment()->set_value(500);
-        return true;
-}
+//         return true;
+// }
 
-bool SnackTab::scroll_down(){
+// bool SnackTab::scroll_down(){
 //         last_id = first_id;
 //         auto data = gateway.get_less_then_by_id(first_id,20);
 //         if(data.empty()){
@@ -448,9 +449,15 @@ bool SnackTab::scroll_down(){
 //
 //         scroll->get_vadjustment()->set_value(100);
 
-        return true;
-}
+//         return true;
+// }
 
 IList* SnackTab::create_list(){
-    return Gtk::make_managed<EntityList<Snack,Entry>>(&gateway);
+
+    auto list = Gtk::make_managed<EntityList<Snack,Entry>>(&gateway);
+
+    list->add_column_title("название");
+    list->add_column_title("размер");
+
+    return list;
 }

@@ -29,7 +29,8 @@ private:
     };
 
     ProviderGateway gateway;
-    std::unique_ptr<EntityList<Provider,Entry>> list;
+//     std::unique_ptr<EntityList<Provider,Entry>> list;
+    EntityList<Provider,Entry>* list;
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -59,10 +60,10 @@ private:
 
 //     void scroll_event(Gtk::PositionType type);
 protected:
-    void fill_list(Gtk::ListBox* list) override;
+//     void fill_list(Gtk::ListBox* list) override;
 
-    bool scroll_down() override;
-    bool scroll_up() override;
+//     bool scroll_down() override;
+//     bool scroll_up() override;
 
     IList* create_list() override;
 public:

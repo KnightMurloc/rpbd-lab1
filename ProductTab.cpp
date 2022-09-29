@@ -14,8 +14,9 @@
 
 ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
 
-    list = std::make_unique<EntityList<Product,Entry>>(&gateway);
-    set_list(list.get());
+//     list = std::make_unique<EntityList<Product,Entry>>(&gateway);
+    list = dynamic_cast<EntityList<Product,Entry>*>(create_list());
+    set_list(list);
 
     builder = Gtk::Builder::create_from_file("../product_menu.glade");
 
@@ -51,8 +52,8 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
 
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&ProductTab::scroll_event));
 
-    add_clumn_lable("название");
-    add_clumn_lable("цена");
+//     add_clumn_lable("название");
+//     add_clumn_lable("цена");
 }
 
 void ProductTab::save_current() {
@@ -244,7 +245,7 @@ void ProductTab::cancel_current() {
 
 }
 
-void ProductTab::fill_list(Gtk::ListBox* list) {
+// void ProductTab::fill_list(Gtk::ListBox* list) {
 //    for(auto child : getListBox()->get_children()){
 //        getListBox()->remove(*child);
 //    }
@@ -258,7 +259,7 @@ void ProductTab::fill_list(Gtk::ListBox* list) {
 //        auto entry = Gtk::make_managed<Entry>(ing);
 //        list->add(*entry);
 //    }
-}
+// }
 
 void ProductTab::select(Gtk::ListBoxRow* row) {
     auto entry = dynamic_cast<Entry*>(row);
@@ -386,7 +387,7 @@ int ProductTab::Entry::get_id() {
 //     }
 // }
 
-bool ProductTab::scroll_down(){
+// bool ProductTab::scroll_down(){
 //        first_id = last_id;
 //        auto data = gateway.get_great_then_by_id(last_id,20);
 //        if(data.empty()){
@@ -410,10 +411,10 @@ bool ProductTab::scroll_down(){
 //        }
 //        getListBox()->show_all();
 //        scroll->get_vadjustment()->set_value(500);
-        return true;
-}
+//         return true;
+// }
 
-bool ProductTab::scroll_up(){
+// bool ProductTab::scroll_up(){
 //        last_id = first_id;
 //        auto data = gateway.get_less_then_by_id(first_id,20);
 //        if(data.empty()){
@@ -438,9 +439,14 @@ bool ProductTab::scroll_up(){
 //
 //        scroll->get_vadjustment()->set_value(100);
 
-        return true;
-}
+//         return true;
+// }
 
 IList* ProductTab::create_list(){
-    return Gtk::make_managed<EntityList<Product,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Product,Entry>>(&gateway);
+
+    list->add_column_title("название");
+    list->add_column_title("цена");
+
+    return list;
 }

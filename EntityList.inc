@@ -1,5 +1,6 @@
 //#include "EntityList.h"
 
+#include "gtkmm/object.h"
 template<class T, class E>
 EntityList<T, E>::EntityList(IGateway<T>* gateway) : gateway(gateway) {
     box = Gtk::make_managed<Gtk::Box>();
@@ -13,16 +14,23 @@ EntityList<T, E>::EntityList(IGateway<T>* gateway) : gateway(gateway) {
     scroll->set_vexpand(true);
     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&EntityList::scroll_event));
 
+    auto scroll_box = Gtk::make_managed<Gtk::Box>();
+    scroll_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+
+
     list = Gtk::make_managed<Gtk::ListBox>();
     list->set_vexpand(true);
-    scroll->add(*list);
+    scroll_box->add(*header);
+    scroll_box->add(*list);
+
+    scroll->add(*scroll_box);
 
     search_entry = Gtk::make_managed<Gtk::SearchEntry>();
     search_entry->set_vexpand(false);
     search_entry->set_hexpand(true);
 
 
-    box->add(*header);
+
     box->add(*scroll);
     box->add(*search_entry);
 
@@ -196,4 +204,9 @@ void EntityList<T,E>::remove_row(Gtk::Widget* widget){
     list->remove(*widget);
 }
 
+template<class T, class E>
+void EntityList<T,E>::add_column_title(std::string title){
+    auto label = Gtk::make_managed<Gtk::Label>(title);
+    header->add(*label);
+}
 
