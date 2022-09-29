@@ -12,7 +12,7 @@
 
 class EmployeesTab : public Tab {
 private:
-class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Employeer> emp;
 
     public:
@@ -54,7 +54,8 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
 
     EmployeerGateway gateway;
 
-    std::unique_ptr<ISearch<Employeer>> current_search;
+//    std::unique_ptr<ISearch<Employeer>> current_search;
+    std::unique_ptr<EntityList<Employeer,Entry>> list;
 
 
     Gtk::Box* info_box;
@@ -86,7 +87,7 @@ class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
 
 //     void scroll_event(Gtk::PositionType type);
 
-    void search();
+    static void search(EntityList<Employeer,Entry>* list);
 
     void search_stop();
 protected:
@@ -94,6 +95,9 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
+
 public:
     explicit EmployeesTab(TabManager* tab_manager);
 

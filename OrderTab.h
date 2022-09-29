@@ -11,7 +11,7 @@
 
 class OrderTab : public Tab {
 private:
-    class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+    class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Order> order;
     public:
         Gtk::Label* reason_label;
@@ -27,6 +27,8 @@ private:
     };
 
     OrderGateway gateway;
+    std::unique_ptr<EntityList<Order,Entry>> list;
+
     Glib::RefPtr<Gtk::Builder> builder;
     Gtk::Box* info_box;
     Gtk::Entry* reason_entry;
@@ -50,6 +52,8 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
 public:
     explicit OrderTab(TabManager* tab_manager);
 

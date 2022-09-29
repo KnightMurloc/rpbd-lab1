@@ -3,9 +3,11 @@
 //
 
 #include "Tab.h"
+#include "gtkmm/box.h"
 #include "gtkmm/enums.h"
 #include "gtkmm/eventbox.h"
 #include "gtkmm/label.h"
+#include "gtkmm/listboxrow.h"
 #include "gtkmm/object.h"
 #include "gtkmm/searchbar.h"
 #include "gtkmm/searchentry.h"
@@ -18,14 +20,14 @@ Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
 
     this->add(*create_top_panel());
 
-    header = Gtk::make_managed<Gtk::Box>();
-    header->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-    header->set_homogeneous(true);
+//    header = Gtk::make_managed<Gtk::Box>();
+//    header->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+//    header->set_homogeneous(true);
 
-    auto cursor = Gdk::Cursor::create(Gdk::CursorType::HAND1);
+//    auto cursor = Gdk::Cursor::create(Gdk::CursorType::HAND1);
 
-    auto event_box = Gtk::make_managed<Gtk::EventBox>();
-    event_box->set_hexpand(true);
+//    auto event_box = Gtk::make_managed<Gtk::EventBox>();
+//    event_box->set_hexpand(true);
 
 //     auto label1 = Gtk::make_managed<Gtk::Label>("test1");
 //     label1->add_events(Gdk::POINTER_MOTION_MASK |
@@ -58,40 +60,40 @@ Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
 
 
 
-    scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
-    scroll->set_vexpand(true);
-    scroll->signal_edge_reached().connect(sigc::mem_fun(this,&Tab::scroll_event));
+//    scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
+//    scroll->set_vexpand(true);
+//    scroll->signal_edge_reached().connect(sigc::mem_fun(this,&Tab::scroll_event));
 
 //     scroll->signal_edge_reached().connect([](Gtk::PositionType type){
 //         std::cout << (int) type << std::endl;
 //     });
 
-    this->add(*scroll);
+//    this->add(*scroll);
 
-    listBox = Gtk::make_managed<Gtk::ListBox>();
-    listBox->set_vexpand(true);
+//    listBox = Gtk::make_managed<Gtk::ListBox>();
+//    listBox->set_vexpand(true);
 
-    auto box = Gtk::make_managed<Gtk::Box>();
-    box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-    scroll->add(*box);
+//    auto box = Gtk::make_managed<Gtk::Box>();
+//    box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+//    scroll->add(*box);
 
-    auto bottom_box = Gtk::make_managed<Gtk::Box>();
-    bottom_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+//    auto bottom_box = Gtk::make_managed<Gtk::Box>();
+//    bottom_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
 
-    search_entry = Gtk::make_managed<Gtk::SearchEntry>();
-    search_entry->set_vexpand(false);
-    search_entry->set_hexpand(true);
+//    search_entry = Gtk::make_managed<Gtk::SearchEntry>();
+//    search_entry->set_vexpand(false);
+//    search_entry->set_hexpand(true);
 
-    stop_search = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-cancel"));
+//    stop_search = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-cancel"));
 //     stop_search->set_label("");
 
 
-    box->add(*header);
-    box->add(*listBox);
-    bottom_box->add(*search_entry);
-    bottom_box->add(*stop_search);
+//    box->add(*header);
+//    box->add(*listBox);
+//    bottom_box->add(*search_entry);
+//    bottom_box->add(*stop_search);
 
-    this->add(*bottom_box);
+//    this->add(*bottom_box);
 }
 
 Gtk::ButtonBox *Tab::create_top_panel() {
@@ -116,78 +118,105 @@ Gtk::Button *Tab::getRemoveButton() const {
     return remove_button;
 }
 
-Gtk::ListBox *Tab::getListBox() const {
-    return listBox;
-}
+//Gtk::ListBox *Tab::getListBox() const {
+//    return listBox;
+//}
 
 TabManager* Tab::get_tab_manager() const {
     return tab_manager;
 }
 
 int Tab::select_dialog() {
-    Gtk::ListBox list;
-
-    fill_list(&list);
-
-    list.show_all();
 
     Gtk::Dialog dialog;
     dialog.add_button("OK", Gtk::RESPONSE_OK);
     dialog.add_button("отмена", Gtk::RESPONSE_CANCEL);
 
-    Gtk::ScrolledWindow scroll;
-    scroll.set_vexpand(true);
-    scroll.add(list);
+    auto list = create_list();
 
-    dynamic_cast<Gtk::Container*>(dialog.get_children()[0])->add(scroll);
+    auto box = dynamic_cast<Gtk::Box*>(list);
 
-    scroll.show_all();
-    if(dialog.run() == Gtk::RESPONSE_OK){
-        auto entry = dynamic_cast<IEntry*>(list.get_selected_row());
+    dynamic_cast<Gtk::Container*>(dialog.get_children()[0])->add(*box);
+
+    box->show_all();
+
+    if(dialog.run()){
+        auto entry = list->get_selected();
         return entry->get_id();
     }
+
+//     Gtk::ListBox list;
+//
+//     fill_list(&list);
+//
+//     list.show_all();
+//
+//     Gtk::Dialog dialog;
+//     dialog.add_button("OK", Gtk::RESPONSE_OK);
+//     dialog.add_button("отмена", Gtk::RESPONSE_CANCEL);
+//
+//     Gtk::ScrolledWindow scroll;
+//     scroll.set_vexpand(true);
+//     scroll.add(list);
+//
+//     dynamic_cast<Gtk::Container*>(dialog.get_children()[0])->add(scroll);
+//
+//     scroll.show_all();
+//     if(dialog.run() == Gtk::RESPONSE_OK){
+//         auto entry = dynamic_cast<IEntry*>(list.get_selected_row());
+//         return entry->get_id();
+//     }
 
     return -1;
 }
 
 void Tab::select_by_id(int entry_id){
+//    fill_list(getListBox());
 
-    fill_list(getListBox());
+    list->fill_list();
 
-    bool find = true;
-
-    do{
-        for(auto child : listBox->get_children()){
-            auto entry = dynamic_cast<IEntry*>(child);
-            if(entry->get_id() == entry_id){
-                listBox->select_row(*dynamic_cast<Gtk::ListBoxRow*>(entry));
-                find = false;
-                break;
-            }
-        }
-    }while(scroll_down() && find);
+//    bool find = true;
+   do{
+       for(auto child : list->get_children()){
+           auto entry = dynamic_cast<IEntry*>(child);
+           if(entry->get_id() == entry_id){
+               list->select_row(dynamic_cast<Gtk::ListBoxRow*>(entry));
+               return;
+           }
+       }
+   }while(list->scroll_down());
 }
 
 void Tab::add_clumn_lable(std::string title){
     auto lable = Gtk::make_managed<Gtk::Label>(title);
-    header->add(*lable);
+//    header->add(*lable);
 }
 
 
 void Tab::remove_entry_by_id(int id){
-    for(auto child : listBox->get_children()){
-        auto entry = dynamic_cast<IEntry*>(child);
-        if(entry->get_id() == id){
-            listBox->remove(*child);
-            break;
-        }
-    }
+   for(auto child : list->get_children()){
+       auto entry = dynamic_cast<IEntry*>(child);
+       if(entry->get_id() == id){
+           list->remove_row(child);
+           break;
+       }
+   }
 }
 
-void Tab::scroll_event(Gtk::PositionType type){
-    if(type == Gtk::PositionType::POS_BOTTOM){
-        scroll_down();
-    }else if(type == Gtk::PositionType::POS_TOP){
-        scroll_up();
-    }
+//void Tab::scroll_event(Gtk::PositionType type){
+//    if(type == Gtk::PositionType::POS_BOTTOM){
+//        scroll_down();
+//    }else if(type == Gtk::PositionType::POS_TOP){
+//        scroll_up();
+//    }
+//}
+
+IList* Tab::get_list() const {
+    return list;
+}
+
+void Tab::set_list(IList* list) {
+    Tab::list = list;
+    auto box = dynamic_cast<Gtk::Box*>(list);
+    add(*box);
 }

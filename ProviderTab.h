@@ -12,7 +12,7 @@
 
 class ProviderTab : public Tab {
 private:
-    class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+    class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Provider> provider;
     public:
         Gtk::Label* name_label;
@@ -29,6 +29,8 @@ private:
     };
 
     ProviderGateway gateway;
+    std::unique_ptr<EntityList<Provider,Entry>> list;
+
     Glib::RefPtr<Gtk::Builder> builder;
 
     Gtk::Box* info_box;
@@ -61,6 +63,8 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
 public:
     ProviderTab(TabManager* manager);
 

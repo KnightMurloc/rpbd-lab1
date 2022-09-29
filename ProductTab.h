@@ -13,7 +13,7 @@
 
 class ProductTab : public Tab {
 private:
-    class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+    class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Product> product;
 
     public:
@@ -28,6 +28,7 @@ private:
     };
 
     ProductGateway gateway;
+    std::unique_ptr<EntityList<Product,Entry>> list;
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -69,6 +70,8 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
 public:
     explicit ProductTab(TabManager* tab_manager);
 

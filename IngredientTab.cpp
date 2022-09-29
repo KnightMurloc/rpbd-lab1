@@ -14,7 +14,9 @@
 
 IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-    current_search = std::make_unique<DefaultSearch>(&gateway);
+//    current_search = std::make_unique<DefaultSearch>(&gateway);
+    list = std::make_unique<EntityList<Ingredient,Entry>>(&gateway);
+    set_list(list.get());
 
     builder = Gtk::Builder::create_from_file("../ingridient_menu.glade");
 
@@ -31,19 +33,20 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 //     first_id = gateway.get_min();
 //     last_id = gateway.get_max();
 
-    this->fill_list(getListBox());
+//    this->fill_list(getListBox());
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&IngredientTab::scroll_event));
 
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::remove_entry));
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::create));
 
-    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&IngredientTab::select));
+   list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&IngredientTab::select));
 
     add_clumn_lable("название");
     add_clumn_lable("еденицы");
 
-    search_entry->signal_activate().connect(sigc::mem_fun(this,&IngredientTab::search));
-    stop_search->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::search_stop));
+   list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list.get()));
+
+//    stop_search->signal_clicked().connect(sigc::mem_fun(this,&IngredientTab::search_stop));
 //     fmt::print("{} : {}\n",first_id,last_id);
 }
 
@@ -51,34 +54,43 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 //
 // }
 
-void IngredientTab::search(){
-    current_search = std::make_unique<NameSearch>(&gateway, search_entry->get_text());
-    fill_list(getListBox());
-    getListBox()->show_all();
+void IngredientTab::search(EntityList<Ingredient,Entry>* list){
+   std::string str = list->get_search_text();
+   std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
+   auto gateway = dynamic_cast<IngredientGateway*>(list->get_gateway());
+   if(gateway == nullptr){
+       return;
+    }
+   auto ptr = std::make_unique<NameSearch>(gateway,str );
+   list->set_search(std::move(ptr));
+
+//    current_search = std::make_unique<NameSearch>(&gateway, search_entry->get_text());
+//    fill_list(getListBox());
+//    getListBox()->show_all();
 }
 
 void IngredientTab::search_stop(){
-    current_search = std::make_unique<DefaultSearch>(&gateway);
-    fill_list(getListBox());
-    getListBox()->show_all();
+//    current_search = std::make_unique<DefaultSearch>(&gateway);
+//    fill_list(getListBox());
+//    getListBox()->show_all();
 }
 
 void IngredientTab::fill_list(Gtk::ListBox* list) {
-
-    for(auto child : getListBox()->get_children()){
-        getListBox()->remove(*child);
-    }
-
-    first_id = 0;
-    last_id = -1;
-    for(const auto& ing : current_search->get_great_then(0,20)){
-        if(ing->get_id() > last_id){
-            last_id = ing->get_id();
-        }
-        auto entry = Gtk::make_managed<Entry>(ing);
-        list->add(*entry);
-    }
-    fmt::print("{}\n", last_id);
+//
+//    for(auto child : getListBox()->get_children()){
+//        getListBox()->remove(*child);
+//    }
+//
+//    first_id = 0;
+//    last_id = -1;
+//    for(const auto& ing : current_search->get_great_then(0,20)){
+//        if(ing->get_id() > last_id){
+//            last_id = ing->get_id();
+//        }
+//        auto entry = Gtk::make_managed<Entry>(ing);
+//        list->add(*entry);
+//    }
+//    fmt::print("{}\n", last_id);
 }
 
 // void IngredientTab::scroll_event(Gtk::PositionType type){
@@ -155,61 +167,63 @@ void IngredientTab::fill_list(Gtk::ListBox* list) {
 
 bool IngredientTab::scroll_up(){
         //test
-        last_id = first_id;
-        auto data = current_search->get_less_then(first_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() < first_id){
-                first_id = ing->get_id();
-            }
-
-            auto entry = Gtk::make_managed<Entry>(ing);
-            fmt::print("name: {}\n", entry->get_ingredient()->get_name());
-            getListBox()->insert(*entry,0);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-            for(int i = rows.size() - 1; i >= 40; i--){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-
-        scroll->get_vadjustment()->set_value(100);
-        return true;
+//        last_id = first_id;
+//        auto data = current_search->get_less_then(first_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() < first_id){
+//                first_id = ing->get_id();
+//            }
+//
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            fmt::print("name: {}\n", entry->get_ingredient()->get_name());
+//            getListBox()->insert(*entry,0);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//            for(int i = rows.size() - 1; i >= 40; i--){
+//                fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//
+//        scroll->get_vadjustment()->set_value(100);
+//        return true;
+    return true;
 }
 
 bool IngredientTab::scroll_down(){
-        first_id = last_id;
-        auto data = current_search->get_great_then(last_id,20);
-        if(data.empty()){
-//             goto end;
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() > last_id){
-                last_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->add(*entry);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-
-            for(int i = 0; i < rows.size() - 40; i++){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-        scroll->get_vadjustment()->set_value(500);
-
-        return true;
+//        first_id = last_id;
+//        auto data = current_search->get_great_then(last_id,20);
+//        if(data.empty()){
+////             goto end;
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() > last_id){
+//                last_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->add(*entry);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//
+//            for(int i = 0; i < rows.size() - 40; i++){
+//                fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//        scroll->get_vadjustment()->set_value(500);
+//
+//        return true;
+    return true;
 }
 
 
@@ -262,26 +276,26 @@ void IngredientTab::select(Gtk::ListBoxRow* row){
 }
 
 void IngredientTab::save(){
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    if(name_entry->get_text().empty()){
-        Gtk::MessageDialog message("имя не указано");
-        message.run();
-        return;
-    }
+   if(name_entry->get_text().empty()){
+       Gtk::MessageDialog message("имя не указано");
+       message.run();
+       return;
+   }
 
-    auto ing = entry->get_ingredient();
+   auto ing = entry->get_ingredient();
 
-    ing->set_name(name_entry->get_text());
-    ing->set_unit(string_to_unit(unit_combo->get_active_id()));
+   ing->set_name(name_entry->get_text());
+   ing->set_unit(string_to_unit(unit_combo->get_active_id()));
 
-    gateway.save(ing);
+   gateway.save(ing);
 
-    entry->name_label->set_text(ing->get_name());
-    entry->unit_label->set_text(unit_combo->get_active_id());
+   entry->name_label->set_text(ing->get_name());
+   entry->unit_label->set_text(unit_combo->get_active_id());
 }
 
 void IngredientTab::create(){
@@ -315,8 +329,10 @@ void IngredientTab::create(){
 
             auto entry = Gtk::make_managed<Entry>(ing);
 
-            getListBox()->append(*entry);
-            getListBox()->show_all();
+            list->add_entity(entry);
+            list->show_all();
+//            getListBox()->append(*entry);
+//            getListBox()->show_all();
 
             dialog->close();
             delete dialog;
@@ -330,14 +346,18 @@ void IngredientTab::create(){
 }
 
 void IngredientTab::remove_entry(){
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    gateway.remove(entry->get_ingredient());
+   gateway.remove(entry->get_ingredient());
+    Gtk::Box* box;
+   Form::getInstance().getBuilder()->get_widget("info_box", box);
 
-    getListBox()->remove(*entry);
+   box->remove(*box->get_children()[0]);
+
+   list->remove_entity(entry);
 }
 
 IngredientTab::Entry::Entry(std::shared_ptr<Ingredient> ingredient) : ingredient(ingredient) {
@@ -380,4 +400,11 @@ std::list<std::shared_ptr<Ingredient>> IngredientTab::NameSearch::get_great_then
 
 std::list<std::shared_ptr<Ingredient>> IngredientTab::NameSearch::get_less_then(int id, int count){
     return gateway->get_less_then_by_name(name,id,count);
+}
+
+IList* IngredientTab::create_list(){
+
+    auto list = Gtk::make_managed<EntityList<Ingredient,Entry>>(&gateway);
+    list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list));
+    return list;
 }

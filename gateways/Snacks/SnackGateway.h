@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <utility>
 
-class SnackGateway : IGateway<Snack> {
+class SnackGateway : public IGateway<Snack> {
 public:
     void save(std::shared_ptr<Snack> data) override;
 
@@ -23,6 +23,9 @@ public:
     std::list<std::shared_ptr<Snack>> get_all() override;
 
     std::list<std::pair<int,int>> get_ingredients(std::shared_ptr<Snack> data);
+
+    std::list<std::shared_ptr<Snack>> get_great_then_by_id(int min, int count) override;
+    std::list<std::shared_ptr<Snack>> get_less_then_by_id(int max, int count) override;
 };
 
 #endif //LAB1_SNACKGATEWAY_H

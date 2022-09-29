@@ -23,6 +23,9 @@
 
 SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
+    list = std::make_unique<EntityList<Snack,Entry>>(&gateway);
+    set_list(list.get());
+
     builder = Gtk::Builder::create_from_file("../snack_menu.glade");
 
     builder->get_widget("box",info_box);
@@ -35,7 +38,7 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
     setup_menu(builder);
     ing_list->set_vexpand(true);
 
-    this->fill_list(getListBox());
+//    this->fill_list(getListBox());
 
     //add_button->signal_clicked().connect(sigc::mem_fun(this, &SnackTab::add_ingredient));
 //     remove_button->signal_clicked().connect(sigc::mem_fun(this, &SnackTab::remove_ingredient));
@@ -58,108 +61,108 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&SnackTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&SnackTab::remove_entry));
 
-    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&SnackTab::select));
+   list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&SnackTab::select));
 
     add_clumn_lable("название");
     add_clumn_lable("размер");
 }
 
 void SnackTab::save_current(){
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    auto snack = entry->get_snack();
+   auto snack = entry->get_snack();
 
 
-    if(name_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указано имя");
-        message.run();
-        return;
-    }
+   if(name_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указано имя");
+       message.run();
+       return;
+   }
 
-    if(size_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указан размер");
-        message.run();
-        return;
-    }
+   if(size_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указан размер");
+       message.run();
+       return;
+   }
 
-    std::cout << "old" << std::endl;
+   std::cout << "old" << std::endl;
 
-    std::vector<std::pair<int,int>> old_list;
-    std::vector<std::pair<int,int>> new_list;
+   std::vector<std::pair<int,int>> old_list;
+   std::vector<std::pair<int,int>> new_list;
 
-    for(auto& ing : gateway.get_ingredients(snack)){
-        std::cout << std::get<0>(ing) << " ";
-        old_list.push_back(ing);
+   for(auto& ing : gateway.get_ingredients(snack)){
+       std::cout << std::get<0>(ing) << " ";
+       old_list.push_back(ing);
 //         old_list.insert(ing);
-    }
-    std::cout << std::endl;
+   }
+   std::cout << std::endl;
 
-    std::cout << "new" << std::endl;
+   std::cout << "new" << std::endl;
 
-    for(auto row : ing_list->get_children()){
+   for(auto row : ing_list->get_children()){
 
-        auto box = dynamic_cast<Gtk::Container*>(row)->get_children()[0];
+       auto box = dynamic_cast<Gtk::Container*>(row)->get_children()[0];
 
-        int* id = static_cast<int*>(box->get_data("id"));
-        int* count = static_cast<int*>(box->get_data("count"));
-        std::cout << *id << " ";
-        new_list.push_back(std::make_pair(*id, *count));
+       int* id = static_cast<int*>(box->get_data("id"));
+       int* count = static_cast<int*>(box->get_data("count"));
+       std::cout << *id << " ";
+       new_list.push_back(std::make_pair(*id, *count));
 //         old_list.insert(std::make_pair<int,int>(*id, *count));
-    }
-    std::cout << std::endl;
+   }
+   std::cout << std::endl;
 
 
-    std::sort(old_list.begin(), old_list.end(),[](std::pair<int,int>& a, std::pair<int,int>& b){
-        return a.first < b.first;
-    });
+   std::sort(old_list.begin(), old_list.end(),[](std::pair<int,int>& a, std::pair<int,int>& b){
+       return a.first < b.first;
+   });
 
-    std::sort(new_list.begin(), new_list.end(),[](std::pair<int,int>& a, std::pair<int,int>& b){
-        return a.first < b.first;
-    });
+   std::sort(new_list.begin(), new_list.end(),[](std::pair<int,int>& a, std::pair<int,int>& b){
+       return a.first < b.first;
+   });
 
-    std::vector<std::pair<int,int>> created;
-    std::vector<std::pair<int,int>> removed;
+   std::vector<std::pair<int,int>> created;
+   std::vector<std::pair<int,int>> removed;
 
-    std::set_difference(new_list.begin(), new_list.end(), old_list.begin(), old_list.end(),
-                        std::inserter(created, created.begin()),
-        [](std::pair<int,int>& a, std::pair<int,int>& b){
-            return a.first < b.first;
-        }
+   std::set_difference(new_list.begin(), new_list.end(), old_list.begin(), old_list.end(),
+                       std::inserter(created, created.begin()),
+       [](std::pair<int,int>& a, std::pair<int,int>& b){
+           return a.first < b.first;
+       }
 
-    );
+   );
 
-    std::set_difference(old_list.begin(), old_list.end(), new_list.begin(), new_list.end(),
-                        std::inserter(removed, removed.begin()),
-        [](std::pair<int,int>& a,std::pair<int,int>& b){
-            return a.first < b.first;
-        }
-    );
+   std::set_difference(old_list.begin(), old_list.end(), new_list.begin(), new_list.end(),
+                       std::inserter(removed, removed.begin()),
+       [](std::pair<int,int>& a,std::pair<int,int>& b){
+           return a.first < b.first;
+       }
+   );
 
-    std::cout << "created" << std::endl;
-    for(auto a : created){
-        std::cout << a.first << " ";
-        snack->get_recipe().add_ingridient(a.first,a.second);
-    }
-    std::cout << std::endl;
+   std::cout << "created" << std::endl;
+   for(auto a : created){
+       std::cout << a.first << " ";
+       snack->get_recipe().add_ingridient(a.first,a.second);
+   }
+   std::cout << std::endl;
 
-    std::cout << "removed" << std::endl;
-    for(auto a : removed){
-        std::cout <<  a.first << " ";
-        snack->get_recipe().remove_ingridient(a.first);
-    }
-    std::cout << std::endl;
+   std::cout << "removed" << std::endl;
+   for(auto a : removed){
+       std::cout <<  a.first << " ";
+       snack->get_recipe().remove_ingridient(a.first);
+   }
+   std::cout << std::endl;
 
-    snack->set_name(name_entry->get_text());
-    snack->set_size(std::stoi(size_entry->get_text()));
+   snack->set_name(name_entry->get_text());
+   snack->set_size(std::stoi(size_entry->get_text()));
 
 
-    entry->name_label->set_text(name_entry->get_text());
-    entry->size_label->set_text(size_entry->get_text());
+   entry->name_label->set_text(name_entry->get_text());
+   entry->size_label->set_text(size_entry->get_text());
 
-    gateway.save(snack);
+   gateway.save(snack);
 }
 
 
@@ -337,7 +340,7 @@ void SnackTab::create(){
 
             auto entry = Gtk::make_managed<Entry>(snack);
 
-            getListBox()->append(*entry);
+//            getListBox()->append(*entry);
 
             dialog->close();
             delete dialog;
@@ -351,19 +354,19 @@ void SnackTab::create(){
 }
 
 void SnackTab::remove_entry() {
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    gateway.remove(entry->get_snack());
+   gateway.remove(entry->get_snack());
 
-    Gtk::Box* box;
-    Form::getInstance().getBuilder()->get_widget("info_box", box);
+   Gtk::Box* box;
+   Form::getInstance().getBuilder()->get_widget("info_box", box);
 
-    box->remove(*box->get_children()[0]);
+   box->remove(*box->get_children()[0]);
 
-    getListBox()->remove(*entry);
+   list->remove_entity(entry);
 }
 
 SnackTab::Entry::Entry(std::shared_ptr<Snack> snack) : snack(snack) {
@@ -448,3 +451,6 @@ bool SnackTab::scroll_down(){
         return true;
 }
 
+IList* SnackTab::create_list(){
+    return Gtk::make_managed<EntityList<Snack,Entry>>(&gateway);
+}

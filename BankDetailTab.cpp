@@ -6,13 +6,17 @@
 #include "Form.h"
 #include "gateways/BankDetail/BankDetail.h"
 #include "gtkmm/dialog.h"
+#include "gtkmm/object.h"
 
 #include <string>
 #include <utility>
 #include <iostream>
 
 BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
-    this->fill_list(getListBox());
+//    this->fill_list(getListBox());
+
+    list = std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
+    set_list(list.get());
 
     builder = Gtk::Builder::create_from_file("../bank_detail_menu.glade");
 
@@ -32,9 +36,8 @@ BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&BankDetailTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&BankDetailTab::remove_entry));
 
-    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&BankDetailTab::select));
+   list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&BankDetailTab::select));
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&BankDetailTab::scroll_event));
-
 
     add_clumn_lable("название");
     add_clumn_lable("город");
@@ -66,48 +69,48 @@ void BankDetailTab::select(Gtk::ListBoxRow* row){
 }
 
 void BankDetailTab::save_current(){
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    if(name_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указано имя");
-        message.run();
-        return;
-    }
+   if(name_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указано имя");
+       message.run();
+       return;
+   }
 
-    if(city_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указан город");
-        message.run();
-        return;
-    }
+   if(city_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указан город");
+       message.run();
+       return;
+   }
 
-    if(tin_entry->get_text().length() != 10){
-        Gtk::MessageDialog message("не коректный ИНН");
-        message.run();
-        return;
-    }
+   if(tin_entry->get_text().length() != 10){
+       Gtk::MessageDialog message("не коректный ИНН");
+       message.run();
+       return;
+   }
 
-    if(settlement_entry->get_text().length() != 20){
-        Gtk::MessageDialog message("не коректный расчётный счёт");
-        message.run();
-        return;
-    }
+   if(settlement_entry->get_text().length() != 20){
+       Gtk::MessageDialog message("не коректный расчётный счёт");
+       message.run();
+       return;
+   }
 
-    auto detail = entry->get_bank_detail();
+   auto detail = entry->get_bank_detail();
 
-    detail->setBankName(name_entry->get_text());
-    detail->setCity(city_entry->get_text());
-    detail->setTin(tin_entry->get_text());
-    detail->setSettlementAccount(settlement_entry->get_text());
+   detail->setBankName(name_entry->get_text());
+   detail->setCity(city_entry->get_text());
+   detail->setTin(tin_entry->get_text());
+   detail->setSettlementAccount(settlement_entry->get_text());
 
-    gateway.save(detail);
+   gateway.save(detail);
 
-    entry->name_label->set_text(detail->getBankName());
-    entry->city_label->set_text(detail->getCity());
-    entry->tin_label->set_text(tin_entry->get_text());
-    entry->account_label->set_text(settlement_entry->get_text().substr(0,10));
+   entry->name_label->set_text(detail->getBankName());
+   entry->city_label->set_text(detail->getCity());
+   entry->tin_label->set_text(tin_entry->get_text());
+   entry->account_label->set_text(settlement_entry->get_text().substr(0,10));
 }
 
 void BankDetailTab::create(){
@@ -169,8 +172,10 @@ void BankDetailTab::create(){
 
             auto entry = Gtk::make_managed<Entry>(detail);
 
-            getListBox()->append(*entry);
-            getListBox()->show_all();
+            list->add_entity(entry);
+
+//            getListBox()->append(*entry);
+           list->show_all();
         }
         dialog->close();
         delete dialog;
@@ -180,19 +185,19 @@ void BankDetailTab::create(){
 }
 
 void BankDetailTab::remove_entry(){
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    gateway.remove(entry->get_bank_detail());
+   gateway.remove(entry->get_bank_detail());
 
-    Gtk::Box* box;
-    Form::getInstance().getBuilder()->get_widget("info_box", box);
+   Gtk::Box* box;
+   Form::getInstance().getBuilder()->get_widget("info_box", box);
 
-    box->remove(*box->get_children()[0]);
+   box->remove(*box->get_children()[0]);
 
-    getListBox()->remove(*entry);
+   list->remove_entity(entry);
 }
 
 void BankDetailTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
@@ -252,56 +257,61 @@ std::shared_ptr<BankDetail> BankDetailTab::Entry::get_bank_detail(){
 // }
 
 bool BankDetailTab::scroll_down(){
-        first_id = last_id;
-        auto data = gateway.get_great_then_by_id(last_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() > last_id){
-                last_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->add(*entry);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-
-            for(int i = 0; i < rows.size() - 40; i++){
-//                 fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-        scroll->get_vadjustment()->set_value(500);
+//        first_id = last_id;
+//        auto data = gateway.get_great_then_by_id(last_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() > last_id){
+//                last_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->add(*entry);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//
+//            for(int i = 0; i < rows.size() - 40; i++){
+////                 fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//        scroll->get_vadjustment()->set_value(500);
         return true;
 }
 
 bool BankDetailTab::scroll_up(){
-        last_id = first_id;
-        auto data = gateway.get_less_then_by_id(first_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() < first_id){
-                first_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->insert(*entry,0);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-            for(int i = rows.size() - 1; i >= 40; i--){
-//                 fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-
-        scroll->get_vadjustment()->set_value(100);
-
+//        last_id = first_id;
+//        auto data = gateway.get_less_then_by_id(first_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() < first_id){
+//                first_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->insert(*entry,0);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//            for(int i = rows.size() - 1; i >= 40; i--){
+////                 fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//
+//        scroll->get_vadjustment()->set_value(100);
+//
         return true;
+}
+
+IList* BankDetailTab::create_list(){
+//     return std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
+    return Gtk::make_managed<EntityList<BankDetail,Entry>>(&gateway);
 }

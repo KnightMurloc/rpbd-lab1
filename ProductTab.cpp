@@ -13,6 +13,10 @@
 #include <fmt/format.h>
 
 ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
+
+    list = std::make_unique<EntityList<Product,Entry>>(&gateway);
+    set_list(list.get());
+
     builder = Gtk::Builder::create_from_file("../product_menu.glade");
 
     builder->get_widget("box",info_box);
@@ -26,7 +30,7 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
     builder->get_widget("select_button_provider",select_button_provider);
     builder->get_widget("find_button_provider",find_button_provider);
     builder->get_widget("name_entry",name_entry);
-    this->fill_list(getListBox());
+//    this->fill_list(getListBox());
     setup_menu(builder);
 
     auto save_button = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-save"));
@@ -43,7 +47,7 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&ProductTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&ProductTab::remove_entry));
 
-    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&ProductTab::select));
+   list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&ProductTab::select));
 
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&ProductTab::scroll_event));
 
@@ -52,60 +56,60 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
 }
 
 void ProductTab::save_current() {
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    if(price_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указана цена");
-        message.run();
-        return;
-    }
+   if(price_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указана цена");
+       message.run();
+       return;
+   }
 
-    if(delivery_terms_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указаны условия поставки");
-        message.run();
-        return;
-    }
+   if(delivery_terms_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указаны условия поставки");
+       message.run();
+       return;
+   }
 
-    if(payment_terms_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указаны условия оплаты");
-        message.run();
-        return;
-    }
+   if(payment_terms_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указаны условия оплаты");
+       message.run();
+       return;
+   }
 
-    if(name_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указано имя");
-        message.run();
-        return;
-    }
+   if(name_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указано имя");
+       message.run();
+       return;
+   }
 
-    auto product = entry->get_product();
+   auto product = entry->get_product();
 
-    int* i_id_ptr = static_cast<int*>(ing_link->get_data("id"));
-    int i_id = -1;
-    if(i_id_ptr){
-        i_id = *i_id_ptr;
-    }
+   int* i_id_ptr = static_cast<int*>(ing_link->get_data("id"));
+   int i_id = -1;
+   if(i_id_ptr){
+       i_id = *i_id_ptr;
+   }
 
-    int* p_id_ptr = static_cast<int*>(provider_link->get_data("id"));
-    int p_id = -1;
-    if(p_id_ptr){
-        p_id = *p_id_ptr;
-    }
+   int* p_id_ptr = static_cast<int*>(provider_link->get_data("id"));
+   int p_id = -1;
+   if(p_id_ptr){
+       p_id = *p_id_ptr;
+   }
 
-    product->set_ingredient_id(i_id);
-    product->set_price(std::stof(price_entry->get_text()));
-    product->set_delivery_terms(delivery_terms_entry->get_text());
-    product->set_payment_terms(payment_terms_entry->get_text());
-    product->set_provider_id(p_id);
-    product->set_name(name_entry->get_text());
+   product->set_ingredient_id(i_id);
+   product->set_price(std::stof(price_entry->get_text()));
+   product->set_delivery_terms(delivery_terms_entry->get_text());
+   product->set_payment_terms(payment_terms_entry->get_text());
+   product->set_provider_id(p_id);
+   product->set_name(name_entry->get_text());
 
-    gateway.save(product);
+   gateway.save(product);
 
-    entry->name_label->set_text(product->get_name());
-    entry->price_label->set_text(price_entry->get_text());
+   entry->name_label->set_text(product->get_name());
+   entry->price_label->set_text(price_entry->get_text());
 }
 
 void ProductTab::create(){
@@ -207,9 +211,10 @@ void ProductTab::create(){
             );
 
             auto entry = Gtk::make_managed<Entry>(product);
-
-            getListBox()->append(*entry);
-            getListBox()->show_all();
+            list->add_entity(entry);
+            list->show_all();
+//            getListBox()->append(*entry);
+//            getListBox()->show_all();
         }
 
         dialog->close();
@@ -220,19 +225,19 @@ void ProductTab::create(){
 }
 
 void ProductTab::remove_entry(){
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    gateway.remove(entry->get_product());
+   gateway.remove(entry->get_product());
 
-    Gtk::Box* box;
-    Form::getInstance().getBuilder()->get_widget("info_box", box);
+   Gtk::Box* box;
+   Form::getInstance().getBuilder()->get_widget("info_box", box);
 
-    box->remove(*box->get_children()[0]);
+   box->remove(*box->get_children()[0]);
 
-    getListBox()->remove(*entry);
+   list->remove_entity(entry);
 }
 
 void ProductTab::cancel_current() {
@@ -240,19 +245,19 @@ void ProductTab::cancel_current() {
 }
 
 void ProductTab::fill_list(Gtk::ListBox* list) {
-    for(auto child : getListBox()->get_children()){
-        getListBox()->remove(*child);
-    }
-
-    first_id = 0;
-    last_id = -1;
-    for(const auto& ing : gateway.get_great_then_by_id(0,20)){
-        if(ing->get_id() > last_id){
-            last_id = ing->get_id();
-        }
-        auto entry = Gtk::make_managed<Entry>(ing);
-        list->add(*entry);
-    }
+//    for(auto child : getListBox()->get_children()){
+//        getListBox()->remove(*child);
+//    }
+//
+//    first_id = 0;
+//    last_id = -1;
+//    for(const auto& ing : gateway.get_great_then_by_id(0,20)){
+//        if(ing->get_id() > last_id){
+//            last_id = ing->get_id();
+//        }
+//        auto entry = Gtk::make_managed<Entry>(ing);
+//        list->add(*entry);
+//    }
 }
 
 void ProductTab::select(Gtk::ListBoxRow* row) {
@@ -382,56 +387,60 @@ int ProductTab::Entry::get_id() {
 // }
 
 bool ProductTab::scroll_down(){
-        first_id = last_id;
-        auto data = gateway.get_great_then_by_id(last_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() > last_id){
-                last_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->add(*entry);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-
-            for(int i = 0; i < rows.size() - 40; i++){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-        scroll->get_vadjustment()->set_value(500);
+//        first_id = last_id;
+//        auto data = gateway.get_great_then_by_id(last_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() > last_id){
+//                last_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->add(*entry);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//
+//            for(int i = 0; i < rows.size() - 40; i++){
+//                fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//        scroll->get_vadjustment()->set_value(500);
         return true;
 }
 
 bool ProductTab::scroll_up(){
-        last_id = first_id;
-        auto data = gateway.get_less_then_by_id(first_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() < first_id){
-                first_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->insert(*entry,0);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-            for(int i = rows.size() - 1; i >= 40; i--){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-
-        scroll->get_vadjustment()->set_value(100);
+//        last_id = first_id;
+//        auto data = gateway.get_less_then_by_id(first_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() < first_id){
+//                first_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->insert(*entry,0);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//            for(int i = rows.size() - 1; i >= 40; i--){
+//                fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//
+//        scroll->get_vadjustment()->set_value(100);
 
         return true;
+}
+
+IList* ProductTab::create_list(){
+    return Gtk::make_managed<EntityList<Product,Entry>>(&gateway);
 }

@@ -162,3 +162,41 @@ std::list<std::pair<int,int>> SnackGateway::get_ingredients(std::shared_ptr<Snac
 
     return result;
 }
+
+std::list<std::shared_ptr<Snack>> SnackGateway::get_great_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from snacks where id > {} order by id limit {}",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Snack>> result;
+
+    while(response.next()){
+        auto snack = std::make_shared<Snack>(response.get<int>(0),response.get<int>(3));
+        snack->set_name(response.get<std::string>(1));
+        snack->set_size(response.get<int>(2));
+        cache.Put(snack->get_id(), snack);
+        result.push_back(snack);
+    }
+    return result;
+}
+
+std::list<std::shared_ptr<Snack>> SnackGateway::get_less_then_by_id(int min, int count){
+    auto db = DbInstance::getInstance();
+
+    std::string sql = fmt::format("select * from snacks where id < {} order by id DESC limit {};",min,count);
+
+    auto response = db.exec(sql);
+
+    std::list<std::shared_ptr<Snack>> result;
+
+    while(response.next()){
+        auto snack = std::make_shared<Snack>(response.get<int>(0),response.get<int>(3));
+        snack->set_name(response.get<std::string>(1));
+        snack->set_size(response.get<int>(2));
+        cache.Put(snack->get_id(), snack);
+        result.push_back(snack);
+    }
+    return result;
+}

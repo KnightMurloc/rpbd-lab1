@@ -129,7 +129,7 @@ std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_all() {
 std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_great_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from orders where id > {} order by id limit {}",min,count);
+    std::string sql = fmt::format("select * from bank_detail where id > {} order by id limit {}",min,count);
 
     auto response = db.exec(sql);
 
@@ -150,7 +150,7 @@ std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_great_then_by_id(i
 std::list<std::shared_ptr<BankDetail>> BankDetailgateway::get_less_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from orders where id < {} order by id DESC limit {};",min,count);
+    std::string sql = fmt::format("select * from bank_detail where id < {} order by id DESC limit {};",min,count);
 
     auto response = db.exec(sql);
 

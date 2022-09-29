@@ -13,7 +13,7 @@
 
 class BankDetailTab : public Tab {
 private:
-    class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+    class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<BankDetail> detail;
     public:
 
@@ -39,6 +39,8 @@ private:
     Gtk::Entry* tin_entry;
     Gtk::Entry* settlement_entry;
 
+    std::unique_ptr<EntityList<BankDetail,Entry>> list;
+
     void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
 
     void select(Gtk::ListBoxRow* row);
@@ -55,6 +57,8 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
 public:
     explicit BankDetailTab(TabManager* manager);
 

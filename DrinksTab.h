@@ -12,7 +12,7 @@
 
 class DrinksTab : public Tab {
 private:
-    class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+    class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Drink> drink;
     public:
 
@@ -29,6 +29,8 @@ private:
     };
 
     Drinkgateway gateway;
+    std::unique_ptr<EntityList<Drink,Entry>> list;
+
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -58,6 +60,9 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
+
 public:
 
     DrinksTab(TabManager* manager);

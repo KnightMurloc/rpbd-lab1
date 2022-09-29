@@ -11,18 +11,8 @@
 #include <memory>
 class Tab;
 #include "TabManager.h"
+#include "EntityList.h"
 
-class IEntry {
-public:
-    virtual int get_id() = 0;
-};
-
-class IList{
-public:
-    virtual IEntry* get_selected() = 0;
-
-
-};
 
 class Tab : public Gtk::Box {
 private:
@@ -32,18 +22,20 @@ private:
     Gtk::Button* add_button;
     Gtk::Button* remove_button;
 
-    Gtk::ListBox* listBox;
-    Gtk::Box* header;
+    IList* list;
+//    Gtk::ListBox* listBox;
+
+//    Gtk::Box* header;
 
     Gtk::ButtonBox* create_top_panel();
 
-    void scroll_event(Gtk::PositionType type);
+//    void scroll_event(Gtk::PositionType type);
 protected:
-    int first_id;
-    int last_id;
-    Gtk::ScrolledWindow* scroll;
-    Gtk::SearchEntry* search_entry;
-    Gtk::Button* stop_search;
+//    int first_id;
+//    int last_id;
+//    Gtk::ScrolledWindow* scroll;
+//    Gtk::SearchEntry* search_entry;
+//    Gtk::Button* stop_search;
 
     TabManager* get_tab_manager() const;
 
@@ -51,14 +43,14 @@ protected:
 
     Gtk::Button *getRemoveButton() const;
 
-    Gtk::ListBox *getListBox() const;
+//    Gtk::ListBox *getListBox() const;
 
-    template<typename T>
-    class ISearch{
-    public:
-        virtual std::list<std::shared_ptr<T>> get_great_then(int id, int count) = 0;
-        virtual std::list<std::shared_ptr<T>> get_less_then(int id, int count) = 0;
-    };
+public:
+    IList* get_list() const;
+
+    void set_list(IList* list);
+
+protected:
 
     virtual void fill_list(Gtk::ListBox* list) = 0;
 
@@ -66,6 +58,8 @@ protected:
 
     virtual bool scroll_down() = 0;
     virtual bool scroll_up() = 0;
+
+    virtual IList* create_list() = 0;
 public:
     Tab(TabManager* tab_manager);
 

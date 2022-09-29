@@ -7,13 +7,19 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <memory>
+#include "gateways/Employeer/EmployeerGateway.h"
 #include "gateways/Orders/OrderGateway.h"
 #include "gtkmm/enums.h"
+#include "sigc++/adaptors/bind.h"
 #include "sigc++/functors/mem_fun.h"
 
 EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-    current_search = std::make_unique<DefaultSearch>(&gateway);
+    list = std::make_unique<EntityList<Employeer,Entry>>(&gateway);
+    set_list(list.get());
+    list->show_all();
+
+//    current_search = std::make_unique<DefaultSearch>(&gateway);
 
     builder = Gtk::Builder::create_from_file("../employeer_menu.glade");
 
@@ -45,13 +51,17 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::remove));
 
-    search_entry->signal_activate().connect(sigc::mem_fun(this,&EmployeesTab::search));
-    stop_search->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::search_stop));
+   list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list.get()));
+//    stop_search->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::search_stop));
 
-    fill_list(getListBox());
+//    fill_list(getListBox());
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&EmployeesTab::scroll_event));
 
-    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
+//     list->set_select_callback(&EmployeesTab::select);
+
+//    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
+    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
+
 
     add_clumn_lable("имя");
     add_clumn_lable("фамилия");
@@ -62,19 +72,27 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     add_clumn_lable("должность");
 }
 
-void EmployeesTab::search(){
-    std::string str = search_entry->get_text();
-    std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
-    current_search = std::make_unique<NameSearch>(&gateway,str );
-    fill_list(getListBox());
-    getListBox()->show_all();
+//TODO устанавливать gateway в листе
+void EmployeesTab::search(EntityList<Employeer,Entry>* list){
+
+
+   std::string str = list->get_search_text();
+   std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
+   auto gateway = dynamic_cast<EmployeerGateway*>(list->get_gateway());
+   if(gateway == nullptr){
+       return;
+    }
+   auto ptr = std::make_unique<NameSearch>(gateway,str );
+   list->set_search(std::move(ptr));
+//    fill_list(getListBox());
+//    getListBox()->show_all();
 
 }
 
 void EmployeesTab::search_stop(){
-    current_search = std::make_unique<DefaultSearch>(&gateway);
-    fill_list(getListBox());
-    getListBox()->show_all();
+//    current_search = std::make_unique<DefaultSearch>(&gateway);
+//    fill_list(getListBox());
+//    getListBox()->show_all();
 }
 
 void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
@@ -121,79 +139,79 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
 }
 
 void EmployeesTab::save_current() {
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    auto empl = entry->get_emp();
+   auto empl = entry->get_emp();
 
-    if(first_name_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указано имя");
-        message.run();
-        return;
-    }
+   if(first_name_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указано имя");
+       message.run();
+       return;
+   }
 
-    if(last_name_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указана фамилия");
-        message.run();
-        return;
-    }
-    if(address_entry->get_text().empty()){
-        Gtk::MessageDialog message("не указан адрес");
-        message.run();
-        return;
-    }
-    int day;
-    int month;
-    int year;
-    float salary;
-    try {
-        day = std::stoi(day_entry->get_text());
-        month = std::stoi(month_entry->get_text());
-        year = std::stoi(year_entry->get_text());
-    } catch (std::exception&) {
-        Gtk::MessageDialog message("не коректная дата");
-        message.run();
-        return;
-    }
+   if(last_name_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указана фамилия");
+       message.run();
+       return;
+   }
+   if(address_entry->get_text().empty()){
+       Gtk::MessageDialog message("не указан адрес");
+       message.run();
+       return;
+   }
+   int day;
+   int month;
+   int year;
+   float salary;
+   try {
+       day = std::stoi(day_entry->get_text());
+       month = std::stoi(month_entry->get_text());
+       year = std::stoi(year_entry->get_text());
+   } catch (std::exception&) {
+       Gtk::MessageDialog message("не коректная дата");
+       message.run();
+       return;
+   }
 
-    if(!check_date(day,month,year)){
-        Gtk::MessageDialog message("не коректная дата");
-        message.run();
-        return;
-    }
+   if(!check_date(day,month,year)){
+       Gtk::MessageDialog message("не коректная дата");
+       message.run();
+       return;
+   }
 
-    try{
-        salary = std::stof(salary_entry->get_text());
-    } catch (std::exception&) {
-        Gtk::MessageDialog message("не коректная зарплата");
-        message.run();
-        return;
-    }
+   try{
+       salary = std::stof(salary_entry->get_text());
+   } catch (std::exception&) {
+       Gtk::MessageDialog message("не коректная зарплата");
+       message.run();
+       return;
+   }
 
-    empl->setFirstName(first_name_entry->get_text());
-    empl->setLastName(last_name_entry->get_text());
-    empl->setPatronymic(patronymic_entry->get_text());
-    empl->setAddress(address_entry->get_text());
-    empl->setSalary(salary);
-    empl->setBirthDate(fmt::format("{}-{}-{}",year,month,day));
-    empl->setPost(string_to_post(post_combobox->get_active_id()));
+   empl->setFirstName(first_name_entry->get_text());
+   empl->setLastName(last_name_entry->get_text());
+   empl->setPatronymic(patronymic_entry->get_text());
+   empl->setAddress(address_entry->get_text());
+   empl->setSalary(salary);
+   empl->setBirthDate(fmt::format("{}-{}-{}",year,month,day));
+   empl->setPost(string_to_post(post_combobox->get_active_id()));
 
-    if(order_link->get_text() != "none") {
-        int* movement_id = static_cast<int*>(order_link->get_data("id"));
-        empl->set_movement_id(*movement_id);
-    }
+   if(order_link->get_text() != "none") {
+       int* movement_id = static_cast<int*>(order_link->get_data("id"));
+       empl->set_movement_id(*movement_id);
+   }
 
-    gateway.save(empl);
+   gateway.save(empl);
 
-    entry->first_name->set_text(empl->getFirstName());
-    entry->last_name->set_text(empl->getLastName());
-    entry->patronymic->set_text(empl->getPatronymic());
-    entry->address->set_text(empl->getAddress());
-    entry->birth_date->set_text(empl->getBirthDate());
-    entry->salary->set_text(std::to_string(empl->getSalary()));
-    entry->post->set_text(empl->getPostAsString());
+   entry->first_name->set_text(empl->getFirstName());
+   entry->last_name->set_text(empl->getLastName());
+   entry->patronymic->set_text(empl->getPatronymic());
+   entry->address->set_text(empl->getAddress());
+   entry->birth_date->set_text(empl->getBirthDate());
+   entry->salary->set_text(std::to_string(empl->getSalary()));
+   entry->post->set_text(empl->getPostAsString());
 }
 
 void EmployeesTab::cancel_current() {
@@ -201,12 +219,12 @@ void EmployeesTab::cancel_current() {
 }
 
 void EmployeesTab::find_order() {
-    auto entry = dynamic_cast<Entry*>(this->getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 //        this->get_tab_manager()->select_on_tab(1, entry->getEmp().getId());
-    get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement_id());
+   get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement_id());
 }
 
 void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
@@ -357,8 +375,8 @@ void EmployeesTab::create() {
                     string_to_post(post_combobox_dialog->get_active_id()));
 
             auto entry = Gtk::make_managed<Entry>(empl);
-            getListBox()->add(*entry);
-            getListBox()->show_all();
+           list->add_entity(entry);
+           list->show_all();
 
             dialog->close();
             delete dialog;
@@ -372,32 +390,32 @@ void EmployeesTab::create() {
 }
 
 void EmployeesTab::remove() {
-    auto entry = dynamic_cast<Entry*>(getListBox()->get_selected_row());
-    if(entry == nullptr){
-        return;
-    }
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry == nullptr){
+       return;
+   }
 
-    gateway.remove(entry->get_emp());
+   gateway.remove(entry->get_emp());
 
-    Gtk::Box* box;
-    Form::getInstance().getBuilder()->get_widget("info_box", box);
+   Gtk::Box* box;
+   Form::getInstance().getBuilder()->get_widget("info_box", box);
 
-    box->remove(*box->get_children()[0]);
+   box->remove(*box->get_children()[0]);
 
-    getListBox()->remove(*entry);
+   list->remove_entity(entry);
 }
 
 void EmployeesTab::fill_list(Gtk::ListBox* list) {
 
-    for(auto child : getListBox()->get_children()){
-        getListBox()->remove(*child);
-    }
-
-    auto data = current_search->get_great_then(0,20);
-    for(auto& emp : data){
-        auto entry = Gtk::make_managed<Entry>(emp);
-        list->append(*entry);
-    }
+//    for(auto child : getListBox()->get_children()){
+//        getListBox()->remove(*child);
+//    }
+//
+//    auto data = current_search->get_great_then(0,20);
+//    for(auto& emp : data){
+//        auto entry = Gtk::make_managed<Entry>(emp);
+//        list->append(*entry);
+//    }
 }
 
 EmployeesTab::Entry::Entry(std::shared_ptr<Employeer> emp) : emp(emp) {
@@ -433,57 +451,57 @@ int EmployeesTab::Entry::get_id() {
 }
 
 bool EmployeesTab::scroll_down(){
-        first_id = last_id;
-        auto data = current_search->get_great_then(last_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() > last_id){
-                last_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->add(*entry);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-
-            for(int i = 0; i < rows.size() - 40; i++){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-        scroll->get_vadjustment()->set_value(500);
+//        first_id = last_id;
+//        auto data = current_search->get_great_then(last_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() > last_id){
+//                last_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->add(*entry);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//
+//            for(int i = 0; i < rows.size() - 40; i++){
+//                fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//        scroll->get_vadjustment()->set_value(500);
         return true;
 }
-
+//
 bool EmployeesTab::scroll_up(){
-        last_id = first_id;
-        auto data = current_search->get_less_then(first_id,20);
-        if(data.empty()){
-            return false;
-        }
-        for(const auto& ing : data){
-            if(ing->get_id() < first_id){
-                first_id = ing->get_id();
-            }
-            auto entry = Gtk::make_managed<Entry>(ing);
-            getListBox()->insert(*entry,0);
-        }
-
-        auto rows = getListBox()->get_children();
-        if(rows.size() > 40){
-            for(int i = rows.size() - 1; i >= 40; i--){
-                fmt::print("removed\n");
-                getListBox()->remove(*rows[i]);
-            }
-        }
-        getListBox()->show_all();
-
-        scroll->get_vadjustment()->set_value(100);
-
+//        last_id = first_id;
+//        auto data = current_search->get_less_then(first_id,20);
+//        if(data.empty()){
+//            return false;
+//        }
+//        for(const auto& ing : data){
+//            if(ing->get_id() < first_id){
+//                first_id = ing->get_id();
+//            }
+//            auto entry = Gtk::make_managed<Entry>(ing);
+//            getListBox()->insert(*entry,0);
+//        }
+//
+//        auto rows = getListBox()->get_children();
+//        if(rows.size() > 40){
+//            for(int i = rows.size() - 1; i >= 40; i--){
+//                fmt::print("removed\n");
+//                getListBox()->remove(*rows[i]);
+//            }
+//        }
+//        getListBox()->show_all();
+//
+//        scroll->get_vadjustment()->set_value(100);
+//
         return true;
 }
 
@@ -514,3 +532,13 @@ std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_great_then(i
 std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_less_then(int id, int count){
     return gateway->get_less_then_by_name(name,id,count);
 }
+
+IList* EmployeesTab::create_list(){
+
+    auto list = Gtk::make_managed<EntityList<Employeer,Entry>>(&gateway);
+
+    list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list));
+
+    return list;
+}
+

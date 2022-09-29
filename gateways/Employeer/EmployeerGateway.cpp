@@ -143,7 +143,7 @@ EmployeerGateway::create(std::string first_name, std::string last_name, std::str
 void EmployeerGateway::remove(std::shared_ptr<Employeer> data) {
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("delete employees where id = {};", data->get_id());
+    std::string sql = fmt::format("delete from employees where id = {};", data->get_id());
 
     db.exec(sql);
 

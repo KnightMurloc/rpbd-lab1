@@ -11,7 +11,7 @@
 
 class SnackTab : public Tab {
 private:
-    class Entry : public Gtk::ListBoxRow, public Tab::IEntry {
+    class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Snack> snack;
 
     public:
@@ -26,6 +26,7 @@ private:
     };
 
     SnackGateway gateway;
+    std::unique_ptr<EntityList<Snack,Entry>> list;
     Glib::RefPtr<Gtk::Builder> builder;
 
     Gtk::Box* info_box;
@@ -53,6 +54,8 @@ protected:
 
     bool scroll_down() override;
     bool scroll_up() override;
+
+    IList* create_list() override;
 public:
     explicit SnackTab(TabManager* tab_manager);
 

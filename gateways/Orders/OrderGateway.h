@@ -19,8 +19,8 @@ public:
 
     std::list<std::shared_ptr<Order>> get_all() override;
 
-    std::list<std::shared_ptr<Order>> get_great_then_by_id(int min, int count);
-    std::list<std::shared_ptr<Order>> get_less_then_by_id(int max, int count);
+    std::list<std::shared_ptr<Order>> get_great_then_by_id(int min, int count) override;
+    std::list<std::shared_ptr<Order>> get_less_then_by_id(int max, int count) override;
 };
 
 

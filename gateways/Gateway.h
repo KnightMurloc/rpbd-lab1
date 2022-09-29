@@ -34,6 +34,9 @@ public:
     virtual void remove(std::shared_ptr<T> data) = 0;
 
     virtual std::list<std::shared_ptr<T>> get_all() = 0;
+
+    virtual std::list<std::shared_ptr<T>> get_great_then_by_id(int min, int count) = 0;
+    virtual std::list<std::shared_ptr<T>> get_less_then_by_id(int max, int count) = 0;
 };
 
 class GatewayException : public std::exception {
