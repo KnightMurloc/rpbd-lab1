@@ -51,7 +51,7 @@ DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinksTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinksTab::remove_entry));
 
-//    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&DrinksTab::select));
+   list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&DrinksTab::select));
 
 //     add_clumn_lable("название");
 //     add_clumn_lable("крепость");

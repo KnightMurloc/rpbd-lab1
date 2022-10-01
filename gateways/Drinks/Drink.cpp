@@ -4,7 +4,7 @@
 
 #include "Drink.h"
 
-Drink::Drink(int id, int r_id) : id(id), recipe(r_id) {}
+Drink::Drink(int id) : id(id) {}
 
 const std::string &Drink::getName() const {
     return name;

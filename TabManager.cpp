@@ -11,6 +11,7 @@
 #include "DrinksTab.h"
 #include "BankDetailTab.h"
 #include "ProviderTab.h"
+#include "SnackOrdersTab.h"
 
 TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContainer) {
     tabs[0] = std::make_unique<EmployeesTab>(this);
@@ -21,6 +22,7 @@ TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContai
     tabs[5] = std::make_unique<DrinksTab>(this);
     tabs[6] = std::make_unique<BankDetailTab>(this);
     tabs[7] = std::make_unique<ProviderTab>(this);
+    tabs[8] = std::make_unique<SnackOrdersTab>(this);
 
     tabs_container->append_page(*tabs[0], "сотрудники");
     tabs_container->append_page(*tabs[1], "продукты");
@@ -30,6 +32,7 @@ TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContai
     tabs_container->append_page(*tabs[5], "напитки");
     tabs_container->append_page(*tabs[6], "реквизиты\nбанка");
     tabs_container->append_page(*tabs[7], "поставщики");
+    tabs_container->append_page(*tabs[8], "заказы\nзакусок");
 }
 
 void TabManager::select_on_tab(TabName tab_name, int entry_id) {
@@ -50,4 +53,13 @@ int TabManager::select_dialog(TabName tab_name) {
 void TabManager::remove_on_tab(TabName tab_name, int id){
     int tab_id = static_cast<int>(tab_name);
     tabs[tab_id]->remove_entry_by_id(id);
+}
+
+Tab* TabManager::get_tab(TabName name){
+    int tab_id = static_cast<int>(name);
+    if(tab_id >= tabs.size()){
+        return nullptr;
+    }
+
+    return tabs[tab_id].get();
 }

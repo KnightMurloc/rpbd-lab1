@@ -398,6 +398,8 @@ void EmployeesTab::remove() {
 
    gateway.remove(entry->get_emp());
 
+   on_remove.emit(entry->get_emp());
+
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
 

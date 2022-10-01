@@ -16,6 +16,7 @@ constexpr std::size_t CACHE_SIZE = 32;
 template <typename Key, typename Value>
 using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
 
+//TODO удалять из кеша
 template<class T>
 class IGateway{
 protected:

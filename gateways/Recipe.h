@@ -11,18 +11,9 @@
 class Recipe{
 
 private:
-    int id;
-
     std::list<std::tuple<int,int>> new_ingridients;
     std::list<int> removed_ingridients;
 public:
-    explicit Recipe(int id);
-
-    [[nodiscard]] int get_id() const;
-
-//     [[nodiscard]] const std::vector<std::tuple<int, int>> &get_ingridients() const;
-
-    void set_id(int id);
 
     void add_ingridient(int recipe, int count);
     void remove_ingridient(int recipe);

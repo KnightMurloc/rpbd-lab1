@@ -9,25 +9,27 @@
 #include <vector>
 #include <list>
 #include "../Recipe.h"
+#include "../entity.h"
 
 
-class Snack{
+class Snack : public IEntity {
 private:
     int id;
     std::string name;
     int size;
+
     Recipe recipe;
 public:
 
-    explicit Snack(int id, int recipe_id);
+    explicit Snack(int id);
+
+    [[nodiscard]] Recipe& get_recipe();
 
     [[nodiscard]] int get_id() const;
 
     [[nodiscard]] const std::string &get_name() const;
 
     [[nodiscard]] int get_size() const;
-
-    [[nodiscard]] Recipe &get_recipe();
 
     void set_name(const std::string &name);
 

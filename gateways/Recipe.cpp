@@ -6,31 +6,12 @@
 #include "Recipe.h"
 #include <tuple>
 
-int Recipe::get_id() const {
-    return id;
-}
-
-// const std::vector<std::tuple<int, int>> &Recipe::get_ingridients() const {
-//
-// }
-
-void Recipe::set_id(int id) {
-    Recipe::id = id;
-}
-
-Recipe::Recipe(int id) : id(id) {}
-
 void Recipe::add_ingridient(int recipe, int count) {
     // ingridients.emplace_back(recipe,count);
     new_ingridients.emplace_back(recipe,count);
 }
 
 void Recipe::remove_ingridient(int recipe) {
-//     ingridients.erase(std::remove_if(ingridients.begin(), ingridients.end(),
-//             [recipe](const std::tuple<int,int> &value){
-//         return std::get<0>(value) == recipe;
-//     }), ingridients.end());
-
     new_ingridients.erase(std::remove_if(new_ingridients.begin(), new_ingridients.end(),
                                          [recipe](const std::tuple<int,int> &value){
                                              return std::get<0>(value) == recipe;

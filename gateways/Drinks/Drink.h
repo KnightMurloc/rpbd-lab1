@@ -18,7 +18,7 @@ private:
     std::string container;
     Recipe recipe;
 public:
-    Drink(int id, int r_id);
+    Drink(int id);
 
     int get_id() const;
 

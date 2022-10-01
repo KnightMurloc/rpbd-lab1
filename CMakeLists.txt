@@ -33,7 +33,7 @@ add_executable(${PROJECT_NAME}
         BankDetailTab.cpp BankDetailTab.h
 
         ProviderTab.cpp ProviderTab.h
-        EntityList.h EntityList.inc)
+        EntityList.h EntityList.inc SnackOrdersTab.cpp SnackOrdersTab.h)
 target_link_directories(${PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} fmt/include)
 target_link_libraries(${PROJECT_NAME} ${GTKMM_LIBRARIES} fmt gateways)

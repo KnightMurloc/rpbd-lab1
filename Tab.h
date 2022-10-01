@@ -5,14 +5,12 @@
 #ifndef LAB1_TAB_H
 #define LAB1_TAB_H
 
-#include "gtkmm/button.h"
-#include "gtkmm/searchentry.h"
+#include "gateways/entity.h"
 #include <gtkmm.h>
 #include <memory>
 class Tab;
 #include "TabManager.h"
 #include "EntityList.h"
-
 
 class Tab : public Gtk::Box {
 private:
@@ -30,37 +28,22 @@ private:
     Gtk::ButtonBox* create_top_panel();
 
 //    void scroll_event(Gtk::PositionType type);
+
+
 protected:
-//    int first_id;
-//    int last_id;
-//    Gtk::ScrolledWindow* scroll;
-//    Gtk::SearchEntry* search_entry;
-//    Gtk::Button* stop_search;
+    sigc::signal<void(std::shared_ptr<IEntity>)> on_remove;
 
     TabManager* get_tab_manager() const;
 
     Gtk::Button *getAddButton() const;
 
     Gtk::Button *getRemoveButton() const;
-
-//    Gtk::ListBox *getListBox() const;
-
+    virtual IList* create_list() = 0;
 public:
     IList* get_list() const;
 
     void set_list(IList* list);
 
-protected:
-
-//     virtual void fill_list(Gtk::ListBox* list) = 0;
-
-//     void add_clumn_lable(std::string title);
-
-//     virtual bool scroll_down() = 0;
-//     virtual bool scroll_up() = 0;
-
-    virtual IList* create_list() = 0;
-public:
     Tab(TabManager* tab_manager);
 
     void select_by_id(int entry_id);
@@ -69,6 +52,8 @@ public:
     int select_dialog();
 
     void remove_entry_by_id(int id);
+
+    sigc::signal<void(std::shared_ptr<IEntity>)>& signal_remove();
 };
 
 inline bool check_date(int day, int month, int year)

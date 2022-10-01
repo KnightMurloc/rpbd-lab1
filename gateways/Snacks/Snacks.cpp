@@ -22,10 +22,6 @@ int Snack::get_size() const {
     return size;
 }
 
-Recipe &Snack::get_recipe() {
-    return recipe;
-}
-
 void Snack::set_name(const std::string &name) {
     this->name = name;
 }
@@ -34,6 +30,10 @@ void Snack::set_size(int size) {
     this->size = size;
 }
 
-Snack::Snack(int id, int recipe_id) : id(id), recipe(recipe_id) {}
+Recipe& Snack::get_recipe(){
+    return recipe;
+}
+
+Snack::Snack(int id) : id(id) {}
 
 

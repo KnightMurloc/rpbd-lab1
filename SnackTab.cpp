@@ -43,6 +43,7 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
     //add_button->signal_clicked().connect(sigc::mem_fun(this, &SnackTab::add_ingredient));
 //     remove_button->signal_clicked().connect(sigc::mem_fun(this, &SnackTab::remove_ingredient));
+
     add_button->signal_clicked().connect(sigc::bind<Gtk::ListBox*,TabManager*>(
         &SnackTab::add_ingredient,
         ing_list,
@@ -168,6 +169,7 @@ void SnackTab::save_current(){
 
 
 void SnackTab::select(Gtk::ListBoxRow* entry_row) {
+
     auto entry = dynamic_cast<Entry*>(entry_row);
     if(entry == nullptr){
         return;
@@ -341,7 +343,7 @@ void SnackTab::create(){
 
             auto entry = Gtk::make_managed<Entry>(snack);
 
-//            getListBox()->append(*entry);
+            list->add_entity(entry);
 
             dialog->close();
             delete dialog;
@@ -362,12 +364,16 @@ void SnackTab::remove_entry() {
 
    gateway.remove(entry->get_snack());
 
+   on_remove.emit(entry->get_snack());
+
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
 
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+
+//    get_tab_manager()->remove_on_tab(TabName::SNACK_ORDERS,entry->get_snack()->get_)
 }
 
 SnackTab::Entry::Entry(std::shared_ptr<Snack> snack) : snack(snack) {

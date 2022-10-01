@@ -3,7 +3,10 @@
 //
 
 #include "Tab.h"
+#include "EntityList.h"
+#include "gateways/entity.h"
 #include "gtkmm/box.h"
+#include "gtkmm/dialog.h"
 #include "gtkmm/enums.h"
 #include "gtkmm/eventbox.h"
 #include "gtkmm/label.h"
@@ -14,6 +17,7 @@
 #include "gtkmm/stockid.h"
 #include "sigc++/functors/mem_fun.h"
 #include <iostream>
+#include <memory>
 
 Tab::Tab(TabManager* tab_manager) : tab_manager(tab_manager) {
     set_orientation(Gtk::ORIENTATION_VERTICAL);
@@ -129,6 +133,7 @@ TabManager* Tab::get_tab_manager() const {
 int Tab::select_dialog() {
 
     Gtk::Dialog dialog;
+    dialog.set_size_request(500,500);
     dialog.add_button("OK", Gtk::RESPONSE_OK);
     dialog.add_button("отмена", Gtk::RESPONSE_CANCEL);
 
@@ -140,7 +145,7 @@ int Tab::select_dialog() {
 
     box->show_all();
 
-    if(dialog.run()){
+    if(dialog.run() == Gtk::RESPONSE_OK){
         auto entry = list->get_selected();
         return entry->get_id();
     }
@@ -219,4 +224,8 @@ void Tab::set_list(IList* list) {
     Tab::list = list;
     auto box = dynamic_cast<Gtk::Box*>(list);
     add(*box);
+}
+
+sigc::signal<void(std::shared_ptr<IEntity>)>& Tab::signal_remove(){
+    return on_remove;
 }

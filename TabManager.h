@@ -16,13 +16,14 @@ enum class TabName{
     INGREDIENTS,
     DRINKS,
     BACK_DETAIL,
-    PROVIDER
+    PROVIDER,
+    SNACK_ORDERS
 };
 
 class TabManager {
 private:
     Gtk::Notebook* tabs_container;
-    std::array<std::unique_ptr<Tab>,8> tabs;
+    std::array<std::unique_ptr<Tab>,9> tabs;
 public:
 
     explicit TabManager(Gtk::Notebook *tabsContainer);
@@ -32,6 +33,8 @@ public:
     int select_dialog(TabName tab_name);
 
     void remove_on_tab(TabName tab_name, int id);
+
+    Tab* get_tab(TabName name);
 };
 
 

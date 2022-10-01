@@ -31,16 +31,16 @@ void Drinkgateway::save(std::shared_ptr<Drink> data) {
     auto new_ing = data->getRecipe().get_new_ingridients();
 
     for(auto ing : rm_ing){
-        sql = fmt::format("delete from recipe_to_ingredient where ingredient = {};",
+        sql = fmt::format("delete from drink_recipes where ingredient = {};",
             ing
         );
         db.exec(sql);
     }
 
     for(auto ing : new_ing){
-        sql = fmt::format("insert into recipe_to_ingredient(recipe, ingredient, count) values({},{},{});",
-            data->getRecipe().get_id(),
+        sql = fmt::format("insert into drink_recipes(ingredient, drink, count) values({},{},{});",
             std::get<0>(ing),
+            data->get_id(),
             std::get<1>(ing)
         );
         db.exec(sql);
@@ -60,7 +60,7 @@ std::shared_ptr<Drink> Drinkgateway::get(int id) {
         auto response = db.exec(sql);
 
         if(response.next()){
-            Drink drink(response.get<int>(0),response.get<int>(5));
+            Drink drink(response.get<int>(0));
 
             drink.setName(response.get<std::string>(1));
             drink.setStrength(response.get<int>(2));
@@ -92,7 +92,7 @@ std::list<std::shared_ptr<Drink>> Drinkgateway::get_all() {
     auto response = db.exec("select * from drinks;");
 
     while(response.next()){
-        Drink drink(response.get<int>(0),response.get<int>(5));
+        Drink drink(response.get<int>(0));
 
         drink.setName(response.get<std::string>(1));
         drink.setStrength(response.get<int>(2));
@@ -109,8 +109,8 @@ std::list<std::pair<int,int>> Drinkgateway::get_ingredients(std::shared_ptr<Drin
     auto db = DbInstance::getInstance();
 
 
-    std::string sql = fmt::format("select * from recipe_to_ingredient where recipe = {};",
-       data->getRecipe().get_id()
+    std::string sql = fmt::format("select ingredient,count from drink_recipes where drink = {};",
+       data->get_id()
     );
 
     auto response = db.exec(sql);
@@ -118,7 +118,7 @@ std::list<std::pair<int,int>> Drinkgateway::get_ingredients(std::shared_ptr<Drin
     std::list<std::pair<int,int>> result;
 
     while(response.next()){
-        result.push_back(std::make_pair(response.get<int>(1),response.get<int>(2)));
+        result.push_back(std::make_pair(response.get<int>(0),response.get<int>(1)));
     }
     return result;
 }
@@ -127,37 +127,36 @@ std::shared_ptr<Drink> Drinkgateway::create(std::string name, int strength, int 
     auto db = DbInstance::getInstance();
 
     db.exec("begin transaction;");
-    std::string sql = "insert into recipes(id) values (default) returning id;";
-    auto response = db.exec(sql);
-    int r_id;
-    if(response.next()){
-        r_id = response.get<int>(0);
-    }else{
-        db.exec("rollback;");
-        throw GatewayException("create error");
-    }
+//     std::string sql = "insert into recipes(id) values (default) returning id;";
+//     auto response = db.exec(sql);
+//     int r_id;
+//     if(response.next()){
+//         r_id = response.get<int>(0);
+//     }else{
+//         db.exec("rollback;");
+//         throw GatewayException("create error");
+//     }
 
-    sql = fmt::format("insert into drinks(name, strength, size, container, recipes)"
-        "values('{}', {}, {}, '{}', {}) returning id;",
+    std::string sql = fmt::format("insert into drinks(name, strength, size, container)"
+        "values('{}', {}, {}, '{}') returning id;",
         name,
         strength,
         size,
-        container,
-        r_id
+        container
     );
 
-    response = db.exec(sql);
+    auto response = db.exec(sql);
     if(response.next()){
-        Drink drink(response.get<int>(0),r_id);
+        Drink drink(response.get<int>(0));
         drink.setName(name);
         drink.setStrength(strength);
         drink.setSize(size);
         drink.setContainer(container);
 
         for(auto ing : ings){
-            sql = fmt::format("insert into recipe_to_ingredient(recipe, ingredient, count) values({},{},{});",
-                r_id,
+            sql = fmt::format("insert into drink_recipes(ingredient, drink, count) values({},{},{});",
                 ing.first,
+                drink.get_id(),
                 ing.second
             );
             db.exec(sql);
@@ -180,7 +179,7 @@ std::list<std::shared_ptr<Drink>> Drinkgateway::get_great_then_by_id(int min, in
     std::list<std::shared_ptr<Drink>> result;
 
     while(response.next()){
-        auto drink = std::make_shared<Drink>(response.get<int>(0),response.get<int>(5));
+        auto drink = std::make_shared<Drink>(response.get<int>(0));
         drink->setName(response.get<std::string>(1));
         drink->setStrength(response.get<int>(2));
         drink->setSize(response.get<int>(3));
@@ -202,7 +201,7 @@ std::list<std::shared_ptr<Drink>> Drinkgateway::get_less_then_by_id(int min, int
     std::list<std::shared_ptr<Drink>> result;
 
     while(response.next()){
-        auto drink = std::make_shared<Drink>(response.get<int>(0),response.get<int>(5));
+        auto drink = std::make_shared<Drink>(response.get<int>(0));
         drink->setName(response.get<std::string>(1));
         drink->setStrength(response.get<int>(2));
         drink->setSize(response.get<int>(3));

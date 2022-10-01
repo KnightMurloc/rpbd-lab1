@@ -81,11 +81,11 @@ void DbInstance::init(){
     bool snacks = check_table_exist("snacks");
 
 
-    bool remove_recipe = check_function_exist("remove_recipe");
-    bool remove_recipe_from_snack = check_trigger_exist("remove_recipe_from_snack");
-    bool remove_recipe_from_dink = check_trigger_exist("remove_recipe_from_dink");
+//     bool remove_recipe = check_function_exist("remove_recipe");
+//     bool remove_recipe_from_snack = check_trigger_exist("remove_recipe_from_snack");
+//     bool remove_recipe_from_dink = check_trigger_exist("remove_recipe_from_dink");
 
-    bool remove_detail = check_function_exist("remove_detail");
+//     bool remove_detail = check_function_exist("remove_detail");
     bool remove_detail_from_provider = check_trigger_exist("remove_detail_from_provider");
 
     bool post = check_enum_exist("post");
@@ -292,52 +292,52 @@ void DbInstance::init(){
         exec("commit;");
     }
 
-    if(!remove_recipe){
-        std::string sql =
-        "create function remove_recipe() returns trigger"
-        "    language plpgsql"
-        " as "
-        " $$ "
-        " begin "
-        "        delete from recipes where id = old.recipes;"
-        "        return new;"
-        "    end;"
-        " $$; ";
-        exec(sql);
-    }
+//     if(!remove_recipe){
+//         std::string sql =
+//         "create function remove_recipe() returns trigger"
+//         "    language plpgsql"
+//         " as "
+//         " $$ "
+//         " begin "
+//         "        delete from recipes where id = old.recipes;"
+//         "        return new;"
+//         "    end;"
+//         " $$; ";
+//         exec(sql);
+//     }
 
-    if(!remove_recipe_from_snack){
-        std::string sql =
-        "create trigger remove_recipe_from_snack"
-        "    after delete on snacks"
-        "    for each row"
-        "    execute procedure remove_recipe();";
-        exec(sql);
-    }
+//     if(!remove_recipe_from_snack){
+//         std::string sql =
+//         "create trigger remove_recipe_from_snack"
+//         "    after delete on snacks"
+//         "    for each row"
+//         "    execute procedure remove_recipe();";
+//         exec(sql);
+//     }
 
-    if(!remove_recipe_from_dink){
-        std::string sql =
-        "create trigger remove_recipe_from_dink"
-        "    after delete on drinks"
-        "    for each row"
-        "    execute procedure remove_recipe();";
-        exec(sql);
-    }
+//     if(!remove_recipe_from_dink){
+//         std::string sql =
+//         "create trigger remove_recipe_from_dink"
+//         "    after delete on drinks"
+//         "    for each row"
+//         "    execute procedure remove_recipe();";
+//         exec(sql);
+//     }
 
-    if(!remove_detail){
-        std::string sql =
-        "create function remove_detail() returns trigger"
-        "    language plpgsql"
-        " as "
-        " $$ "
-        " begin "
-        "        delete from bank_detail where id = old.bank_detail;"
-        "        return new;"
-        "    end;"
-        "$$;";
-
-        exec(sql);
-    }
+//     if(!remove_detail){
+//         std::string sql =
+//         "create function remove_detail() returns trigger"
+//         "    language plpgsql"
+//         " as "
+//         " $$ "
+//         " begin "
+//         "        delete from bank_detail where id = old.bank_detail;"
+//         "        return new;"
+//         "    end;"
+//         "$$;";
+//
+//         exec(sql);
+//     }
 
     if(!remove_detail_from_provider){
         std::string sql =
