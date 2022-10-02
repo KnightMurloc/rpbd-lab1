@@ -28,6 +28,6 @@ add_library(${PROJECT_NAME} STATIC
         Provider/ProviderGateway.h
         Product/Product.cpp Product/Product.h
         Product/ProductGateway.cpp Product/ProductGateway.h
-        SnackOrders/SnackOrder.cpp SnackOrders/SnackOrder.h SnackOrders/SnackOrdergateway.cpp SnackOrders/SnackOrdergateway.h)
+        SnackOrders/SnackOrder.cpp SnackOrders/SnackOrder.h SnackOrders/SnackOrdergateway.cpp SnackOrders/SnackOrdergateway.h DrinkOrders/DrinkOrder.cpp DrinkOrders/DrinkOrder.h DrinkOrders/DrinkOrderGateway.cpp DrinkOrders/DrinkOrderGateway.h)
 target_include_directories(${PROJECT_NAME} PRIVATE caches/include)
 target_link_libraries(${PROJECT_NAME} nanodbc caches fmt)

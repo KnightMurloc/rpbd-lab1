@@ -409,6 +409,8 @@ void DrinksTab::remove_entry(){
 
    gateway.remove(entry->get_drink());
 
+   on_remove.emit(entry->get_drink());
+
     Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
 

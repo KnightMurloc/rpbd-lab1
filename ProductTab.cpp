@@ -4,6 +4,7 @@
 
 #include "ProductTab.h"
 #include "Form.h"
+#include "TabManager.h"
 #include "gateways/Product/Product.h"
 #include "sigc++/functors/mem_fun.h"
 
@@ -50,6 +51,8 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&ProductTab::select));
 
+
+   get_tab_manager()->get_tab(TabName::INGREDIENTS)->signal_remove().connect(sigc::mem_fun(this,&ProductTab::remove_ingredient_callback));
 //     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&ProductTab::scroll_event));
 
 //     add_clumn_lable("название");
@@ -191,12 +194,22 @@ void ProductTab::create(){
             }
 
             int* i_id_ptr = static_cast<int*>(ing_link_dialog->get_data("id"));
+            if(i_id_ptr == nullptr){
+                Gtk::MessageDialog message("не указан ингридиент");
+                message.run();
+                return;
+            }
             int i_id = -1;
             if(i_id_ptr){
                 i_id = *i_id_ptr;
             }
 
             int* p_id_ptr = static_cast<int*>(provider_link_dialog->get_data("id"));
+            if(p_id_ptr == nullptr){
+                Gtk::MessageDialog message("не указан ингридиент");
+                message.run();
+                return;
+            }
             int p_id = -1;
             if(p_id_ptr){
                 p_id = *p_id_ptr;
@@ -349,6 +362,15 @@ void ProductTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
     builder->get_widget("price_entry",price_entry_menu);
 
     price_entry_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::float_only, price_entry_menu));
+}
+
+void ProductTab::remove_ingredient_callback(std::shared_ptr<IEntity> entity){
+    for(auto child : list->get_list_box()->get_children()){
+        auto entry = dynamic_cast<Entry*>(child);
+        if(entry->get_product()->get_ingredient_id() == entity->get_id()){
+            list->remove_entity(entry);
+        }
+    }
 }
 
 

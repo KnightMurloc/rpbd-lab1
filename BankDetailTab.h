@@ -10,6 +10,7 @@
 #include "gateways/BankDetail/BankDetailgateway.h"
 #include "glibmm/refptr.h"
 #include "gtkmm/listboxrow.h"
+#include <iostream>
 
 class BankDetailTab : public Tab {
 private:
@@ -27,6 +28,10 @@ private:
         std::shared_ptr<BankDetail> get_bank_detail();
 
         int get_id() override;
+
+        ~Entry(){
+            std::cout << "test2" << std::endl;
+        }
     };
 
     BankDetailgateway gateway;

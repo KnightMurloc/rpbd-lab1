@@ -118,6 +118,8 @@ void SnackGateway::remove(std::shared_ptr<Snack> data) {
             data->get_id());
 
     db.exec(sql);
+
+    cache.Remove(data->get_id());
 }
 
 std::list<std::shared_ptr<Snack>> SnackGateway::get_all() {

@@ -1,31 +1,27 @@
 //
-// Created by victor on 30.09.2022.
+// Created by victor on 02.10.2022.
 //
 
-#include "SnackOrdersTab.h"
+#include "DrinkOrdersTab.h"
 #include "TabManager.h"
-#include "fmt/core.h"
-#include "gateways/Snacks/SnackGateway.h"
+#include "gateways/Drinks/Drinkgateway.h"
 #include "gateways/Employeer/EmployeerGateway.h"
 #include "gateways/Snacks/Snacks.h"
 #include <fmt/format.h>
 #include <memory>
 #include <string>
 #include "Form.h"
-#include "gtkmm/entry.h"
-#include "gtkmm/object.h"
-#include "sigc++/functors/mem_fun.h"
 
-SnackOrdersTab::SnackOrdersTab(TabManager* tab_manager) : Tab(tab_manager) {
-    list = dynamic_cast<EntityList<SnackOrder,Entry>*>(this->create_list());
+DrinkOrdersTab::DrinkOrdersTab(TabManager* tab_manager) : Tab(tab_manager) {
+    list = dynamic_cast<EntityList<DrinkOrder,Entry>*>(this->create_list());
     set_list(list);
 
-    builder = Gtk::Builder::create_from_file("../snack_order_menu.glade");
+    builder = Gtk::Builder::create_from_file("../drink_order_menu.glade");
 
     builder->get_widget("box",info_box);
-    builder->get_widget("snack_link",snack_link);
-    builder->get_widget("snack_find",snack_find);
-    builder->get_widget("snack_select",snack_select);
+    builder->get_widget("drink_link", drink_link);
+    builder->get_widget("drink_find", drink_find);
+    builder->get_widget("drink_select", drink_select);
     builder->get_widget("waiter_link",waiter_link);
     builder->get_widget("waiter_find",waiter_find);
     builder->get_widget("waiter_select",waiter_select);
@@ -33,46 +29,46 @@ SnackOrdersTab::SnackOrdersTab(TabManager* tab_manager) : Tab(tab_manager) {
 
     setup_menu(builder);
 
-    snack_find->signal_clicked().connect(sigc::mem_fun(this,&SnackOrdersTab::find_snack));
-    waiter_find->signal_clicked().connect(sigc::mem_fun(this,&SnackOrdersTab::find_waiter));
+    drink_find->signal_clicked().connect(sigc::mem_fun(this, &DrinkOrdersTab::find_drink));
+    waiter_find->signal_clicked().connect(sigc::mem_fun(this,&DrinkOrdersTab::find_waiter));
 
-    snack_select->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&SnackOrdersTab::select_snack, snack_link, get_tab_manager()));
-    waiter_select->signal_clicked().connect(sigc::bind< Gtk::Label*, TabManager*>(&SnackOrdersTab::select_waiter,waiter_link,get_tab_manager()));
+    drink_select->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&DrinkOrdersTab::select_drink, drink_link, get_tab_manager()));
+    waiter_select->signal_clicked().connect(sigc::bind< Gtk::Label*, TabManager*>(&DrinkOrdersTab::select_waiter,waiter_link,get_tab_manager()));
 
     auto save_button = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-save"));
-    save_button->signal_clicked().connect(sigc::mem_fun(this,&SnackOrdersTab::save_current));
+    save_button->signal_clicked().connect(sigc::mem_fun(this,&DrinkOrdersTab::save_current));
     info_box->add(*save_button);
     info_box->show_all();
 
-    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&SnackOrdersTab::select));
+    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&DrinkOrdersTab::select));
 
-    getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&SnackOrdersTab::create));
+    getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinkOrdersTab::create));
 
-    getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&SnackOrdersTab::remove));
+    getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinkOrdersTab::remove));
 
-    get_tab_manager()->get_tab(TabName::SNACK)->signal_remove().connect(sigc::mem_fun(this,&SnackOrdersTab::remove_snack_callback));
+    get_tab_manager()->get_tab(TabName::DRINKS)->signal_remove().connect(sigc::mem_fun(this,&DrinkOrdersTab::remove_drink_callback));
 
-    get_tab_manager()->get_tab(TabName::EMPLOYEES)->signal_remove().connect(sigc::mem_fun(this,&SnackOrdersTab::remove_waiter_callback));
+    get_tab_manager()->get_tab(TabName::EMPLOYEES)->signal_remove().connect(sigc::mem_fun(this,&DrinkOrdersTab::remove_waiter_callback));
 //     get_tab_manager()->get_tab(TabName::SNACK)->signal_select().connect([](int a){
 //        fmt::print("test: {}\n",a);
 //     });
 }
 
-IList* SnackOrdersTab::create_list() {
-    auto list = Gtk::make_managed<EntityList<SnackOrder,Entry>>(&gateway);
-    list->add_column_title("закуска");
+IList* DrinkOrdersTab::create_list() {
+    auto list = Gtk::make_managed<EntityList<DrinkOrder,Entry>>(&gateway);
+    list->add_column_title("напиток");
     list->add_column_title("офицант");
     list->add_column_title("столик");
     return list;
 }
 
-void SnackOrdersTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder) {
+void DrinkOrdersTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder) {
     Gtk::Entry* table_entry_menu = nullptr;
     builder->get_widget("table_entry",table_entry_menu);
     table_entry_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,table_entry_menu));
 }
 
-void SnackOrdersTab::select(Gtk::ListBoxRow* row) {
+void DrinkOrdersTab::select(Gtk::ListBoxRow* row) {
     auto entry = dynamic_cast<Entry*>(row);
     if(entry == nullptr){
         return;
@@ -91,8 +87,8 @@ void SnackOrdersTab::select(Gtk::ListBoxRow* row) {
 
     auto order = entry->get_order();
 
-    snack_link->set_text(order->get_snack()->get_name());
-    snack_link->set_data("id", new int(order->get_snack_id()), [](void* data){delete (int*) data;});
+    drink_link->set_text(order->get_drink()->getName());
+    drink_link->set_data("id", new int(order->get_drink_id()), [](void* data){delete (int*) data;});
 
     waiter_link->set_text(order->get_waiter()->getLastName());
     waiter_link->set_data("id", new int(order->get_waiter_id()),[](void* data){delete (int*) data;});
@@ -100,18 +96,18 @@ void SnackOrdersTab::select(Gtk::ListBoxRow* row) {
     table_entry->set_text(std::to_string(order->get_table()));
 }
 
-void SnackOrdersTab::select_snack(Gtk::Label* label, TabManager* manager){
-    int id = manager->select_dialog(TabName::SNACK);
+void DrinkOrdersTab::select_drink(Gtk::Label* label, TabManager* manager){
+    int id = manager->select_dialog(TabName::DRINKS);
     if(id == -1){
         return;
     }
 
     label->set_data("id", new int(id), [](void* data){delete (int*) data;});
-    SnackGateway snack_gateway;
-    label->set_text(snack_gateway.get(id)->get_name());
+    Drinkgateway drink_gateway;
+    label->set_text(drink_gateway.get(id)->getName());
 }
 
-void SnackOrdersTab::select_waiter(Gtk::Label* label, TabManager* manager){
+void DrinkOrdersTab::select_waiter(Gtk::Label* label, TabManager* manager){
     int id = manager->select_dialog(TabName::EMPLOYEES);
     if(id == -1){
         return;
@@ -122,7 +118,7 @@ void SnackOrdersTab::select_waiter(Gtk::Label* label, TabManager* manager){
     label->set_text(emp_gateway.get(id)->getLastName());
 }
 
-void SnackOrdersTab::save_current(){
+void DrinkOrdersTab::save_current(){
     auto entry = dynamic_cast<Entry*>(list->get_selected());
     if(entry == nullptr){
         return;
@@ -130,7 +126,7 @@ void SnackOrdersTab::save_current(){
 
     auto order = entry->get_order();
 
-    int* snack_id = static_cast<int*>(snack_link->get_data("id"));
+    int* snack_id = static_cast<int*>(drink_link->get_data("id"));
     if(snack_id == nullptr){
        Gtk::MessageDialog message("продукт не указан");
        message.run();
@@ -150,13 +146,13 @@ void SnackOrdersTab::save_current(){
        return;
     }
 
-    order->set_snack_id(*snack_id);
+    order->set_drink_id(*snack_id);
     order->set_waiter_id(*waiter_id);
     order->set_table(std::stoi(table_entry->get_text()));
 
     gateway.save(order);
 
-    entry->drink_label->set_text(order->get_snack()->get_name());
+    entry->drink_label->set_text(order->get_drink()->getName());
 
     std::unique_ptr<gchar, decltype(&g_free)> first_name_ptr(g_utf8_substring(order->get_waiter()->getFirstName().c_str(),0,1), g_free);
 
@@ -167,8 +163,8 @@ void SnackOrdersTab::save_current(){
 }
 
 
-void SnackOrdersTab::create() {
-    auto builder = Gtk::Builder::create_from_file("../snack_order_menu.glade");
+void DrinkOrdersTab::create() {
+    auto builder = Gtk::Builder::create_from_file("../drink_order_menu.glade");
     setup_menu(builder);
 
     auto dialog = new Gtk::Dialog();
@@ -178,53 +174,44 @@ void SnackOrdersTab::create() {
     Gtk::Box* box;
     builder->get_widget("box", box);
 
-    Gtk::Label* snack_link_dialog;
-    Gtk::Button* snack_find_dialog;
-    Gtk::Button* snack_select_dialog;
+    Gtk::Label* drink_link_dialog;
+    Gtk::Button* drink_find_dialog;
+    Gtk::Button* drink_select_dialog;
 
     Gtk::Label* waiter_link_dialog;
     Gtk::Button* waiter_find_dialog;
     Gtk::Button* waiter_select_dialog;
 
-    builder->get_widget("snack_link",snack_link_dialog);
-    builder->get_widget("snack_find",snack_find_dialog);
-    builder->get_widget("snack_select",snack_select_dialog);
+    builder->get_widget("drink_link", drink_link_dialog);
+    builder->get_widget("drink_find", drink_find_dialog);
+    builder->get_widget("drink_select", drink_select_dialog);
 
     builder->get_widget("waiter_link",waiter_link_dialog);
     builder->get_widget("waiter_find",waiter_find_dialog);
     builder->get_widget("waiter_select",waiter_select_dialog);
 
-    snack_find_dialog->set_sensitive(false);
+    drink_find_dialog->set_sensitive(false);
     waiter_find_dialog->set_sensitive(false);
 
-    snack_select_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&SnackOrdersTab::select_snack, snack_link_dialog, get_tab_manager()));
-    waiter_select_dialog->signal_clicked().connect(sigc::bind< Gtk::Label*, TabManager*>(&SnackOrdersTab::select_waiter,waiter_link_dialog,get_tab_manager()));
+    drink_select_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&DrinkOrdersTab::select_drink, drink_link_dialog, get_tab_manager()));
+    waiter_select_dialog->signal_clicked().connect(sigc::bind< Gtk::Label*, TabManager*>(&DrinkOrdersTab::select_waiter,waiter_link_dialog,get_tab_manager()));
 
     dynamic_cast<Gtk::Container*>(dialog->get_children()[0])->add(*box);
 
     dialog->signal_response().connect([this, dialog, builder](int response){
         if(response == Gtk::RESPONSE_OK){
-            Gtk::Label* snack_link_dialog;
-            Gtk::Button* snack_find_dialog;
-            Gtk::Button* snack_select_dialog;
-
+            Gtk::Label* drink_link_dialog;
             Gtk::Label* waiter_link_dialog;
-            Gtk::Button* waiter_find_dialog;
-            Gtk::Button* waiter_select_dialog;
 
             Gtk::Entry* table_entry_dialog;
 
-            builder->get_widget("snack_link",snack_link_dialog);
-            builder->get_widget("snack_find",snack_find_dialog);
-            builder->get_widget("snack_select",snack_select_dialog);
+            builder->get_widget("drink_link", drink_link_dialog);
             builder->get_widget("waiter_link",waiter_link_dialog);
-            builder->get_widget("waiter_find",waiter_find_dialog);
-            builder->get_widget("waiter_select",waiter_select_dialog);
             builder->get_widget("table_entry",table_entry_dialog);
 
 
-            int* snack_id = static_cast<int*>(snack_link_dialog->get_data("id"));
-            if(snack_id == nullptr){
+            int* drink_id = static_cast<int*>(drink_link_dialog->get_data("id"));
+            if(drink_id == nullptr){
                 Gtk::MessageDialog message("продукт не указан");
                 message.run();
                 return;
@@ -243,7 +230,7 @@ void SnackOrdersTab::create() {
                 return;
             }
 
-            auto order = gateway.create(*snack_id, *waiter_id, std::stoi(table_entry_dialog->get_text()));
+            auto order = gateway.create(*drink_id, *waiter_id, std::stoi(table_entry_dialog->get_text()));
 
             auto entry = Gtk::make_managed<Entry>(order);
             list->add_entity(entry);
@@ -256,21 +243,16 @@ void SnackOrdersTab::create() {
     dialog->show_all();
 }
 
-void SnackOrdersTab::remove_snack_callback(std::shared_ptr<IEntity> entity){
-    auto snack = std::dynamic_pointer_cast<Snack>(entity);
-    if(snack == nullptr){
-        return;
-    }
-
+void DrinkOrdersTab::remove_drink_callback(std::shared_ptr<IEntity> entity){
     for(auto child : list->get_list_box()->get_children()){
         auto entry = dynamic_cast<Entry*>(child);
-        if(entry->get_order()->get_snack_id() == snack->get_id()){
+        if(entry->get_order()->get_drink_id() == entity->get_id()){
             list->remove_entity(entry);
         }
     }
 }
 
-void SnackOrdersTab::remove_waiter_callback(std::shared_ptr<IEntity> entity){
+void DrinkOrdersTab::remove_waiter_callback(std::shared_ptr<IEntity> entity){
     auto waiter = std::dynamic_pointer_cast<Employeer>(entity);
     if(waiter == nullptr){
         return;
@@ -284,7 +266,7 @@ void SnackOrdersTab::remove_waiter_callback(std::shared_ptr<IEntity> entity){
     }
 }
 
-void SnackOrdersTab::remove() {
+void DrinkOrdersTab::remove() {
     auto entry = dynamic_cast<Entry*>(list->get_selected());
     if(entry == nullptr){
         return;
@@ -300,16 +282,16 @@ void SnackOrdersTab::remove() {
     list->remove_entity(entry);
 }
 
-void SnackOrdersTab::find_snack(){
-    int* id = static_cast<int*>(snack_link->get_data("id"));
+void DrinkOrdersTab::find_drink(){
+    int* id = static_cast<int*>(drink_link->get_data("id"));
     if(id == nullptr){
         return;
     }
 
-    get_tab_manager()->select_on_tab(TabName::SNACK,*id);
+    get_tab_manager()->select_on_tab(TabName::DRINKS,*id);
 }
 
-void SnackOrdersTab::find_waiter(){
+void DrinkOrdersTab::find_waiter(){
     int* id = static_cast<int*>(waiter_link->get_data("id"));
     if(id == nullptr){
         return;
@@ -318,12 +300,12 @@ void SnackOrdersTab::find_waiter(){
     get_tab_manager()->select_on_tab(TabName::EMPLOYEES,*id);
 }
 
-SnackOrdersTab::Entry::Entry(std::shared_ptr<SnackOrder> order) : order(order) {
+DrinkOrdersTab::Entry::Entry(std::shared_ptr<DrinkOrder> order) : order(order) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     box->set_homogeneous(true);
 
-    drink_label = Gtk::make_managed<Gtk::Label>(order->get_snack()->get_name());
+    drink_label = Gtk::make_managed<Gtk::Label>(order->get_drink()->getName());
     auto waiter = order->get_waiter();
 //     gchar* first_name_ptr = g_utf8_substring(waiter->getFirstName().c_str(),0,1);
     std::unique_ptr<gchar, decltype(&g_free)> first_name_ptr(g_utf8_substring(waiter->getFirstName().c_str(),0,1), g_free);
@@ -343,10 +325,10 @@ SnackOrdersTab::Entry::Entry(std::shared_ptr<SnackOrder> order) : order(order) {
     this->add(*box);
 }
 
-std::shared_ptr<SnackOrder> SnackOrdersTab::Entry::get_order() {
+std::shared_ptr<DrinkOrder> DrinkOrdersTab::Entry::get_order() {
     return order;
 }
 
-int SnackOrdersTab::Entry::get_id() {
+int DrinkOrdersTab::Entry::get_id() {
     return order->get_id();
 }

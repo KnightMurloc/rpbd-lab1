@@ -65,6 +65,8 @@ void SnackOrdergateway::remove(std::shared_ptr<SnackOrder> data) {
     std::string sql = fmt::format("delete from snack_orders where id = {};",data->get_id());
 
     db.exec(sql);
+
+    cache.Remove(data->get_id());
 }
 
 std::list<std::shared_ptr<SnackOrder>> SnackOrdergateway::get_all() {
@@ -96,7 +98,7 @@ std::list<std::shared_ptr<SnackOrder>> SnackOrdergateway::get_great_then_by_id(i
 std::list<std::shared_ptr<SnackOrder>> SnackOrdergateway::get_less_then_by_id(int id, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from employees where id < {} order by id DESC limit {};",id,count);
+    std::string sql = fmt::format("select * from snack_orders where id < {} order by id DESC limit {};",id,count);
 
     auto response = db.exec(sql);
 

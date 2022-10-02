@@ -7,10 +7,12 @@
 #include "fmt/core.h"
 #include "fmt/format.h"
 #include "gateways/Ingredients/Ingredient.h"
+#include "gateways/entity.h"
 #include "gateways/units.h"
 #include "gtkmm/combobox.h"
 #include "gtkmm/dialog.h"
 #include "sigc++/functors/mem_fun.h"
+#include <memory>
 
 IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 
@@ -352,6 +354,7 @@ void IngredientTab::remove_entry(){
    }
 
    gateway.remove(entry->get_ingredient());
+   on_remove.emit(entry->get_ingredient());
     Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
 

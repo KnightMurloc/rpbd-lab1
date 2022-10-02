@@ -9,6 +9,7 @@
 #include <memory>
 #include "Tab.h"
 #include "gateways/Product/ProductGateway.h"
+#include "gateways/entity.h"
 #include "gtkmm/entry.h"
 
 class ProductTab : public Tab {
@@ -65,6 +66,7 @@ private:
 
     static void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
 
+    void remove_ingredient_callback(std::shared_ptr<IEntity> entity);
 //     void scroll_event(Gtk::PositionType type);
 protected:
 //     void fill_list(Gtk::ListBox* list) override;

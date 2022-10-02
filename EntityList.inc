@@ -1,6 +1,10 @@
 //#include "EntityList.h"
 
+#include "EntityList.h"
+#include "gtkmm/box.h"
+#include "gtkmm/enums.h"
 #include "gtkmm/object.h"
+#include "sigc++/functors/mem_fun.h"
 template<class T, class E>
 EntityList<T, E>::EntityList(IGateway<T>* gateway) : gateway(gateway) {
     box = Gtk::make_managed<Gtk::Box>();
@@ -25,14 +29,22 @@ EntityList<T, E>::EntityList(IGateway<T>* gateway) : gateway(gateway) {
 
     scroll->add(*scroll_box);
 
+    auto bottom_box = Gtk::make_managed<Gtk::Box>();
+    bottom_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+
     search_entry = Gtk::make_managed<Gtk::SearchEntry>();
     search_entry->set_vexpand(false);
     search_entry->set_hexpand(true);
 
+    auto stop_search_button = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-cancel"));
 
+    stop_search_button->signal_clicked().connect(sigc::mem_fun(this,&EntityList::reset_search));
+
+    bottom_box->add(*search_entry);
+    bottom_box->add(*stop_search_button);
 
     box->add(*scroll);
-    box->add(*search_entry);
+    box->add(*bottom_box);
 
     current_search = std::make_unique<DefaultSearch>(gateway);
 
@@ -91,6 +103,7 @@ bool EntityList<T, E>::scroll_down() {
         for(int i = 0; i < rows.size() - 40; i++){
 //            fmt::print("removed\n");
             list->remove(*rows[i]);
+            delete rows[i];
         }
     }
     list->show_all();
@@ -120,6 +133,8 @@ bool EntityList<T, E>::scroll_up() {
         for(size_t i = rows.size() - 1; i >= 40; i--){
 //            fmt::print("removed\n");
             list->remove(*rows[i]);
+            delete rows[i];
+
         }
     }
     list->show_all();
@@ -146,6 +161,7 @@ void EntityList<T, E>::add_entity(E* entity){
 template<class T, class E>
 void EntityList<T, E>::remove_entity(E* entity){
     list->remove(*entity);
+    delete entity;
 }
 
 template<class T, class E>
@@ -172,6 +188,8 @@ void EntityList<T,E>::set_search(std::unique_ptr<ISearch<T>> search){
 template<class T, class E>
 void EntityList<T,E>::reset_search(){
     current_search = std::make_unique<DefaultSearch>(gateway);
+    search_entry->set_text("");
+    fill_list();
 }
 
 template<class T, class E>
@@ -202,6 +220,8 @@ void EntityList<T,E>::select_row(Gtk::ListBoxRow* widget){
 template<class T, class E>
 void EntityList<T,E>::remove_row(Gtk::Widget* widget){
     list->remove(*widget);
+
+    delete widget;
 }
 
 template<class T, class E>

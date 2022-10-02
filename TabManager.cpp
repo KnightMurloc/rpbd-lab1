@@ -12,17 +12,19 @@
 #include "BankDetailTab.h"
 #include "ProviderTab.h"
 #include "SnackOrdersTab.h"
+#include "DrinkOrdersTab.h"
 
 TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContainer) {
     tabs[0] = std::make_unique<EmployeesTab>(this);
-    tabs[1] = std::make_unique<ProductTab>(this);
     tabs[2] = std::make_unique<OrderTab>(this);
     tabs[3] = std::make_unique<SnackTab>(this);
     tabs[4] = std::make_unique<IngredientTab>(this);
+    tabs[1] = std::make_unique<ProductTab>(this);
     tabs[5] = std::make_unique<DrinksTab>(this);
     tabs[6] = std::make_unique<BankDetailTab>(this);
     tabs[7] = std::make_unique<ProviderTab>(this);
     tabs[8] = std::make_unique<SnackOrdersTab>(this);
+    tabs[9] = std::make_unique<DrinkOrdersTab>(this);
 
     tabs_container->append_page(*tabs[0], "сотрудники");
     tabs_container->append_page(*tabs[1], "продукты");
@@ -33,6 +35,7 @@ TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContai
     tabs_container->append_page(*tabs[6], "реквизиты\nбанка");
     tabs_container->append_page(*tabs[7], "поставщики");
     tabs_container->append_page(*tabs[8], "заказы\nзакусок");
+    tabs_container->append_page(*tabs[9], "заказы\nнапитков");
 }
 
 void TabManager::select_on_tab(TabName tab_name, int entry_id) {

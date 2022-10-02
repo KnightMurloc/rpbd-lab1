@@ -17,13 +17,14 @@ enum class TabName{
     DRINKS,
     BACK_DETAIL,
     PROVIDER,
-    SNACK_ORDERS
+    SNACK_ORDERS,
+    DRINK_ORDERS
 };
 
 class TabManager {
 private:
     Gtk::Notebook* tabs_container;
-    std::array<std::unique_ptr<Tab>,9> tabs;
+    std::array<std::unique_ptr<Tab>,10> tabs;
 public:
 
     explicit TabManager(Gtk::Notebook *tabsContainer);

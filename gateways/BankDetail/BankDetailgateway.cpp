@@ -103,6 +103,8 @@ void BankDetailgateway::remove(std::shared_ptr<BankDetail> data) {
 
     std::string sql = fmt::format("delete from bank_detail where id = {};", data->get_id());
 
+    cache.Remove(data->get_id());
+
     db.exec(sql);
 }
 

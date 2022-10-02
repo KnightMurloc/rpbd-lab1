@@ -18,6 +18,8 @@ private:
 public:
     explicit BankDetail(int id);
 
+    ~BankDetail();
+
     [[nodiscard]] int get_id() const;
 
     [[nodiscard]] const std::string &getBankName() const;
