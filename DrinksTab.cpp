@@ -12,8 +12,6 @@
 
 
 DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
-
-//     list = std::make_unique<EntityList<Drink,Entry>>(&gateway);
     list = dynamic_cast<EntityList<Drink,Entry>*>(create_list());
     set_list(list);
 
@@ -27,8 +25,6 @@ DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
     builder->get_widget("ing_list",ing_list);
     builder->get_widget("add_button",add_button);
     builder->get_widget("remove_button",remove_button);
-
-//    fill_list(getListBox());
 
     setup_menu(builder);
 
@@ -52,11 +48,6 @@ DrinksTab::DrinksTab(TabManager *manager) : Tab(manager) {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&DrinksTab::remove_entry));
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&DrinksTab::select));
-
-//     add_clumn_lable("название");
-//     add_clumn_lable("крепость");
-//     add_clumn_lable("размер");
-//     add_clumn_lable("ёмкость подачи");
 }
 
 int DrinksTab::Entry::get_id() {
@@ -91,7 +82,6 @@ void DrinksTab::select(Gtk::ListBoxRow* row){
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
     //replace box
-
     if(box->get_children().empty() || box->get_children()[0]->get_name() != "dring_menu"){
         if(!box->get_children().empty()){
             box->remove(*box->get_children()[0]);
@@ -199,19 +189,12 @@ void DrinksTab::save_current(){
        return;
    }
 
-//     std::cout << "old" << std::endl;
-
    std::vector<std::pair<int,int>> old_list;
    std::vector<std::pair<int,int>> new_list;
 
    for(auto& ing : gateway.get_ingredients(drink)){
-//         std::cout << std::get<0>(ing) << " ";
        old_list.push_back(ing);
-//         old_list.insert(ing);
    }
-//     std::cout << std::endl;
-
-//     std::cout << "new" << std::endl;
 
    for(auto row : ing_list->get_children()){
 
@@ -219,12 +202,9 @@ void DrinksTab::save_current(){
 
        int* id = static_cast<int*>(box->get_data("id"));
        int* count = static_cast<int*>(box->get_data("count"));
-//         std::cout << *id << " ";
-       new_list.push_back(std::make_pair(*id, *count));
-//         old_list.insert(std::make_pair<int,int>(*id, *count));
-   }
-//     std::cout << std::endl;
 
+       new_list.push_back(std::make_pair(*id, *count));
+   }
 
    std::sort(old_list.begin(), old_list.end(),[](std::pair<int,int>& a, std::pair<int,int>& b){
        return a.first < b.first;
@@ -253,19 +233,13 @@ void DrinksTab::save_current(){
    );
 
 
-//     std::cout << "created" << std::endl;
    for(auto a : created){
-//         std::cout << a.first << " ";
        drink->getRecipe().add_ingridient(a.first,a.second);
    }
-//     std::cout << std::endl;
 
-//     std::cout << "removed" << std::endl;
    for(auto a : removed){
-//         std::cout <<  a.first << " ";
        drink->getRecipe().remove_ingridient(a.first);
    }
-//     std::cout << std::endl;
 
    drink->setName(name_entry->get_text());
    drink->setStrength(std::stoi(strength_entry->get_text()));
@@ -390,9 +364,6 @@ void DrinksTab::create(){
 
             list->add_entity(entry);
             list->show_all();
-
-//            getListBox()->append(*entry);
-//            getListBox()->show_all();
         }
         dialog->close();
         delete dialog;
@@ -422,73 +393,6 @@ void DrinksTab::remove_entry(){
 std::shared_ptr<Drink> DrinksTab::Entry::get_drink() {
     return drink;
 }
-
-// void DrinksTab::select_by_id(int entry_id) {
-//
-// }
-
-// void DrinksTab::fill_list(Gtk::ListBox *list) {
-//     for(const auto& drink : gateway.get_all()){
-//         auto entry = Gtk::make_managed<Entry>(drink);
-//
-//         list->append(*entry);
-//     }
-// }
-
-// bool DrinksTab::scroll_down(){
-//        first_id = last_id;
-//        auto data = gateway.get_great_then_by_id(last_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() > last_id){
-//                last_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->add(*entry);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//
-//            for(int i = 0; i < rows.size() - 40; i++){
-////                 fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//        scroll->get_vadjustment()->set_value(500);
-//        return true;
-//     return true;
-// }
-
-// bool DrinksTab::scroll_up(){
-//        last_id = first_id;
-//        auto data = gateway.get_less_then_by_id(first_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() < first_id){
-//                first_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->insert(*entry,0);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//            for(int i = rows.size() - 1; i >= 40; i--){
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//
-//        scroll->get_vadjustment()->set_value(100);
-
-//         return true;
-// }
 
 IList* DrinksTab::create_list(){
 

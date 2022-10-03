@@ -20,7 +20,6 @@
 
 ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
 
-//     list = std::make_unique<EntityList<Provider,Entry>>(&gateway);
     list = dynamic_cast<EntityList<Provider,Entry>*>(create_list());
     set_list(list);
 
@@ -36,9 +35,7 @@ ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
     builder->get_widget("select_button", select_button);
     builder->get_widget("find_button", find_button);
 
-    setup_menu(builder);
-
-//    this->fill_list(getListBox());
+//     setup_menu(builder);
 
     auto save_button = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-save"));
     save_button->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::save_current));
@@ -48,19 +45,12 @@ ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
     find_button->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::find_detail));
     select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&ProviderTab::select_deltail,detail_link, get_tab_manager()));
 
-//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&ProviderTab::scroll_event));
-
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::remove_entry));
 
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::create));
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&ProviderTab::select));
 
-//     add_clumn_lable("название");
-//     add_clumn_lable("почтовый адрес");
-//     add_clumn_lable("телефон");
-//     add_clumn_lable("факс");
-//     add_clumn_lable("email");
 }
 
 void ProviderTab::select(Gtk::ListBoxRow* row){
@@ -91,9 +81,12 @@ void ProviderTab::select(Gtk::ListBoxRow* row){
         detail_link->set_text(detail->getBankName());
 
         detail_link->set_data("id",new int(detail->get_id()),[](void* data){delete (int*) data;});
+        find_button->set_sensitive(true);
     }catch(GatewayException& e){
         detail_link->set_text("none");
         detail_link->set_data("id",nullptr,[](void* data){delete (int*) data;});
+        find_button->set_sensitive(false);
+
     }
 
 }
@@ -157,7 +150,7 @@ void ProviderTab::save_current(){
 
 void ProviderTab::create(){
     auto builder = Gtk::Builder::create_from_file("../provider_menu.glade");
-    setup_menu(builder);
+//     setup_menu(builder);
 
     auto dialog = new Gtk::Dialog();
     dialog->add_button("OK", Gtk::RESPONSE_OK);
@@ -242,9 +235,6 @@ void ProviderTab::create(){
             );
 
             auto entry = Gtk::make_managed<Entry>(provider);
-
-//            getListBox()->append(*entry);
-//            getListBox()->show_all();
         }
 
         dialog->close();
@@ -272,17 +262,17 @@ void ProviderTab::remove_entry(){
    get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail_id());
 }
 
-void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
-    Gtk::Entry* entry_number_menu;
-    Gtk::Entry* fax_entry_menu;
-
-    builder->get_widget("entry_number", entry_number_menu);
-    builder->get_widget("fax_entry", fax_entry_menu);
-
-    entry_number_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,entry_number_menu));
-
-    fax_entry_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,fax_entry_menu));
-}
+// void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
+//     Gtk::Entry* entry_number_menu;
+//     Gtk::Entry* fax_entry_menu;
+//
+//     builder->get_widget("entry_number", entry_number_menu);
+//     builder->get_widget("fax_entry", fax_entry_menu);
+//
+//     entry_number_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,entry_number_menu));
+//
+//     fax_entry_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,fax_entry_menu));
+// }
 
 void ProviderTab::find_detail(){
     int* id = static_cast<int*>(detail_link->get_data("id"));
@@ -331,94 +321,6 @@ ProviderTab::Entry::Entry(std::shared_ptr<Provider> provider) : provider(provide
 int ProviderTab::Entry::get_id() {
     return provider->get_id();
 }
-
-// void ProviderTab::select_by_id(int entry_id) {
-//
-// }
-
-// void ProviderTab::scroll_event(Gtk::PositionType type){
-//     if(type == Gtk::PositionType::POS_BOTTOM){
-//         scroll_down();
-//     }else if(type == Gtk::PositionType::POS_TOP){
-//         scroll_up();
-//     }
-// }
-
-// void ProviderTab::fill_list(Gtk::ListBox* list) {
-//    for(auto child : getListBox()->get_children()){
-//        getListBox()->remove(*child);
-//    }
-//
-//    first_id = 0;
-//    last_id = -1;
-//    for(const auto& ing : gateway.get_great_then_by_id(0,20)){
-//        if(ing->get_id() > last_id){
-//            last_id = ing->get_id();
-//        }
-//        auto entry = Gtk::make_managed<Entry>(ing);
-//        list->add(*entry);
-//    }
-
-//     for(const auto& provider : gateway.get_all()){
-//         auto entry = Gtk::make_managed<Entry>(provider);
-//         list->add(*entry);
-//     }
-// }
-
-// bool ProviderTab::scroll_down(){
-//        first_id = last_id;
-//        auto data = gateway.get_great_then_by_id(last_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() > last_id){
-//                last_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->add(*entry);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//
-//            for(int i = 0; i < rows.size() - 40; i++){
-//                fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//        scroll->get_vadjustment()->set_value(500);
-//         return true;
-// }
-
-// bool ProviderTab::scroll_up(){
-//        last_id = first_id;
-//        auto data = gateway.get_less_then_by_id(first_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() < first_id){
-//                first_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->insert(*entry,0);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//            for(int i = rows.size() - 1; i >= 40; i--){
-//                fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//
-//        scroll->get_vadjustment()->set_value(100);
-
-//         return true;
-// }
 
 IList* ProviderTab::create_list(){
 

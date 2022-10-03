@@ -42,7 +42,3 @@ void BankDetail::setTin(std::string tin) {
 void BankDetail::setSettlementAccount(std::string settlementAccount) {
     settlement_account = settlementAccount;
 }
-
-BankDetail::~BankDetail(){
-    std::cout << "test" << std::endl;
-}

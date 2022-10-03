@@ -27,14 +27,6 @@ LabOne::LabOne(Glib::RefPtr<Gtk::Application> gtk_app): gtk_app(std::move(gtk_ap
 
     tab_manager = std::make_unique<TabManager>(tabs_container);
 
-//    tabs[0] = std::make_unique<EmployeesTab>();
-//    tabs[1] = std::make_unique<ProductTab>();
-//    tabs[2] = std::make_unique<OrderTab>();
-//
-//    tabs_container->append_page(*tabs[0], "сотрудники");
-//    tabs_container->append_page(*tabs[1], "продукты");
-//    tabs_container->append_page(*tabs[2], "приказы");
-
     tabs_container->show_all();
 }
 

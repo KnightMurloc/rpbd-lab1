@@ -15,12 +15,9 @@
 
 EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-//     list = std::make_unique<EntityList<Employeer,Entry>>(&gateway);
     list = dynamic_cast<EntityList<Employeer,Entry>*>(create_list());
     set_list(list);
     list->show_all();
-
-//    current_search = std::make_unique<DefaultSearch>(&gateway);
 
     builder = Gtk::Builder::create_from_file("../employeer_menu.glade");
 
@@ -46,37 +43,18 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     info_box->show_all();
 
     find_button->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::find_order));
-//    select_button->signal_clicked().connect(sigc::mem_fun<Gtk::Label*>(this,&EmployeesTab::select_order,oreder_link));
+
     select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link, get_tab_manager()));
 
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::remove));
 
-//    list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list.get()));
-//    stop_search->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::search_stop));
-
-//    fill_list(getListBox());
-//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&EmployeesTab::scroll_event));
-
-//     list->set_select_callback(&EmployeesTab::select);
-
-//    getListBox()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
     list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
 
-
-//     add_clumn_lable("имя");
-//     add_clumn_lable("фамилия");
-//     add_clumn_lable("отчество");
-//     add_clumn_lable("адрес");
-//     add_clumn_lable("дата рождения");
-//     add_clumn_lable("зарплата");
-//     add_clumn_lable("должность");
 }
 
 //TODO устанавливать gateway в листе
 void EmployeesTab::search(EntityList<Employeer,Entry>* list){
-
-
    std::string str = list->get_search_text();
    std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
    auto gateway = dynamic_cast<EmployeerGateway*>(list->get_gateway());
@@ -85,15 +63,6 @@ void EmployeesTab::search(EntityList<Employeer,Entry>* list){
     }
    auto ptr = std::make_unique<NameSearch>(gateway,str );
    list->set_search(std::move(ptr));
-//    fill_list(getListBox());
-//    getListBox()->show_all();
-
-}
-
-void EmployeesTab::search_stop(){
-//    current_search = std::make_unique<DefaultSearch>(&gateway);
-//    fill_list(getListBox());
-//    getListBox()->show_all();
 }
 
 void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
@@ -224,7 +193,7 @@ void EmployeesTab::find_order() {
    if(entry == nullptr){
        return;
    }
-//        this->get_tab_manager()->select_on_tab(1, entry->getEmp().getId());
+
    get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement_id());
 }
 
@@ -277,7 +246,7 @@ void EmployeesTab::create() {
     builder->get_widget("emp_select_button", select_button_dialog);
 
     find_button_dialog->set_sensitive(false);
-//            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*>(&EmployeesTab::select_order,oreder_link_dialog));
+
     select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link_dialog, get_tab_manager()));
 
     dynamic_cast<Gtk::Container*>(dialog->get_children()[0])->add(*box);
@@ -287,8 +256,7 @@ void EmployeesTab::create() {
             Gtk::Entry* first_name_entry_dialog;
             Gtk::Entry* last_name_entry_dialog;
             Gtk::Label* order_link_dialog;
-//             Gtk::Button* find_button_dialog;
-//             Gtk::Button* select_button_dialog;
+
             Gtk::Entry* patronymic_entry_dialog;
             Gtk::Entry* address_entry_dialog;
             Gtk::Entry* day_entry_dialog;
@@ -300,8 +268,7 @@ void EmployeesTab::create() {
             builder->get_widget("first_name_entry", first_name_entry_dialog);
             builder->get_widget("last_name_entry", last_name_entry_dialog);
             builder->get_widget("oreder_link", order_link_dialog);
-//             builder->get_widget("emp_find_button", find_button_dialog);
-//             builder->get_widget("emp_select_button", select_button_dialog);
+
             builder->get_widget("patronymic_entry", patronymic_entry_dialog);
             builder->get_widget("address_entry", address_entry_dialog);
             builder->get_widget("day_entry", day_entry_dialog);
@@ -309,11 +276,6 @@ void EmployeesTab::create() {
             builder->get_widget("year_entry", year_entry_dialog);
             builder->get_widget("salary_entry", salary_entry_dialog);
             builder->get_widget("post_combobox", post_combobox_dialog);
-
-//             find_button_dialog->set_sensitive(false);
-// //            select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*>(&EmployeesTab::select_order,oreder_link_dialog));
-//             select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link_dialog, get_tab_manager()));
-
 
             if(first_name_entry_dialog->get_text().empty()){
                 Gtk::MessageDialog message("не указано имя");
@@ -408,19 +370,6 @@ void EmployeesTab::remove() {
    list->remove_entity(entry);
 }
 
-// void EmployeesTab::fill_list(Gtk::ListBox* list) {
-
-//    for(auto child : getListBox()->get_children()){
-//        getListBox()->remove(*child);
-//    }
-//
-//    auto data = current_search->get_great_then(0,20);
-//    for(auto& emp : data){
-//        auto entry = Gtk::make_managed<Entry>(emp);
-//        list->append(*entry);
-//    }
-// }
-
 EmployeesTab::Entry::Entry(std::shared_ptr<Employeer> emp) : emp(emp) {
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
@@ -452,69 +401,6 @@ std::shared_ptr<Employeer> EmployeesTab::Entry::get_emp() {
 int EmployeesTab::Entry::get_id() {
     return emp->get_id();
 }
-
-// bool EmployeesTab::scroll_down(){
-//        first_id = last_id;
-//        auto data = current_search->get_great_then(last_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() > last_id){
-//                last_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->add(*entry);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//
-//            for(int i = 0; i < rows.size() - 40; i++){
-//                fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//        scroll->get_vadjustment()->set_value(500);
-//         return true;
-// }
-//
-// bool EmployeesTab::scroll_up(){
-//        last_id = first_id;
-//        auto data = current_search->get_less_then(first_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() < first_id){
-//                first_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->insert(*entry,0);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//            for(int i = rows.size() - 1; i >= 40; i--){
-//                fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//
-//        scroll->get_vadjustment()->set_value(100);
-//
-//         return true;
-// }
-
-// void EmployeesTab::scroll_event(Gtk::PositionType type){
-//     if(type == Gtk::POS_BOTTOM){
-//         scroll_down();
-//     }else if(type == Gtk::POS_TOP){
-//         scroll_up();
-//     }
-// }
 
 EmployeesTab::DefaultSearch::DefaultSearch(EmployeerGateway* gateway) : gateway(gateway) {};
 

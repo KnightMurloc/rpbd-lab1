@@ -13,9 +13,6 @@
 #include <iostream>
 
 BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
-//    this->fill_list(getListBox());
-
-//     list = std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
     list = dynamic_cast<EntityList<BankDetail,Entry>*>(create_list());
     set_list(list);
 
@@ -38,12 +35,6 @@ BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&BankDetailTab::remove_entry));
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&BankDetailTab::select));
-//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&BankDetailTab::scroll_event));
-
-//     add_clumn_lable("название");
-//     add_clumn_lable("город");
-//     add_clumn_lable("ИНН");
-//     add_clumn_lable("расчётный счёт");
 }
 
 void BankDetailTab::select(Gtk::ListBoxRow* row){
@@ -175,7 +166,6 @@ void BankDetailTab::create(){
 
             list->add_entity(entry);
 
-//            getListBox()->append(*entry);
            list->show_all();
         }
         dialog->close();
@@ -234,86 +224,11 @@ BankDetailTab::Entry::Entry(std::shared_ptr<BankDetail> detail) : detail(detail)
     this->add(*box);
 }
 
-// void BankDetailTab::select_by_id(int entry_id) {
-// //    fill_list(getListBox());
-// }
-
-// void BankDetailTab::fill_list(Gtk::ListBox *list) {
-//     for(auto& data : gateway.get_great_then_by_id(0,20)){
-//         auto entry = Gtk::make_managed<Entry>(data);
-//         list->append(*entry);
-//     }
-// }
-
 std::shared_ptr<BankDetail> BankDetailTab::Entry::get_bank_detail(){
     return detail;
 }
 
-// void BankDetailTab::scroll_event(Gtk::PositionType type){
-//     if(type == Gtk::PositionType::POS_BOTTOM){
-//         scroll_down();
-//     }else if(type == Gtk::PositionType::POS_TOP){
-//         scroll_up();
-//     }
-// }
-
-// bool BankDetailTab::scroll_down(){
-//        first_id = last_id;
-//        auto data = gateway.get_great_then_by_id(last_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() > last_id){
-//                last_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->add(*entry);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//
-//            for(int i = 0; i < rows.size() - 40; i++){
-////                 fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//        scroll->get_vadjustment()->set_value(500);
-//         return true;
-// }
-
-// bool BankDetailTab::scroll_up(){
-//        last_id = first_id;
-//        auto data = gateway.get_less_then_by_id(first_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() < first_id){
-//                first_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->insert(*entry,0);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//            for(int i = rows.size() - 1; i >= 40; i--){
-////                 fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//
-//        scroll->get_vadjustment()->set_value(100);
-//
-//         return true;
-// }
-
 IList* BankDetailTab::create_list(){
-//     return std::make_unique<EntityList<BankDetail,Entry>>(&gateway);
     auto list = Gtk::make_managed<EntityList<BankDetail,Entry>>(&gateway);
 
     list->add_column_title("название");

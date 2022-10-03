@@ -27,7 +27,7 @@ private:
     };
 
     OrderGateway gateway;
-//     std::unique_ptr<EntityList<Order,Entry>> list;
+
     EntityList<Order,Entry>* list;
 
     Glib::RefPtr<Gtk::Builder> builder;
@@ -47,24 +47,12 @@ private:
 
     void remove();
 
-//     void scroll_event(Gtk::PositionType type);
+    void save_current();
 protected:
-//     void fill_list(Gtk::ListBox* list) override;
-
-//     bool scroll_down() override;
-//     bool scroll_up() override;
 
     IList* create_list() override;
 public:
     explicit OrderTab(TabManager* tab_manager);
-
-    void save_current();
-
-    void cancel_current();
-
-//     void select_by_id(int entry_id) override;
-
-//    int select_dialog() override;
 };
 
 

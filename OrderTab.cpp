@@ -10,11 +10,8 @@
 
 OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-//     list = std::make_unique<EntityList<Order,Entry>>(&gateway);
     list = dynamic_cast<EntityList<Order,Entry>*>(create_list());
     set_list(list);
-//    this->fill_list(getListBox());
-//     scroll->signal_edge_reached().connect(sigc::mem_fun(this,&OrderTab::scroll_event));
 
     builder = Gtk::Builder::create_from_file("../order_menu.glade");
 
@@ -37,10 +34,6 @@ OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&OrderTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&OrderTab::remove));
 
-//     add_clumn_lable("причина");
-//     add_clumn_lable("номер приказа");
-//     add_clumn_lable("дата приказа");
-//     add_clumn_lable("должность");
 }
 
 OrderTab::Entry::Entry(std::shared_ptr<Order> order) : order(order) {
@@ -149,21 +142,6 @@ void OrderTab::save_current() {
    entry->post_label->set_text(order->get_post_as_string());
 }
 
-void OrderTab::cancel_current() {
-
-}
-
-// void OrderTab::select_by_id(int entry_id) {
-//     for(auto row : getListBox()->get_children()){
-//         auto entry = dynamic_cast<Entry*>(row);
-//         std::cout << entry_id << " " << entry->get_order().get_id() << std::endl;
-//         if(entry->get_order().get_id() == entry_id){
-//             getListBox()->select_row(*dynamic_cast<Gtk::ListBoxRow*>(row));
-//             return;
-//         }
-//     }
-// }
-
 void OrderTab::create(){
 
     auto builder = Gtk::Builder::create_from_file("../order_menu.glade");
@@ -179,9 +157,6 @@ void OrderTab::create(){
 
     dynamic_cast<Gtk::Container*>(dialog->get_children()[0])->add(*box);
 
-//    Gtk::Dialog* dialog;
-//    Form::getInstance().getBuilder()->get_widget("order_create_dialog",dialog);
-
     dialog->signal_response().connect([this, dialog, builder](int response){
             if(response == Gtk::RESPONSE_OK) {
                 Gtk::Entry *reason_entry_dialog;
@@ -190,13 +165,6 @@ void OrderTab::create(){
                 Gtk::Entry *order_day_entry;
                 Gtk::Entry *order_month_entry;
                 Gtk::Entry *order_year_entry;
-
-//                Form::getInstance().getBuilder()->get_widget("order_reason_entry_dialog", reason_entry_dialog);
-//                Form::getInstance().getBuilder()->get_widget("order_number_entry_dialog", order_number_entry_dialog);
-//                Form::getInstance().getBuilder()->get_widget("order_post_combobox_dialog", order_post_combobox);
-//                Form::getInstance().getBuilder()->get_widget("order_day_entry_dialog", order_day_entry);
-//                Form::getInstance().getBuilder()->get_widget("order_month_entry_dialog", order_month_entry);
-//                Form::getInstance().getBuilder()->get_widget("order_year_entry_dialog", order_year_entry);
 
                 builder->get_widget("order_reason_entry_dialog", reason_entry_dialog);
                 builder->get_widget("order_number_entry_dialog", order_number_entry_dialog);
@@ -256,52 +224,6 @@ void OrderTab::create(){
     });
 
     dialog->show_all();
-//    dialog->show_all();
-//    while(true) {
-//        if (dialog->run() == Gtk::RESPONSE_OK) {
-//            std::cout << "OK" << std::endl;
-//
-//            Gtk::Entry *reason_entry;
-//            Gtk::Entry *order_number_entry;
-//            Gtk::ComboBoxText *order_post_combobox;
-//            Gtk::Entry *order_day_entry;
-//            Gtk::Entry *order_month_entry;
-//            Gtk::Entry *order_year_entry;
-//
-//            Form::getInstance().getBuilder()->get_widget("order_reason_entry_dialog", reason_entry);
-//            Form::getInstance().getBuilder()->get_widget("order_number_entry_dialog", order_number_entry);
-//            Form::getInstance().getBuilder()->get_widget("order_post_combobox_dialog", order_post_combobox);
-//            Form::getInstance().getBuilder()->get_widget("order_day_entry_dialog", order_day_entry);
-//            Form::getInstance().getBuilder()->get_widget("order_month_entry_dialog", order_month_entry);
-//            Form::getInstance().getBuilder()->get_widget("order_year_entry_dialog", order_year_entry);
-//
-//            if (reason_entry->get_text().empty()) {
-//                Gtk::MessageDialog message("не указана причина");
-//                message.show_all();
-//                continue;
-//            }
-//
-//            if(order_number_entry->get_text().empty()){
-//                Gtk::MessageDialog message("не указан номер приказа");
-//                message.show_all();
-//                continue;
-//            }
-//
-//            int day = std::stoi(order_day_entry->get_text());
-//            int month = std::stoi(order_month_entry->get_text());
-//            int year = std::stoi(order_year_entry->get_text());
-//
-//            if(!check_date(day, month, year)){
-//                Gtk::MessageDialog message("некоректная дата");
-//                message.show_all();
-//                continue;
-//            }
-//
-//            dialog->close();
-//            return;
-//        }
-//    }
-//    dialog->close();
 }
 
 void OrderTab::setup_menu(const Glib::RefPtr<Gtk::Builder>& builder) {
@@ -320,35 +242,6 @@ void OrderTab::setup_menu(const Glib::RefPtr<Gtk::Builder>& builder) {
     order_year_entry_dialog->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,order_number_entry_dialog));
 }
 
-//int OrderTab::select_dialog() {
-//
-//    Gtk::ListBox list;
-//
-//    auto data = gateway.get_all();
-//    for(auto& order : data){
-//        auto entry = Gtk::make_managed<Entry>(order);
-//        list.append(*entry);
-//    }
-//
-//    Gtk::Dialog dialog;
-//    dialog.add_button("OK", Gtk::RESPONSE_OK);
-//    dialog.add_button("отмена", Gtk::RESPONSE_CANCEL);
-//
-//    Gtk::ScrolledWindow scroll;
-//    scroll.set_vexpand(true);
-//    scroll.add(list);
-//
-//    dynamic_cast<Gtk::Container*>(dialog.get_children()[0])->add(scroll);
-//
-//    scroll.show_all();
-//    if(dialog.run() == Gtk::RESPONSE_OK){
-//        auto entry = dynamic_cast<Entry*>(list.get_selected_row());
-//        return entry->get_order().get_id();
-//    }
-//
-//    return -1;
-//}
-
 void OrderTab::remove() {
    auto entry = dynamic_cast<Entry*>(list->get_selected());
    if(entry == nullptr){
@@ -364,152 +257,6 @@ void OrderTab::remove() {
 
    list->remove_entity(entry);
 }
-
-// void OrderTab::fill_list(Gtk::ListBox* list) {
-//    first_id = 0;
-//    last_id = -1;
-//    for(auto child : getListBox()->get_children()){
-//        getListBox()->remove(*child);
-//    }
-//
-//    for(const auto& ing : gateway.get_great_then_by_id(0,20)){
-//        if(ing->get_id() > last_id){
-//            last_id = ing->get_id();
-//        }
-//        auto entry = Gtk::make_managed<Entry>(ing);
-//        list->add(*entry);
-//    }
-// }
-
-// void OrderTab::scroll_event(Gtk::PositionType type){
-//     if(type == Gtk::PositionType::POS_BOTTOM){
-//         scroll_down();
-// //         first_id = last_id;
-// //         auto data = gateway.get_great_then_by_id(last_id,20);
-// //         if(data.empty()){
-// //             return false;
-// // //             return;
-// //         }
-// //         for(const auto& ing : data){
-// //             if(ing->get_id() > last_id){
-// //                 last_id = ing->get_id();
-// //             }
-// //             auto entry = Gtk::make_managed<Entry>(ing);
-// //             getListBox()->add(*entry);
-// //         }
-// //
-// //         auto rows = getListBox()->get_children();
-// //         if(rows.size() > 40){
-// //             for(int i = 0; i < rows.size() - 40; i++){
-// //                 fmt::print("removed\n");
-// //                 getListBox()->remove(*rows[i]);
-// //             }
-// //         }
-// //         getListBox()->show_all();
-// //         scroll->get_vadjustment()->set_value(500);
-//
-// //     fmt::print("{} - {}\n",scroll->get_vadjustment()->get_lower(),scroll->get_vadjustment()->get_upper());
-//
-//     }else if(type == Gtk::PositionType::POS_TOP){
-//         scroll_up();
-// //         last_id = first_id;
-// //         auto data = gateway.get_less_then_by_id(first_id,20);
-// //         if(data.empty()){
-// // //             goto end;
-// //             return false;
-// // //             return;
-// //         }
-// //         for(const auto& ing : data){
-// //             if(ing->get_id() < first_id){
-// //                 first_id = ing->get_id();
-// //             }
-// //
-// //             auto entry = Gtk::make_managed<Entry>(ing);
-// // //             fmt::print("name: {}\n", entry->get_ingredient()->get_name());
-// // //             getListBox()->add(*entry);
-// //             getListBox()->insert(*entry,0);
-// //         }
-// //
-// //         auto rows = getListBox()->get_children();
-// //         if(rows.size() > 40){
-// //             for(int i = rows.size() - 1; i >= 40; i--){
-// //                 fmt::print("removed\n");
-// //                 getListBox()->remove(*rows[i]);
-// //             }
-// //         }
-// //         getListBox()->show_all();
-// //
-// //         scroll->get_vadjustment()->set_value(100);
-//
-// //         fmt::print("{} - {}\n",scroll->get_vadjustment()->get_lower(),scroll->get_vadjustment()->get_upper());
-//
-// //         scroll->get_vadjustment()->set
-//     }
-//     //TODO убрать
-// // end:
-// //     auto rows = getListBox()->get_children();
-// //     fmt::print("rows: {}\n", rows.size());
-// //     return true;
-//     getListBox()->show_all();
-// }
-
-// bool OrderTab::scroll_up(){
-//        last_id = first_id;
-//        auto data = gateway.get_less_then_by_id(first_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() < first_id){
-//                first_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->insert(*entry,0);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//            for(int i = rows.size() - 1; i >= 40; i--){
-//                fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//
-//        scroll->get_vadjustment()->set_value(100);
-
-//         return true;
-// }
-
-// bool OrderTab::scroll_down(){
-//         fmt::print("scroll_down\n");
-//        fmt::print("scroll_up\n");
-//        first_id = last_id;
-//        auto data = gateway.get_great_then_by_id(last_id,20);
-//        if(data.empty()){
-//            return false;
-//        }
-//        for(const auto& ing : data){
-//            if(ing->get_id() > last_id){
-//                last_id = ing->get_id();
-//            }
-//            auto entry = Gtk::make_managed<Entry>(ing);
-//            getListBox()->add(*entry);
-//        }
-//
-//        auto rows = getListBox()->get_children();
-//        if(rows.size() > 40){
-//
-//            for(int i = 0; i < rows.size() - 40; i++){
-//                fmt::print("removed\n");
-//                getListBox()->remove(*rows[i]);
-//            }
-//        }
-//        getListBox()->show_all();
-//        scroll->get_vadjustment()->set_value(500);
-
-//         return true;
-// }
 
 IList* OrderTab::create_list(){
 

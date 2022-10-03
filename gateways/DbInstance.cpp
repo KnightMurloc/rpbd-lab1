@@ -76,16 +76,14 @@ void DbInstance::init(){
     bool orders = check_table_exist("orders");
     bool products = check_table_exist("products");
     bool provider = check_table_exist("provider");
-    bool recipe_to_ingredient = check_table_exist("recipe_to_ingredient");
-    bool recipes = check_table_exist("recipes");
     bool snacks = check_table_exist("snacks");
 
+    bool drink_recipes = check_table_exist("drink_recipes");
+    bool drink_orders = check_table_exist("drink_orders");
 
-//     bool remove_recipe = check_function_exist("remove_recipe");
-//     bool remove_recipe_from_snack = check_trigger_exist("remove_recipe_from_snack");
-//     bool remove_recipe_from_dink = check_trigger_exist("remove_recipe_from_dink");
+    bool snack_recipes = check_table_exist("snack_recipes");
+    bool snack_orders = check_table_exist("snack_orders");
 
-//     bool remove_detail = check_function_exist("remove_detail");
     bool remove_detail_from_provider = check_trigger_exist("remove_detail_from_provider");
 
     bool post = check_enum_exist("post");
@@ -222,36 +220,6 @@ void DbInstance::init(){
         exec("commit;");
     }
 
-    if(!recipes){
-        std::string sql =
-        "create table recipes("
-        "    id serial not null"
-        ");";
-
-        exec("begin transaction;");
-        exec(sql);
-
-        sql = "create unique index recipes_id_uindex on recipes (id);";
-        exec(sql);
-        exec("commit;");
-    }
-
-    if(!recipe_to_ingredient){
-        std::string sql =
-        "create table recipe_to_ingredient("
-        "    recipe int not null"
-        "        constraint recipe_to_ingredient_recipes_id_fk"
-        "            references recipes (id)"
-        "                on delete cascade,"
-        "    ingredient int"
-        "        constraint recipe_to_ingredient_ingredients_id_fk"
-        "            references ingredients (id)"
-        "                on delete cascade,"
-        "    count int not null"
-        ");";
-        exec(sql);
-    }
-
     if(!snacks){
         std::string sql =
         "create table snacks("
@@ -292,53 +260,6 @@ void DbInstance::init(){
         exec("commit;");
     }
 
-//     if(!remove_recipe){
-//         std::string sql =
-//         "create function remove_recipe() returns trigger"
-//         "    language plpgsql"
-//         " as "
-//         " $$ "
-//         " begin "
-//         "        delete from recipes where id = old.recipes;"
-//         "        return new;"
-//         "    end;"
-//         " $$; ";
-//         exec(sql);
-//     }
-
-//     if(!remove_recipe_from_snack){
-//         std::string sql =
-//         "create trigger remove_recipe_from_snack"
-//         "    after delete on snacks"
-//         "    for each row"
-//         "    execute procedure remove_recipe();";
-//         exec(sql);
-//     }
-
-//     if(!remove_recipe_from_dink){
-//         std::string sql =
-//         "create trigger remove_recipe_from_dink"
-//         "    after delete on drinks"
-//         "    for each row"
-//         "    execute procedure remove_recipe();";
-//         exec(sql);
-//     }
-
-//     if(!remove_detail){
-//         std::string sql =
-//         "create function remove_detail() returns trigger"
-//         "    language plpgsql"
-//         " as "
-//         " $$ "
-//         " begin "
-//         "        delete from bank_detail where id = old.bank_detail;"
-//         "        return new;"
-//         "    end;"
-//         "$$;";
-//
-//         exec(sql);
-//     }
-
     if(!remove_detail_from_provider){
         std::string sql =
         "create trigger remove_detail_from_provider"
@@ -349,4 +270,85 @@ void DbInstance::init(){
         exec(sql);
     }
 
+
+    if(!drink_recipes){
+        std::string sql =
+        "create table drink_recipes("
+        "    id serial not null,"
+        "    ingredient int not null"
+        "        constraint drink_recipes_ingredients_id_fk"
+        "            references ingredients (id)"
+        "                on delete cascade,"
+        "    drink int not null"
+        "        constraint drink_recipes_drinks_id_fk"
+        "            references drinks (id)"
+        "                on delete cascade,"
+        "    count int not null);";
+
+        exec("begin transaction;");
+        exec(sql);
+
+        sql = "create unique index drink_recipes_id_uindex on drink_recipes (id);";
+        exec(sql);
+        exec("commit;");
+    }
+
+    if(!drink_orders){
+        std::string sql =
+        "create table drink_orders("
+        "    id serial not null,"
+        "    drink int not null"
+        "        constraint drink_orders_drinks_id_fk"
+        "            references drinks (id)"
+        "                on delete cascade,"
+        "    waiter int not null"
+        "        constraint drink_orders_employees_id_fk"
+        "            references employees (id)"
+        "                on delete cascade,"
+        "    table_ int);";
+        exec("begin transaction;");
+        exec(sql);
+        sql = "create unique index drink_orders_id_uindex on drink_orders (id);";
+        exec("commit;");
+    }
+
+    if(!snack_recipes){
+        std::string sql =
+        "create table snack_recipes("
+        "    id serial not null,"
+        "    ingredient int not null"
+        "        constraint snack_recipes_ingredients_id_fk"
+        "            references ingredients (id)"
+        "                on delete cascade,"
+        "    snack int not null"
+        "        constraint snack_recipes_snacks_id_fk"
+        "            references snacks (id)"
+        "                on delete cascade,"
+        "    count int not null);";
+        exec("begin transaction;");
+        exec(sql);
+        sql = "create unique index snack_recipes_id_uindex on snack_recipes (id);";
+
+        exec("commit;");
+    }
+
+    if(!snack_orders){
+        std::string sql =
+        "create table snack_orders("
+        "    id serial not null,"
+        "    snack int not null"
+        "        constraint snack_orders_drinks_id_fk"
+        "            references drinks (id)"
+        "                on delete cascade,"
+        "    waiter int not null"
+        "        constraint snack_orders_employees_id_fk"
+        "            references employees (id)"
+        "                on delete cascade,"
+        "    table_ int not null);";
+        exec("begin transaction;");
+        exec(sql);
+        sql = "create unique index snack_orders_id_uindex on snack_orders (id);";
+
+        exec("commit;");
+    }
 }

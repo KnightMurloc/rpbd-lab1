@@ -51,13 +51,7 @@ private:
     Gtk::Entry* name_entry;
     Gtk::ComboBoxText* unit_combo;
 
-//    std::unique_ptr<ISearch<Ingredient>> current_search;
-//     std::unique_ptr<EntityList<Ingredient,Entry>> list;
     EntityList<Ingredient,Entry>* list;
-
-//     std::function<std::list<std::shared_ptr<Ingredient>(int,int)>> get_data;
-//     std::function<void(int,int)> get_data;
-//     std::function<std::list<std::shared_ptr<Ingredient>>(int,int)> get_data;
 
     void remove_entry();
 
@@ -67,25 +61,13 @@ private:
 
     void save();
 
-//     void scroll_event(Gtk::PositionType type);
-
     static void search(EntityList<Ingredient,Entry>* list);
 
-    void search_stop();
 protected:
-//     void fill_list(Gtk::ListBox* list) override;
-
-//     bool scroll_down() override;
-//     bool scroll_up() override;
-
     IList* create_list() override;
 public:
 
     explicit IngredientTab(TabManager* tab_manager);
-
-//     void select_by_id(int entry_id) override;
-
-//    int select_dialog() override;
 };
 
 

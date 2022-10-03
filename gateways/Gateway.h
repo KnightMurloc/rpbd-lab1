@@ -36,6 +36,10 @@ public:
 
     virtual std::list<std::shared_ptr<T>> get_all() = 0;
 
+    void remove_from_cache(int id){
+        cache.Remove(id);
+    }
+
     virtual std::list<std::shared_ptr<T>> get_great_then_by_id(int min, int count) = 0;
     virtual std::list<std::shared_ptr<T>> get_less_then_by_id(int max, int count) = 0;
 };

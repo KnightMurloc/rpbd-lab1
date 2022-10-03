@@ -17,11 +17,6 @@ private:
 
     Gtk::Notebook* tabs_container;
 
-//    EmployeesTab employeesTab;
-//    ProductTab productTab;
-
-//    std::array<std::unique_ptr<Tab>,3> tabs;
-
     std::unique_ptr<TabManager> tab_manager;
 
 public:

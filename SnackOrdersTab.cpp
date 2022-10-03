@@ -53,9 +53,6 @@ SnackOrdersTab::SnackOrdersTab(TabManager* tab_manager) : Tab(tab_manager) {
     get_tab_manager()->get_tab(TabName::SNACK)->signal_remove().connect(sigc::mem_fun(this,&SnackOrdersTab::remove_snack_callback));
 
     get_tab_manager()->get_tab(TabName::EMPLOYEES)->signal_remove().connect(sigc::mem_fun(this,&SnackOrdersTab::remove_waiter_callback));
-//     get_tab_manager()->get_tab(TabName::SNACK)->signal_select().connect([](int a){
-//        fmt::print("test: {}\n",a);
-//     });
 }
 
 IList* SnackOrdersTab::create_list() {
@@ -325,14 +322,11 @@ SnackOrdersTab::Entry::Entry(std::shared_ptr<SnackOrder> order) : order(order) {
 
     drink_label = Gtk::make_managed<Gtk::Label>(order->get_snack()->get_name());
     auto waiter = order->get_waiter();
-//     gchar* first_name_ptr = g_utf8_substring(waiter->getFirstName().c_str(),0,1);
     std::unique_ptr<gchar, decltype(&g_free)> first_name_ptr(g_utf8_substring(waiter->getFirstName().c_str(),0,1), g_free);
 
     std::string waiter_name = fmt::format("{} {}.", waiter->getLastName(), first_name_ptr.get());
-//     g_free(first_name_ptr);
 
     waiter_label = Gtk::make_managed<Gtk::Label>(waiter_name);
-
 
     table_label = Gtk::make_managed<Gtk::Label>(std::to_string(order->get_table()));
 

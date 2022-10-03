@@ -29,7 +29,7 @@ private:
     };
 
     Drinkgateway gateway;
-//     std::unique_ptr<EntityList<Drink,Entry>> list;
+
     EntityList<Drink,Entry>* list;
 
 
@@ -57,20 +57,9 @@ private:
 
     void remove_entry();
 protected:
-//     void fill_list(Gtk::ListBox *list) override;
-
-//     bool scroll_down() override;
-//     bool scroll_up() override;
-
     IList* create_list() override;
-
 public:
-
     DrinksTab(TabManager* manager);
-
-//     void select_by_id(int entry_id) override;
-
-
 };
 
 

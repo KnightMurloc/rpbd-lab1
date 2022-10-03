@@ -28,10 +28,6 @@ private:
         std::shared_ptr<BankDetail> get_bank_detail();
 
         int get_id() override;
-
-        ~Entry(){
-            std::cout << "test2" << std::endl;
-        }
     };
 
     BankDetailgateway gateway;
@@ -44,7 +40,6 @@ private:
     Gtk::Entry* tin_entry;
     Gtk::Entry* settlement_entry;
 
-//     std::unique_ptr<EntityList<BankDetail,Entry>> list;
     EntityList<BankDetail,Entry>* list;
 
     void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
@@ -57,18 +52,12 @@ private:
 
     void remove_entry();
 
-//     void scroll_event(Gtk::PositionType type);
 protected:
-//     void fill_list(Gtk::ListBox *list) override;
-
-//     bool scroll_down() override;
-//     bool scroll_up() override;
 
     IList* create_list() override;
 public:
     explicit BankDetailTab(TabManager* manager);
 
-//     void select_by_id(int entry_id) override;
 };
 
 

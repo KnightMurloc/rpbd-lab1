@@ -80,8 +80,8 @@ void Drinkgateway::remove(std::shared_ptr<Drink> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("delete from drinks where id = {};", data->get_id());
-    cache.Remove(data->get_id());
     db.exec(sql);
+    cache.Remove(data->get_id());
 }
 
 std::list<std::shared_ptr<Drink>> Drinkgateway::get_all() {

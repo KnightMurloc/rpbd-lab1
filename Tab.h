@@ -21,14 +21,8 @@ private:
     Gtk::Button* remove_button;
 
     IList* list;
-//    Gtk::ListBox* listBox;
-
-//    Gtk::Box* header;
 
     Gtk::ButtonBox* create_top_panel();
-
-//    void scroll_event(Gtk::PositionType type);
-
 
 protected:
     sigc::signal<void(std::shared_ptr<IEntity>)> on_remove;
@@ -48,7 +42,6 @@ public:
 
     void select_by_id(int entry_id);
 
-//    virtual int select_dialog() = 0;
     int select_dialog();
 
     void remove_entry_by_id(int id);

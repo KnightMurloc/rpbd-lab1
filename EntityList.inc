@@ -124,14 +124,12 @@ bool EntityList<T, E>::scroll_up() {
         }
 
         auto entry = Gtk::make_managed<E>(ing);
-//        fmt::print("name: {}\n", entry->get_ingredient()->get_name());
         list->insert(*entry,0);
     }
 
     auto rows = list->get_children();
     if(rows.size() > 40){
         for(size_t i = rows.size() - 1; i >= 40; i--){
-//            fmt::print("removed\n");
             list->remove(*rows[i]);
             delete rows[i];
 
@@ -161,6 +159,7 @@ void EntityList<T, E>::add_entity(E* entity){
 template<class T, class E>
 void EntityList<T, E>::remove_entity(E* entity){
     list->remove(*entity);
+    gateway->remove_from_cache(entity->get_id());
     delete entity;
 }
 
@@ -220,7 +219,10 @@ void EntityList<T,E>::select_row(Gtk::ListBoxRow* widget){
 template<class T, class E>
 void EntityList<T,E>::remove_row(Gtk::Widget* widget){
     list->remove(*widget);
-
+    auto entity = dynamic_cast<E*>(widget);
+    if(entity){
+        gateway->remove_from_cache(entity->get_id());
+    }
     delete widget;
 }
 

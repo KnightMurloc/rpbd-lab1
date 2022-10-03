@@ -23,7 +23,6 @@
 
 SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
-//     list = std::make_unique<EntityList<Snack,Entry>>(&gateway);
     list = dynamic_cast<EntityList<Snack,Entry>*>(create_list());
     set_list(list);
 
@@ -38,11 +37,6 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
     setup_menu(builder);
     ing_list->set_vexpand(true);
-
-//    this->fill_list(getListBox());
-
-    //add_button->signal_clicked().connect(sigc::mem_fun(this, &SnackTab::add_ingredient));
-//     remove_button->signal_clicked().connect(sigc::mem_fun(this, &SnackTab::remove_ingredient));
 
     add_button->signal_clicked().connect(sigc::bind<Gtk::ListBox*,TabManager*>(
         &SnackTab::add_ingredient,
@@ -65,8 +59,6 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&SnackTab::select));
 
-//     add_clumn_lable("название");
-//     add_clumn_lable("размер");
 }
 
 void SnackTab::save_current(){
@@ -90,19 +82,14 @@ void SnackTab::save_current(){
        return;
    }
 
-   std::cout << "old" << std::endl;
-
    std::vector<std::pair<int,int>> old_list;
    std::vector<std::pair<int,int>> new_list;
 
    for(auto& ing : gateway.get_ingredients(snack)){
        std::cout << std::get<0>(ing) << " ";
        old_list.push_back(ing);
-//         old_list.insert(ing);
-   }
-   std::cout << std::endl;
 
-   std::cout << "new" << std::endl;
+   }
 
    for(auto row : ing_list->get_children()){
 
@@ -110,12 +97,8 @@ void SnackTab::save_current(){
 
        int* id = static_cast<int*>(box->get_data("id"));
        int* count = static_cast<int*>(box->get_data("count"));
-       std::cout << *id << " ";
        new_list.push_back(std::make_pair(*id, *count));
-//         old_list.insert(std::make_pair<int,int>(*id, *count));
    }
-   std::cout << std::endl;
-
 
    std::sort(old_list.begin(), old_list.end(),[](std::pair<int,int>& a, std::pair<int,int>& b){
        return a.first < b.first;
@@ -143,19 +126,13 @@ void SnackTab::save_current(){
        }
    );
 
-   std::cout << "created" << std::endl;
    for(auto a : created){
-       std::cout << a.first << " ";
        snack->get_recipe().add_ingridient(a.first,a.second);
    }
-   std::cout << std::endl;
 
-   std::cout << "removed" << std::endl;
    for(auto a : removed){
-       std::cout <<  a.first << " ";
        snack->get_recipe().remove_ingridient(a.first);
    }
-   std::cout << std::endl;
 
    snack->set_name(name_entry->get_text());
    snack->set_size(std::stoi(size_entry->get_text()));
@@ -211,14 +188,6 @@ void SnackTab::select(Gtk::ListBoxRow* entry_row) {
     size_entry->set_text(std::to_string(entry->get_snack()->get_size()));
     ing_list->show_all();
 }
-
-// void SnackTab::fill_list(Gtk::ListBox* list) {
-//     auto data = gateway.get_all();
-//     for(auto& snack : data){
-//         auto entry = Gtk::make_managed<Entry>(snack);
-//         list->append(*entry);
-//     }
-// }
 
 void SnackTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
     int ing_id = tab_manager->select_dialog(TabName::INGREDIENTS);
@@ -373,7 +342,6 @@ void SnackTab::remove_entry() {
 
    list->remove_entity(entry);
 
-//    get_tab_manager()->remove_on_tab(TabName::SNACK_ORDERS,entry->get_snack()->get_)
 }
 
 SnackTab::Entry::Entry(std::shared_ptr<Snack> snack) : snack(snack) {
@@ -402,61 +370,6 @@ std::shared_ptr<Snack> SnackTab::Entry::get_snack() {
 int SnackTab::Entry::get_id() {
     return snack->get_id();
 }
-
-// bool SnackTab::scroll_up(){
-//         first_id = last_id;
-//         auto data = gateway.get_great_then_by_id(last_id,20);
-//         if(data.empty()){
-//             return false;
-//         }
-//         for(const auto& ing : data){
-//             if(ing->get_id() > last_id){
-//                 last_id = ing->get_id();
-//             }
-//             auto entry = Gtk::make_managed<Entry>(ing);
-//             getListBox()->add(*entry);
-//         }
-//
-//         auto rows = getListBox()->get_children();
-//         if(rows.size() > 40){
-//
-//             for(int i = 0; i < rows.size() - 40; i++){
-//                 fmt::print("removed\n");
-//                 getListBox()->remove(*rows[i]);
-//             }
-//         }
-//         getListBox()->show_all();
-//         scroll->get_vadjustment()->set_value(500);
-//         return true;
-// }
-
-// bool SnackTab::scroll_down(){
-//         last_id = first_id;
-//         auto data = gateway.get_less_then_by_id(first_id,20);
-//         if(data.empty()){
-//             return false;
-//         }
-//         for(const auto& ing : data){
-//             if(ing->get_id() < first_id){
-//                 first_id = ing->get_id();
-//             }
-//             auto entry = Gtk::make_managed<Entry>(ing);
-//             getListBox()->insert(*entry,0);
-//         }
-//
-//         auto rows = getListBox()->get_children();
-//         if(rows.size() > 40){
-//             for(int i = rows.size() - 1; i >= 40; i--){
-//                 fmt::print("removed\n");
-//                 getListBox()->remove(*rows[i]);
-//             }
-//         }
-//         getListBox()->show_all();
-//
-//         scroll->get_vadjustment()->set_value(100);
-
-//         return true;
-// }
 
 IList* SnackTab::create_list(){
 

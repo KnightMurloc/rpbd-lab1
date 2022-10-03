@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <memory>
+#include <string>
 
 template<>
 lru_cache_t<int,std::shared_ptr<Employeer>> IGateway<Employeer>::cache(CACHE_SIZE);
@@ -93,7 +94,7 @@ void EmployeerGateway::save(std::shared_ptr<Employeer> data) {
                                   data->getAddress(),
                                   data->getBirthDate(),
                                   data->getSalary(),
-                                  data->get_movement_id(),
+                                  data->get_movement_id() == -1 ? "NULL" std::to_string(data->get_movement_id()),
                                   post_to_string(data->getPost()),
                                   data->get_id()
                                   );

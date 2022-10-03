@@ -29,7 +29,7 @@ private:
     };
 
     ProviderGateway gateway;
-//     std::unique_ptr<EntityList<Provider,Entry>> list;
+
     EntityList<Provider,Entry>* list;
 
     Glib::RefPtr<Gtk::Builder> builder;
@@ -54,22 +54,14 @@ private:
 
     void create();
 
-    void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
+//     void setup_menu(Glib::RefPtr<Gtk::Builder> builder);
 
     void remove_entry();
 
-//     void scroll_event(Gtk::PositionType type);
 protected:
-//     void fill_list(Gtk::ListBox* list) override;
-
-//     bool scroll_down() override;
-//     bool scroll_up() override;
-
     IList* create_list() override;
 public:
     ProviderTab(TabManager* manager);
-
-//     void select_by_id(int entry_id) override;
 };
 
 
