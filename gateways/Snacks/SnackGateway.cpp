@@ -9,8 +9,11 @@
 #include <fmt/format.h>
 #include <utility>
 
-template<>
-lru_cache_t<int,std::shared_ptr<Snack>> IGateway<Snack>::cache(CACHE_SIZE);
+// template<>
+// lru_cache_t<int,std::shared_ptr<Snack>> IGateway<Snack>::cache(CACHE_SIZE);
+
+// template<>
+// cache<Snack> IGateway<Snack>::cache_new;
 
 void SnackGateway::save(std::shared_ptr<Snack> data) {
     auto db = DbInstance::getInstance();
@@ -28,14 +31,14 @@ void SnackGateway::save(std::shared_ptr<Snack> data) {
 
     for(auto ing : rm_ing){
         sql = fmt::format("delete from snack_recipes where ingredient = {};",
-            ing
+            ing->get_id()
         );
         db.exec(sql);
     }
 
     for(auto ing : new_ing){
         sql = fmt::format("insert into snack_recipes(ingredient,snack , count) values({},{},{});",
-            std::get<0>(ing),
+            std::get<0>(ing)->get_id(),
             data->get_id(),
             std::get<1>(ing)
         );
@@ -77,7 +80,8 @@ std::shared_ptr<Snack> SnackGateway::create(std::string name, int size, std::vec
 
         auto ptr = std::make_shared<Snack>(snack);
 
-        cache.Put(ptr->get_id(), ptr);
+//         cache.Put(ptr->get_id(), ptr);
+        cache_new.put(ptr);
 
         db.exec("commit;");
         return ptr;
@@ -87,13 +91,34 @@ std::shared_ptr<Snack> SnackGateway::create(std::string name, int size, std::vec
 }
 
 std::shared_ptr<Snack> SnackGateway::get(int id) {
-    auto result = cache.TryGet(id);
-    if(result.second){
-        return (*result.first).second;
+//     auto result = cache.TryGet(id);
+//     if(result.second){
+//         return (*result.first).second;
+//     }else{
+//         auto db = DbInstance::getInstance();
+//
+//         std::string sql = fmt::format("select * from snacks where id = {};", id);
+//
+//         auto response = db.exec(sql);
+//
+//         if(response.next()){
+//             Snack snack(response.get<int>(0));
+//             snack.set_name(response.get<std::string>(1));
+//             snack.set_size(response.get<int>(2));
+//
+//             auto ptr = std::make_shared<Snack>(snack);
+//             cache.Put(id, ptr);
+//
+//             return ptr;
+//         }
+//     }
+
+    if(cache_new.exist(id)){
+        return cache_new.get(id);
     }else{
         auto db = DbInstance::getInstance();
 
-        std::string sql = fmt::format("select * from snacks where id = {};", id);
+        std::string sql = fmt::format("select id, name, size from snacks where id = {};", id);
 
         auto response = db.exec(sql);
 
@@ -103,11 +128,13 @@ std::shared_ptr<Snack> SnackGateway::get(int id) {
             snack.set_size(response.get<int>(2));
 
             auto ptr = std::make_shared<Snack>(snack);
-            cache.Put(id, ptr);
+//             cache.Put(id, ptr);
+            cache_new.put(ptr);
 
             return ptr;
         }
     }
+
     throw GatewayException("not found");
 }
 
@@ -119,29 +146,32 @@ void SnackGateway::remove(std::shared_ptr<Snack> data) {
 
     db.exec(sql);
 
-    cache.Remove(data->get_id());
+//     cache.Remove(data->get_id());
+    cache_new.remove(data->get_id());
 }
 
 std::list<std::shared_ptr<Snack>> SnackGateway::get_all() {
 
     auto db = DbInstance::getInstance();
 
-    std::string sql = "select * from snacks;";
+    std::string sql = "select id from snacks;";
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Snack>> result;
 
     while(response.next()){
-        Snack snack(response.get<int>(0));
-        snack.set_name(response.get<std::string>(1));
-        snack.set_size(response.get<int>(2));
-
-        auto ptr = std::make_shared<Snack>(snack);
-
-        cache.Put(ptr->get_id(),ptr);
-
-        result.push_back(ptr);
+//         Snack snack(response.get<int>(0));
+//         snack.set_name(response.get<std::string>(1));
+//         snack.set_size(response.get<int>(2));
+//
+//         auto ptr = std::make_shared<Snack>(snack);
+//
+// //         cache.Put(ptr->get_id(),ptr);
+//         cache_new.put(ptr);
+//
+//         result.push_back(ptr);
+        result.push_back(get(response.get<int>(0)));
     }
 
     return result;
@@ -168,18 +198,20 @@ std::list<std::pair<int,int>> SnackGateway::get_ingredients(std::shared_ptr<Snac
 std::list<std::shared_ptr<Snack>> SnackGateway::get_great_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from snacks where id > {} order by id limit {}",min,count);
+    std::string sql = fmt::format("select id from snacks where id > {} order by id limit {}",min,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Snack>> result;
 
     while(response.next()){
-        auto snack = std::make_shared<Snack>(response.get<int>(0));
-        snack->set_name(response.get<std::string>(1));
-        snack->set_size(response.get<int>(2));
-        cache.Put(snack->get_id(), snack);
-        result.push_back(snack);
+//         auto snack = std::make_shared<Snack>(response.get<int>(0));
+//         snack->set_name(response.get<std::string>(1));
+//         snack->set_size(response.get<int>(2));
+// //         cache.Put(snack->get_id(), snack);
+//         cache_new.put(snack);
+//         result.push_back(snack);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }
@@ -187,18 +219,20 @@ std::list<std::shared_ptr<Snack>> SnackGateway::get_great_then_by_id(int min, in
 std::list<std::shared_ptr<Snack>> SnackGateway::get_less_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from snacks where id < {} order by id DESC limit {};",min,count);
+    std::string sql = fmt::format("select id from snacks where id < {} order by id DESC limit {};",min,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Snack>> result;
 
     while(response.next()){
-        auto snack = std::make_shared<Snack>(response.get<int>(0));
-        snack->set_name(response.get<std::string>(1));
-        snack->set_size(response.get<int>(2));
-        cache.Put(snack->get_id(), snack);
-        result.push_back(snack);
+//         auto snack = std::make_shared<Snack>(response.get<int>(0));
+//         snack->set_name(response.get<std::string>(1));
+//         snack->set_size(response.get<int>(2));
+// //         cache.Put(snack->get_id(), snack);
+//         cache_new.put(snack);
+//         result.push_back(snack);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }

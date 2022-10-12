@@ -97,7 +97,8 @@ void BankDetailTab::save_current(){
    detail->setTin(tin_entry->get_text());
    detail->setSettlementAccount(settlement_entry->get_text());
 
-   gateway.save(detail);
+//    gateway.save(detail);
+    BankDetail::save(detail);
 
    entry->name_label->set_text(detail->getBankName());
    entry->city_label->set_text(detail->getCity());
@@ -155,11 +156,17 @@ void BankDetailTab::create(){
                 return;
             }
 
-            auto detail = gateway.create(
-              name_entry_dialog->get_text(),
-              city_entry_dialog->get_text(),
-              tin_entry_dialog->get_text(),
-              settlement_entry_dialog->get_text()
+//             auto detail = gateway.create(
+//               name_entry_dialog->get_text(),
+//               city_entry_dialog->get_text(),
+//               tin_entry_dialog->get_text(),
+//               settlement_entry_dialog->get_text()
+//             );
+            auto detail = BankDetail::create(
+                name_entry_dialog->get_text(),
+                city_entry_dialog->get_text(),
+                tin_entry_dialog->get_text(),
+                settlement_entry_dialog->get_text()
             );
 
             auto entry = Gtk::make_managed<Entry>(detail);
@@ -181,7 +188,8 @@ void BankDetailTab::remove_entry(){
        return;
    }
 
-   gateway.remove(entry->get_bank_detail());
+//    gateway.remove(entry->get_bank_detail());
+    BankDetail::remove(entry->get_bank_detail());
 
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -229,7 +237,7 @@ std::shared_ptr<BankDetail> BankDetailTab::Entry::get_bank_detail(){
 }
 
 IList* BankDetailTab::create_list(){
-    auto list = Gtk::make_managed<EntityList<BankDetail,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<BankDetail,Entry>>();
 
     list->add_column_title("название");
     list->add_column_title("город");

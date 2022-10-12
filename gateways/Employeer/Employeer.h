@@ -11,6 +11,7 @@
 #include "../Orders/Order.h"
 #include "../entity.h"
 #include <memory>
+#include <list>
 
 class Employeer : public IEntity {
 private:
@@ -21,9 +22,33 @@ private:
     std::string address;
     std::string birth_date;
     float salary;
-    int movement_id = -1;
+//     std movement_id = -1;
+    std::weak_ptr<Order> movement;
     Post post;
 public:
+    static std::list<std::shared_ptr<Employeer>> get_great_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<Employeer>> get_less_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<Employeer>> get_great_than_by_id_filtred_by_name(std::string name,int id, int count);
+
+    static std::list<std::shared_ptr<Employeer>> get_less_than_by_id_filtred_by_name(std::string name,int id, int count);
+
+    static std::shared_ptr<Employeer> get(int id);
+
+    static std::shared_ptr<Employeer> create(std::string first_name,
+            std::string last_name,
+            std::string patronymic,
+            std::string address,
+            std::string birth_date,
+            float salary,
+            std::shared_ptr<Order> movement,
+            Post post);
+
+    static void save(std::shared_ptr<Employeer> empl);
+
+    static void remove(std::shared_ptr<Employeer> empl);
+
     explicit Employeer(int id);
 
     [[nodiscard]] int get_id() const override;
@@ -52,17 +77,19 @@ public:
 
     void setSalary(float salary);
 
-    [[nodiscard]] int get_movement_id() const;
+    [[nodiscard]] std::shared_ptr<Order> get_movement() const;
 
-    void set_movement_id(int movementId);
+    void set_movement(std::shared_ptr<Order> movement);
+
+//     [[nodiscard]] int get_movement_id() const;
+
+//     void set_movement_id(int movementId);
 
     [[nodiscard]] Post getPost() const;
 
     void setPost(Post post);
 
     [[nodiscard]] std::string getPostAsString() const;
-
-    [[nodiscard]] std::shared_ptr<Order> get_movement();
 };
 
 

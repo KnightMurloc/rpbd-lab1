@@ -28,7 +28,7 @@ private:
         int get_id() override;
     };
 
-    ProductGateway gateway;
+//     ProductGateway gateway;
 //     std::unique_ptr<EntityList<Product,Entry>> list;
     EntityList<Product,Entry>* list;
 

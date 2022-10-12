@@ -28,7 +28,7 @@ private:
         int get_id() override;
     };
 
-    ProviderGateway gateway;
+//     ProviderGateway gateway;
 
     EntityList<Provider,Entry>* list;
 

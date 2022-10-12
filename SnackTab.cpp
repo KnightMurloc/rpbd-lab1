@@ -85,7 +85,13 @@ void SnackTab::save_current(){
    std::vector<std::pair<int,int>> old_list;
    std::vector<std::pair<int,int>> new_list;
 
-   for(auto& ing : gateway.get_ingredients(snack)){
+//    for(auto& ing : gateway.get_ingredients(snack)){
+//        std::cout << std::get<0>(ing) << " ";
+//        old_list.push_back(ing);
+//
+//    }
+
+    for(auto& ing : Snack::get_ingredients(snack)){
        std::cout << std::get<0>(ing) << " ";
        old_list.push_back(ing);
 
@@ -127,11 +133,11 @@ void SnackTab::save_current(){
    );
 
    for(auto a : created){
-       snack->get_recipe().add_ingridient(a.first,a.second);
+       snack->get_recipe().add_ingridient(Ingredient::get(a.first),a.second);
    }
 
    for(auto a : removed){
-       snack->get_recipe().remove_ingridient(a.first);
+       snack->get_recipe().remove_ingridient(Ingredient::get(a.first));
    }
 
    snack->set_name(name_entry->get_text());
@@ -141,7 +147,8 @@ void SnackTab::save_current(){
    entry->name_label->set_text(name_entry->get_text());
    entry->size_label->set_text(size_entry->get_text());
 
-   gateway.save(snack);
+//    gateway.save(snack);
+   Snack::save(snack);
 }
 
 
@@ -167,7 +174,25 @@ void SnackTab::select(Gtk::ListBoxRow* entry_row) {
         ing_list->remove(*child);
     }
 
-    for(auto& ing : gateway.get_ingredients(entry->get_snack())){
+//     for(auto& ing : gateway.get_ingredients(entry->get_snack())){
+//         std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(std::get<0>(ing));
+//         auto row = Gtk::make_managed<Gtk::Box>();
+//         row->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+//         row->set_homogeneous(true);
+//
+//         auto name_ing = Gtk::make_managed<Gtk::Label>(ingredient->get_name());
+//         auto count_ing = Gtk::make_managed<Gtk::Label>(std::to_string(std::get<1>(ing)));
+//         row->add(*name_ing);
+//         row->add(*count_ing);
+//
+//         row->set_data("id", new int(ingredient->get_id()),[](void* data){delete (int*) data;});
+//         row->set_data("count", new int(std::get<1>(ing)), [](void* data){delete (int*) data;});
+//
+//         ing_list->add(*row);
+//     }
+
+
+    for(auto& ing : Snack::get_ingredients(entry->get_snack())){
         std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(std::get<0>(ing));
         auto row = Gtk::make_managed<Gtk::Box>();
         row->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
@@ -308,7 +333,8 @@ void SnackTab::create(){
                 ings.push_back(std::make_pair(*id, *count));
             }
 
-            auto snack = gateway.create(name_entry_dialog->get_text(),std::stoi(size_entry_dialog->get_text()),ings);
+//             auto snack = gateway.create(name_entry_dialog->get_text(),std::stoi(size_entry_dialog->get_text()),ings);
+            auto snack = Snack::create(name_entry_dialog->get_text(),std::stoi(size_entry_dialog->get_text()),ings);
 
             auto entry = Gtk::make_managed<Entry>(snack);
 
@@ -331,7 +357,8 @@ void SnackTab::remove_entry() {
        return;
    }
 
-   gateway.remove(entry->get_snack());
+//    gateway.remove(entry->get_snack());
+    Snack::remove(entry->get_snack());
 
    on_remove.emit(entry->get_snack());
 
@@ -373,7 +400,7 @@ int SnackTab::Entry::get_id() {
 
 IList* SnackTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Snack,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Snack,Entry>>();
 
     list->add_column_title("название");
     list->add_column_title("размер");

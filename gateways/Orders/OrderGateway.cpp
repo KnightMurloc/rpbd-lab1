@@ -8,19 +8,42 @@
 #include <fmt/format.h>
 #include <memory>
 
-template<>
-lru_cache_t<int,std::shared_ptr<Order>> IGateway<Order>::cache(CACHE_SIZE);
+// template<>
+// lru_cache_t<int,std::shared_ptr<Order>> IGateway<Order>::cache(CACHE_SIZE);
+
+// template<>
+// cache<Order> IGateway<Order>::cache_new;
 
 std::shared_ptr<Order> OrderGateway::get(int id) {
 
-    auto result = cache.TryGet(id);
-    if(result.second){
-        return (*result.first).second;
+//     auto result = cache.TryGet(id);
+//     if(result.second){
+//         return (*result.first).second;
+//     }else{
+//
+//         auto db = DbInstance::getInstance();
+//
+//         auto response = db.exec("select * from orders where id = " + std::to_string(id));
+//
+//         if(response.next()){
+//             Order order(response.get<int>(0));
+//             order.set_reason(response.get<std::string>(1));
+//             order.set_order_number(response.get<int>(2));
+//             order.set_post(string_to_post(response.get<std::string>(3)));
+//             order.set_order_date(response.get<std::string>(4));
+//
+//             auto ptr = std::make_shared<Order>(order);
+//             cache.Put(id, ptr);
+//
+//             return ptr;
+//         }
+//     }
+    if(cache_new.exist(id)){
+        return cache_new.get(id);
     }else{
-
         auto db = DbInstance::getInstance();
 
-        auto response = db.exec("select * from orders where id = " + std::to_string(id));
+        auto response = db.exec("select id,reason, order_number, order_date, post from orders where id = " + std::to_string(id));
 
         if(response.next()){
             Order order(response.get<int>(0));
@@ -30,11 +53,13 @@ std::shared_ptr<Order> OrderGateway::get(int id) {
             order.set_order_date(response.get<std::string>(4));
 
             auto ptr = std::make_shared<Order>(order);
-            cache.Put(id, ptr);
+//             cache.Put(id, ptr);
+            cache_new.put(ptr);
 
             return ptr;
         }
     }
+
     throw GatewayException("not found");
 }
 
@@ -43,20 +68,22 @@ std::list<std::shared_ptr<Order>> OrderGateway::get_all() {
 
     auto db = DbInstance::getInstance();
 
-    auto response = db.exec("select * from orders;");
+    auto response = db.exec("select id from orders;");
 
     while(response.next()){
-        Order order(response.get<int>(0));
-        order.set_reason(response.get<std::string>(1));
-        order.set_order_number(response.get<int>(2));
-        order.set_post(string_to_post(response.get<std::string>(3)));
-        order.set_order_date(response.get<std::string>(4));
-
-        auto ptr = std::make_shared<Order>(order);
-
-        cache.Put(ptr->get_id(), ptr);
-
-        result.push_back(ptr);
+//         Order order(response.get<int>(0));
+//         order.set_reason(response.get<std::string>(1));
+//         order.set_order_number(response.get<int>(2));
+//         order.set_post(string_to_post(response.get<std::string>(3)));
+//         order.set_order_date(response.get<std::string>(4));
+//
+//         auto ptr = std::make_shared<Order>(order);
+//
+// //         cache.Put(ptr->get_id(), ptr);
+//         cache_new.put(ptr);
+//
+//         result.push_back(ptr);
+        result.push_back(get(response.get<int>(0)));
     }
 
     return result;
@@ -82,7 +109,8 @@ std::shared_ptr<Order> OrderGateway::create(const std::string &reason, int order
 
         auto ptr = std::make_shared<Order>(order);
 
-        cache.Put(ptr->get_id(),ptr);
+//         cache.Put(ptr->get_id(),ptr);
+        cache_new.put(ptr);
 
         return ptr;
     }
@@ -112,7 +140,8 @@ void OrderGateway::remove(std::shared_ptr<Order> data) {
 
     std::string sql = fmt::format("delete from orders where id = {};", data->get_id());
 
-    cache.Remove(data->get_id());
+//     cache.Remove(data->get_id());
+    cache_new.remove(data->get_id());
 
     db.exec(sql);
 }
@@ -120,20 +149,23 @@ void OrderGateway::remove(std::shared_ptr<Order> data) {
 std::list<std::shared_ptr<Order>> OrderGateway::get_great_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from orders where id > {} order by id limit {}",min,count);
+    std::string sql = fmt::format("select id from orders where id > {} order by id limit {}",min,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Order>> result;
 
     while(response.next()){
-        auto order = std::make_shared<Order>(response.get<int>(0));
-        order->set_reason(response.get<std::string>(1));
-        order->set_order_number(response.get<int>(2));
-        order->set_post(string_to_post(response.get<std::string>(3)));
-        order->set_order_date(response.get<std::string>(4));
-        cache.Put(order->get_id(), order);
-        result.push_back(order);
+//         auto order = std::make_shared<Order>(response.get<int>(0));
+//         order->set_reason(response.get<std::string>(1));
+//         order->set_order_number(response.get<int>(2));
+//         order->set_post(string_to_post(response.get<std::string>(3)));
+//         order->set_order_date(response.get<std::string>(4));
+// //         cache.Put(order->get_id(), order);
+//         cache_new.put(order);
+//         result.push_back(order);
+        result.push_back(get(response.get<int>(0)));
+
     }
     return result;
 }
@@ -141,20 +173,22 @@ std::list<std::shared_ptr<Order>> OrderGateway::get_great_then_by_id(int min, in
 std::list<std::shared_ptr<Order>> OrderGateway::get_less_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from orders where id < {} order by id DESC limit {};",min,count);
+    std::string sql = fmt::format("select id from orders where id < {} order by id DESC limit {};",min,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Order>> result;
 
     while(response.next()){
-        auto order = std::make_shared<Order>(response.get<int>(0));
-        order->set_reason(response.get<std::string>(1));
-        order->set_order_number(response.get<int>(2));
-        order->set_post(string_to_post(response.get<std::string>(3)));
-        order->set_order_date(response.get<std::string>(4));
-        cache.Put(order->get_id(), order);
-        result.push_back(order);
+//         auto order = std::make_shared<Order>(response.get<int>(0));
+//         order->set_reason(response.get<std::string>(1));
+//         order->set_order_number(response.get<int>(2));
+//         order->set_post(string_to_post(response.get<std::string>(3)));
+//         order->set_order_date(response.get<std::string>(4));
+// //         cache.Put(order->get_id(), order);
+//         cache_new.put(order);
+//         result.push_back(order);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }

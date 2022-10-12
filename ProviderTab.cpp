@@ -137,9 +137,12 @@ void ProviderTab::save_current(){
    int* d_id = static_cast<int*>(detail_link->get_data("id"));
 
    if(d_id)
-       provider->set_bank_detail_id(*d_id);
+       provider->set_bank_detail(BankDetail::get(*d_id));
 
-   gateway.save(provider);
+    Provider::save(provider);
+
+//    gateway.save(provider);
+
 
    entry->name_label->set_text(provider->get_name());
    entry->post_address_label->set_text(provider->get_post_address());
@@ -225,7 +228,15 @@ void ProviderTab::create(){
             }
             fmt::print("create provider {}\n",*d_id_ptr);
 
-            auto provider = gateway.create(
+//             auto provider = gateway.create(
+//               name_entry_dialog->get_text(),
+//               address_entry_dialog->get_text(),
+//               entry_number_dialog->get_text(),
+//               fax_entry_dialog->get_text(),
+//               email_entry_dialog->get_text(),
+//               d_id
+//             );
+            auto provider = Provider::create(
               name_entry_dialog->get_text(),
               address_entry_dialog->get_text(),
               entry_number_dialog->get_text(),
@@ -250,7 +261,8 @@ void ProviderTab::remove_entry(){
        return;
    }
 
-   gateway.remove(entry->get_provider());
+   Provider::remove(entry->get_provider());
+//    gateway.remove(entry->get_provider());
 
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -259,7 +271,7 @@ void ProviderTab::remove_entry(){
 
    list->remove_entity(entry);
 
-   get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail_id());
+   get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail()->get_id());
 }
 
 // void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
@@ -324,7 +336,7 @@ int ProviderTab::Entry::get_id() {
 
 IList* ProviderTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Provider,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Provider,Entry>>();
 
     list->add_column_title("название");
     list->add_column_title("почтовый адрес");

@@ -13,17 +13,29 @@
 class DrinkOrder : public IEntity {
 private:
     int id;
-    int drink;
-    int waiter;
+    std::shared_ptr<Drink> drink;
+    std::shared_ptr<Employeer> waiter;
+//     int drink;
+//     int waiter;
     int table;
 public:
+    static std::list<std::shared_ptr<DrinkOrder>> get_great_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<DrinkOrder>> get_less_than_by_id(int id, int count);
+
+    static void save(std::shared_ptr<DrinkOrder> order);
+
+    static std::shared_ptr<DrinkOrder> create(
+            std::shared_ptr<Drink> drink,
+            std::shared_ptr<Employeer> waiter,
+            int table
+    );
+
+    static void remove(std::shared_ptr<DrinkOrder> order);
+
     explicit DrinkOrder(int id);
 
     [[nodiscard]] int get_id() const override;
-
-    [[nodiscard]] int get_drink_id() const;
-
-    [[nodiscard]] int get_waiter_id() const;
 
     [[nodiscard]] int get_table() const;
 
@@ -31,9 +43,9 @@ public:
 
     [[nodiscard]] std::shared_ptr<Employeer> get_waiter();
 
-    void set_drink_id(int drink);
+    void set_drink(std::shared_ptr<Drink>);
 
-    void set_waiter_id(int waiter);
+    void set_waiter(std::shared_ptr<Employeer>);
 
     void set_table(int table);
 };

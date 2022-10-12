@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Form.h"
 #include "fmt/core.h"
+#include "gateways/Orders/Order.h"
 #include <fmt/format.h>
 
 OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
@@ -134,7 +135,8 @@ void OrderTab::save_current() {
    order->set_post(string_to_post(post_combobox->get_active_id()));
    order->set_order_date(fmt::format("{}-{}-{}",year,month, day));
 
-   gateway.save(order);
+//    gateway.save(order);
+   Order::save(order);
 
    entry->reason_label->set_text(order->get_reason());
    entry->order_number_label->set_text(std::to_string(order->get_order_number()));
@@ -204,12 +206,17 @@ void OrderTab::create(){
                     return;
                 }
 
-                auto order = gateway.create(
-                        reason_entry_dialog->get_text(),
+//                 auto order = gateway.create(
+//                         reason_entry_dialog->get_text(),
+//                         std::stoi(order_number_entry_dialog->get_text()),
+//                         fmt::format("{}-{}-{}",year, month, day),
+//                         order_post_combobox->get_active_id()
+//                         );
+
+                auto order = Order::create(                        reason_entry_dialog->get_text(),
                         std::stoi(order_number_entry_dialog->get_text()),
                         fmt::format("{}-{}-{}",year, month, day),
-                        order_post_combobox->get_active_id()
-                        );
+                        order_post_combobox->get_active_id());
 
                 auto entry = Gtk::make_managed<Entry>(order);
                 list->add_entity(entry);
@@ -248,7 +255,8 @@ void OrderTab::remove() {
        return;
    }
 
-   gateway.remove(entry->get_order());
+//    gateway.remove(entry->get_order());
+    Order::remove(entry->get_order());
 
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -260,7 +268,7 @@ void OrderTab::remove() {
 
 IList* OrderTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Order,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Order,Entry>>();
 
     list->add_column_title("причина");
     list->add_column_title("номер приказа");

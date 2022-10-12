@@ -30,7 +30,7 @@ private:
         int get_id() override;
     };
 
-    BankDetailgateway gateway;
+//     BankDetailgateway gateway;
 
     Glib::RefPtr<Gtk::Builder> builder;
 

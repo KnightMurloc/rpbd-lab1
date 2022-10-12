@@ -28,7 +28,7 @@ private:
         int get_id() override;
     };
 
-    Drinkgateway gateway;
+//     Drinkgateway gateway;
 
     EntityList<Drink,Entry>* list;
 

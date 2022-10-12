@@ -20,6 +20,19 @@ private:
 
     Recipe recipe;
 public:
+    static std::list<std::shared_ptr<Snack>> get_great_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<Snack>> get_less_than_by_id(int id, int count);
+
+    static std::list<std::pair<int,int>> get_ingredients(std::shared_ptr<Snack> data);
+
+    static std::shared_ptr<Snack> get(int id);
+
+    static std::shared_ptr<Snack> create(std::string name, int size, std::vector<std::pair<int,int>> ings);
+
+    static void remove(std::shared_ptr<Snack> snack);
+
+    static void save(std::shared_ptr<Snack> snack);
 
     explicit Snack(int id);
 

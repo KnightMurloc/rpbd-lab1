@@ -42,17 +42,17 @@ class Entry : public Gtk::ListBoxRow, public IEntry {
 
     class NameSearch : public ISearch<Employeer> {
     private:
-        EmployeerGateway* gateway;
+//         EmployeerGateway* gateway;
         std::string name;
     public:
-        NameSearch(EmployeerGateway* gateway, std::string name);
+        NameSearch(std::string name);
         std::list<std::shared_ptr<Employeer>> get_great_then(int id, int count);
         std::list<std::shared_ptr<Employeer>> get_less_then(int id, int count);
     };
 
     Glib::RefPtr<Gtk::Builder> builder;
 
-    EmployeerGateway gateway;
+//     EmployeerGateway gateway;
 
     EntityList<Employeer,Entry>* list;
 

@@ -7,6 +7,8 @@
 
 #include <string>
 #include "../entity.h"
+#include <memory>
+#include <list>
 
 class BankDetail : public IEntity {
 private:
@@ -16,6 +18,24 @@ private:
     std::string tin;
     std::string settlement_account;
 public:
+
+    static std::shared_ptr<BankDetail> get(int id);
+
+    static std::list<std::shared_ptr<BankDetail>> get_great_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<BankDetail>> get_less_than_by_id(int id, int count);
+
+    static void save(std::shared_ptr<BankDetail> detail);
+
+    static std::shared_ptr<BankDetail> create(
+        std::string bank_name,
+        std::string city,
+        std::string tin,
+        std::string settlement_account
+    );
+
+    static void remove(std::shared_ptr<BankDetail> detail);
+
     explicit BankDetail(int id);
 
     [[nodiscard]] int get_id() const;

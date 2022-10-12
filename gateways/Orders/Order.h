@@ -7,8 +7,11 @@
 
 #include <string>
 #include "../posts.h"
+#include <memory>
+#include "../entity.h"
+#include <list>
 
-class Order {
+class Order : IEntity {
 private:
     int id;
     std::string reason;
@@ -16,6 +19,18 @@ private:
     std::string order_date; //TODO конвертировать
     Post post;
 public:
+    static std::list<std::shared_ptr<Order>> get_great_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<Order>> get_less_than_by_id(int id, int count);
+
+    static std::shared_ptr<Order> get(int id);
+
+    static void save(std::shared_ptr<Order> order);
+
+    static std::shared_ptr<Order> create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post);
+
+    static void remove(std::shared_ptr<Order> order);
+
     explicit Order(int id);
 
     [[nodiscard]] int get_id() const;

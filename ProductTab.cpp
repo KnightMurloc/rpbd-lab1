@@ -103,14 +103,17 @@ void ProductTab::save_current() {
        p_id = *p_id_ptr;
    }
 
-   product->set_ingredient_id(i_id);
+//    product->set_ingredient_id(i_id);
+    product->set_ingredient(Ingredient::get(i_id));
    product->set_price(std::stof(price_entry->get_text()));
    product->set_delivery_terms(delivery_terms_entry->get_text());
    product->set_payment_terms(payment_terms_entry->get_text());
-   product->set_provider_id(p_id);
+//    product->set_provider_id(p_id);
+   product->set_provider(Provider::get(p_id));
    product->set_name(name_entry->get_text());
 
-   gateway.save(product);
+   Product::save(product);
+//    gateway.save(product);
 
    entry->name_label->set_text(product->get_name());
    entry->price_label->set_text(price_entry->get_text());
@@ -215,8 +218,17 @@ void ProductTab::create(){
                 p_id = *p_id_ptr;
             }
 
-            auto product = gateway.create(
-              i_id,
+//             auto product = gateway.create(
+//               i_id,
+//               std::stof(price_entry_dialog->get_text()),
+//               delivery_terms_entry_dialog->get_text(),
+//               payment_terms_entry_dialog->get_text(),
+//               p_id,
+//               name_entry_dialog->get_text()
+//             );
+
+            auto product = Product::create(
+                i_id,
               std::stof(price_entry_dialog->get_text()),
               delivery_terms_entry_dialog->get_text(),
               payment_terms_entry_dialog->get_text(),
@@ -244,7 +256,8 @@ void ProductTab::remove_entry(){
        return;
    }
 
-   gateway.remove(entry->get_product());
+//    gateway.remove(entry->get_product());
+    Product::remove(entry->get_product());
 
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -295,7 +308,7 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
         ing_link->set_text(entry->get_product()->get_ingredient()->get_name());
         find_button_ing->set_sensitive(true);
 
-        ing_link->set_data("id",new int(entry->get_product()->get_ingredient_id()),[](void* data){delete (int*) data;});
+        ing_link->set_data("id",new int(entry->get_product()->get_ingredient()->get_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException&){
         ing_link->set_text("none");
         find_button_ing->set_sensitive(false);
@@ -309,7 +322,7 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
     try{
         provider_link->set_text(entry->get_product()->get_provider()->get_name());
         find_button_provider->set_sensitive(true);
-        provider_link->set_data("id", new int(entry->get_product()->get_provider_id()),[](void* data){delete (int*) data;});
+        provider_link->set_data("id", new int(entry->get_product()->get_provider()->get_id()),[](void* data){delete (int*) data;});
     }catch(GatewayException&){
         provider_link->set_text("none");
         find_button_provider->set_sensitive(false);
@@ -367,7 +380,7 @@ void ProductTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
 void ProductTab::remove_ingredient_callback(std::shared_ptr<IEntity> entity){
     for(auto child : list->get_list_box()->get_children()){
         auto entry = dynamic_cast<Entry*>(child);
-        if(entry->get_product()->get_ingredient_id() == entity->get_id()){
+        if(entry->get_product()->get_ingredient()->get_id() == entity->get_id()){
             list->remove_entity(entry);
         }
     }
@@ -465,7 +478,7 @@ int ProductTab::Entry::get_id() {
 // }
 
 IList* ProductTab::create_list(){
-    auto list = Gtk::make_managed<EntityList<Product,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Product,Entry>>();
 
     list->add_column_title("название");
     list->add_column_title("цена");

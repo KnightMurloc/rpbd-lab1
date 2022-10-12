@@ -25,26 +25,26 @@ private:
         int get_id() override;
     };
 
-    class DefaultSearch : public ISearch<Ingredient> {
-    private:
-        IngredientGateway* gateway;
-    public:
-        DefaultSearch(IngredientGateway* gateway);
-        std::list<std::shared_ptr<Ingredient>> get_great_then(int id, int count);
-        std::list<std::shared_ptr<Ingredient>> get_less_then(int id, int count);
-    };
+//     class DefaultSearch : public ISearch<Ingredient> {
+//     private:
+// //         IngredientGateway* gateway;
+//     public:
+//         DefaultSearch(IngredientGateway* gateway);
+//         std::list<std::shared_ptr<Ingredient>> get_great_then(int id, int count);
+//         std::list<std::shared_ptr<Ingredient>> get_less_then(int id, int count);
+//     };
 
     class NameSearch : public ISearch<Ingredient> {
     private:
-        IngredientGateway* gateway;
+//         IngredientGateway* gateway;
         std::string name;
     public:
-        NameSearch(IngredientGateway* gateway, std::string name);
+        NameSearch(std::string name);
         std::list<std::shared_ptr<Ingredient>> get_great_then(int id, int count);
         std::list<std::shared_ptr<Ingredient>> get_less_then(int id, int count);
     };
 
-    IngredientGateway gateway;
+//     IngredientGateway gateway;
     Glib::RefPtr<Gtk::Builder> builder;
 
     Gtk::Box* info_box;

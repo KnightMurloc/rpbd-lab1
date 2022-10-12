@@ -5,6 +5,7 @@
 #include "SnackOrdersTab.h"
 #include "TabManager.h"
 #include "fmt/core.h"
+#include "gateways/SnackOrders/SnackOrder.h"
 #include "gateways/Snacks/SnackGateway.h"
 #include "gateways/Employeer/EmployeerGateway.h"
 #include "gateways/Snacks/Snacks.h"
@@ -56,7 +57,7 @@ SnackOrdersTab::SnackOrdersTab(TabManager* tab_manager) : Tab(tab_manager) {
 }
 
 IList* SnackOrdersTab::create_list() {
-    auto list = Gtk::make_managed<EntityList<SnackOrder,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<SnackOrder,Entry>>();
     list->add_column_title("закуска");
     list->add_column_title("офицант");
     list->add_column_title("столик");
@@ -89,10 +90,10 @@ void SnackOrdersTab::select(Gtk::ListBoxRow* row) {
     auto order = entry->get_order();
 
     snack_link->set_text(order->get_snack()->get_name());
-    snack_link->set_data("id", new int(order->get_snack_id()), [](void* data){delete (int*) data;});
+    snack_link->set_data("id", new int(order->get_snack()->get_id()), [](void* data){delete (int*) data;});
 
     waiter_link->set_text(order->get_waiter()->getLastName());
-    waiter_link->set_data("id", new int(order->get_waiter_id()),[](void* data){delete (int*) data;});
+    waiter_link->set_data("id", new int(order->get_waiter()->get_id()),[](void* data){delete (int*) data;});
 
     table_entry->set_text(std::to_string(order->get_table()));
 }
@@ -147,11 +148,12 @@ void SnackOrdersTab::save_current(){
        return;
     }
 
-    order->set_snack_id(*snack_id);
-    order->set_waiter_id(*waiter_id);
+    order->set_snack(Snack::get(*snack_id));
+    order->set_waiter(Employeer::get(*waiter_id));
     order->set_table(std::stoi(table_entry->get_text()));
 
-    gateway.save(order);
+    SnackOrder::save(order);
+//     gateway.save(order);
 
     entry->drink_label->set_text(order->get_snack()->get_name());
 
@@ -240,7 +242,9 @@ void SnackOrdersTab::create() {
                 return;
             }
 
-            auto order = gateway.create(*snack_id, *waiter_id, std::stoi(table_entry_dialog->get_text()));
+//             auto order = gateway.create(*snack_id, *waiter_id, std::stoi(table_entry_dialog->get_text()));
+
+            auto order = SnackOrder::create(*snack_id, *waiter_id, std::stoi(table_entry_dialog->get_text()));
 
             auto entry = Gtk::make_managed<Entry>(order);
             list->add_entity(entry);
@@ -261,7 +265,7 @@ void SnackOrdersTab::remove_snack_callback(std::shared_ptr<IEntity> entity){
 
     for(auto child : list->get_list_box()->get_children()){
         auto entry = dynamic_cast<Entry*>(child);
-        if(entry->get_order()->get_snack_id() == snack->get_id()){
+        if(entry->get_order()->get_snack()->get_id() == snack->get_id()){
             list->remove_entity(entry);
         }
     }
@@ -275,7 +279,7 @@ void SnackOrdersTab::remove_waiter_callback(std::shared_ptr<IEntity> entity){
 
     for(auto child : list->get_list_box()->get_children()){
         auto entry = dynamic_cast<Entry*>(child);
-        if(entry->get_order()->get_waiter_id() == waiter->get_id()){
+        if(entry->get_order()->get_waiter()->get_id() == waiter->get_id()){
             list->remove_entity(entry);
         }
     }
@@ -287,7 +291,8 @@ void SnackOrdersTab::remove() {
         return;
     }
 
-    gateway.remove(entry->get_order());
+//     gateway.remove(entry->get_order());
+    SnackOrder::remove(entry->get_order());
 
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);

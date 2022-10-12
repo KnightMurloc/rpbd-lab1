@@ -6,7 +6,7 @@
 #include "gtkmm/object.h"
 #include "sigc++/functors/mem_fun.h"
 template<class T, class E>
-EntityList<T, E>::EntityList(IGateway<T>* gateway) : gateway(gateway) {
+EntityList<T, E>::EntityList() {
     box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_VERTICAL);
 
@@ -46,7 +46,7 @@ EntityList<T, E>::EntityList(IGateway<T>* gateway) : gateway(gateway) {
     box->add(*scroll);
     box->add(*bottom_box);
 
-    current_search = std::make_unique<DefaultSearch>(gateway);
+    current_search = std::make_unique<DefaultSearch>();
 
     fill_list();
 
@@ -159,22 +159,24 @@ void EntityList<T, E>::add_entity(E* entity){
 template<class T, class E>
 void EntityList<T, E>::remove_entity(E* entity){
     list->remove(*entity);
-    gateway->remove_from_cache(entity->get_id());
+//     gateway->remove_from_cache(entity->get_id());
     delete entity;
 }
 
-template<class T, class E>
-EntityList<T, E>::DefaultSearch::DefaultSearch(IGateway<T>* gateway) : gateway(gateway){}
+// template<class T, class E>
+// EntityList<T, E>::DefaultSearch::DefaultSearch(IGateway<T>* gateway) : gateway(gateway){}
 
 
 template<class T, class E>
 std::list<std::shared_ptr<T>> EntityList<T,E>::DefaultSearch::get_great_then(int id, int count){
-    return gateway->get_great_then_by_id(id,count);
+    return T::get_great_than_by_id(id,count);
+//     return gateway->get_great_then_by_id(id,count);
 }
 
 template<class T, class E>
 std::list<std::shared_ptr<T>> EntityList<T,E>::DefaultSearch::get_less_then(int id, int count){
-    return gateway->get_less_then_by_id(id,count);
+    return T::get_less_than_by_id(id,count);
+//     return gateway->get_less_then_by_id(id,count);
 }
 
 template<class T, class E>
@@ -186,7 +188,7 @@ void EntityList<T,E>::set_search(std::unique_ptr<ISearch<T>> search){
 
 template<class T, class E>
 void EntityList<T,E>::reset_search(){
-    current_search = std::make_unique<DefaultSearch>(gateway);
+//     current_search = std::make_unique<DefaultSearch>(gateway);
     search_entry->set_text("");
     fill_list();
 }
@@ -198,7 +200,8 @@ std::string EntityList<T,E>::get_search_text(){
 
 template<class T, class E>
 IGateway<T>* EntityList<T,E>::get_gateway(){
-    return gateway;
+//     return gateway;
+    return nullptr;
 }
 
 template<class T, class E>
@@ -220,9 +223,9 @@ template<class T, class E>
 void EntityList<T,E>::remove_row(Gtk::Widget* widget){
     list->remove(*widget);
     auto entity = dynamic_cast<E*>(widget);
-    if(entity){
-        gateway->remove_from_cache(entity->get_id());
-    }
+//     if(entity){
+//         gateway->remove_from_cache(entity->get_id());
+//     }
     delete widget;
 }
 

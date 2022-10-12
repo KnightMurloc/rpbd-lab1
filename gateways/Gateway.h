@@ -7,16 +7,16 @@
 
 #include <list>
 #include <string>
-#include <cache.hpp>
-#include <lru_cache_policy.hpp>
+// #include <cache.hpp>
+// #include <lru_cache_policy.hpp>
 #include <memory>
+#include "../cache.h"
 
 constexpr std::size_t CACHE_SIZE = 32;
 
-template <typename Key, typename Value>
-using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
+// template <typename Key, typename Value>
+// using lru_cache_t = typename caches::fixed_sized_cache<Key, Value, caches::LRUCachePolicy>;
 
-//TODO удалять из кеша
 template<class T>
 class IGateway{
 protected:
@@ -25,9 +25,12 @@ protected:
 //     lru_cache_t<int, T> cache(32);
 //     caches::fixed_sized_cache<int, T, caches::LRUCachePolicy> cache(CACHE_SIZE);
 //     static std::unique_ptr<lru_cache_t<int,std::shared_ptr<T>>> cache;
-    static lru_cache_t<int,std::shared_ptr<T>> cache;
+//     static lru_cache_t<int,std::shared_ptr<T>> cache;
+
+    static cache<T> cache_new;
 
 public:
+
     virtual void save(std::shared_ptr<T> data) = 0;
 
     virtual std::shared_ptr<T> get(int id) = 0;
@@ -37,12 +40,16 @@ public:
     virtual std::list<std::shared_ptr<T>> get_all() = 0;
 
     void remove_from_cache(int id){
-        cache.Remove(id);
+//         cache.Remove(id);
+        cache_new.remove(id);
     }
 
     virtual std::list<std::shared_ptr<T>> get_great_then_by_id(int min, int count) = 0;
     virtual std::list<std::shared_ptr<T>> get_less_then_by_id(int max, int count) = 0;
 };
+
+template<class T>
+cache<T> IGateway<T>::cache_new{};
 
 class GatewayException : public std::exception {
 public:

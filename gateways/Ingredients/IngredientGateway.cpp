@@ -8,8 +8,10 @@
 #include "fmt/core.h"
 #include "fmt/format.h"
 
-template<>
-lru_cache_t<int,std::shared_ptr<Ingredient>> IGateway<Ingredient>::cache(CACHE_SIZE);
+// template<>
+// lru_cache_t<int,std::shared_ptr<Ingredient>> IGateway<Ingredient>::cache(CACHE_SIZE);
+// template<>
+// cache<Ingredient> IGateway<Ingredient>::cache_new;
 
 void IngredientGateway::save(std::shared_ptr<Ingredient> data) {
     auto db = DbInstance::getInstance();
@@ -25,14 +27,35 @@ void IngredientGateway::save(std::shared_ptr<Ingredient> data) {
 
 std::shared_ptr<Ingredient> IngredientGateway::get(int id) {
 
-    auto result = cache.TryGet(id);
+//     auto result = cache.TryGet(id);
+//
+//     if(result.second){
+//         return (*result.first).second;
+//     }else{
+//         auto db = DbInstance::getInstance();
+//
+//         std::string sql = fmt::format("select * from ingredients where id = {};", id);
+//
+//         auto response = db.exec(sql);
+//
+//         if(response.next()){
+//             Ingredient ingredient(response.get<int>(0));
+//             ingredient.set_name(response.get<std::string>(1));
+//             ingredient.set_unit(string_to_unit(response.get<std::string>(2)));
+//
+//             auto ptr = std::make_shared<Ingredient>(ingredient);
+//             cache.Put(id, ptr);
+//
+//             return ptr;
+//         }
+//     }
 
-    if(result.second){
-        return (*result.first).second;
+    if(cache_new.exist(id)){
+        return cache_new.get(id);
     }else{
         auto db = DbInstance::getInstance();
 
-        std::string sql = fmt::format("select * from ingredients where id = {};", id);
+        std::string sql = fmt::format("select id, name, unit from ingredients where id = {};", id);
 
         auto response = db.exec(sql);
 
@@ -42,11 +65,13 @@ std::shared_ptr<Ingredient> IngredientGateway::get(int id) {
             ingredient.set_unit(string_to_unit(response.get<std::string>(2)));
 
             auto ptr = std::make_shared<Ingredient>(ingredient);
-            cache.Put(id, ptr);
+//             cache.Put(id, ptr);
+            cache_new.put(ptr);
 
             return ptr;
         }
     }
+
     throw GatewayException("not found");
 }
 
@@ -57,7 +82,8 @@ void IngredientGateway::remove(std::shared_ptr<Ingredient> data) {
 
     db.exec(sql);
 
-    cache.Remove(data->get_id());
+//     cache.Remove(data->get_id());
+    cache_new.remove(data->get_id());
 }
 
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_all() {
@@ -66,18 +92,20 @@ std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_all() {
 
     std::list<std::shared_ptr<Ingredient>> result;
 
-    auto response = db.exec("select * from ingredients;");
+    auto response = db.exec("select id from ingredients;");
 
     while(response.next()){
-        Ingredient ingredient(response.get<int>(0));
-        ingredient.set_name(response.get<std::string>(1));
-        ingredient.set_unit(string_to_unit(response.get<std::string>(2)));
-
-        auto ptr = std::make_shared<Ingredient>(ingredient);
-
-        cache.Put(ptr->get_id(),ptr);
-
-        result.push_back(ptr);
+//         Ingredient ingredient(response.get<int>(0));
+//         ingredient.set_name(response.get<std::string>(1));
+//         ingredient.set_unit(string_to_unit(response.get<std::string>(2)));
+//
+//         auto ptr = std::make_shared<Ingredient>(ingredient);
+//
+// //         cache.Put(ptr->get_id(),ptr);
+//         cache_new.put(ptr);
+//
+//         result.push_back(ptr);
+        result.push_back(get(response.get<int>(0)));
     }
 
     return result;
@@ -100,7 +128,8 @@ std::shared_ptr<Ingredient> IngredientGateway::create(std::string name, Unit uni
 
         auto ptr = std::make_shared<Ingredient>(ing);
 
-        cache.Put(ptr->get_id(),ptr);
+//         cache.Put(ptr->get_id(),ptr);
+        cache_new.put(ptr);
 
         return ptr;
     }
@@ -131,18 +160,20 @@ std::shared_ptr<Ingredient> IngredientGateway::create(std::string name, Unit uni
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_great_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from ingredients where id > {} order by id limit {}",min,count);
+    std::string sql = fmt::format("select id from ingredients where id > {} order by id limit {}",min,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Ingredient>> result;
 
     while(response.next()){
-        auto ing = std::make_shared<Ingredient>(response.get<int>(0));
-        ing->set_name(response.get<std::string>(1));
-        ing->set_unit(string_to_unit(response.get<std::string>(2)));
-        cache.Put(ing->get_id(), ing);
-        result.push_back(ing);
+//         auto ing = std::make_shared<Ingredient>(response.get<int>(0));
+//         ing->set_name(response.get<std::string>(1));
+//         ing->set_unit(string_to_unit(response.get<std::string>(2)));
+// //         cache.Put(ing->get_id(), ing);
+//         cache_new.put(ing);
+//         result.push_back(ing);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }
@@ -150,18 +181,19 @@ std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_great_then_by_id(i
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_less_then_by_id(int min, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from ingredients where id < {} order by id DESC limit {};",min,count);
+    std::string sql = fmt::format("select id from ingredients where id < {} order by id DESC limit {};",min,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Ingredient>> result;
 
     while(response.next()){
-        auto ing = std::make_shared<Ingredient>(response.get<int>(0));
-        ing->set_name(response.get<std::string>(1));
-        ing->set_unit(string_to_unit(response.get<std::string>(2)));
-        cache.Put(ing->get_id(), ing);
-        result.push_back(ing);
+//         auto ing = std::make_shared<Ingredient>(response.get<int>(0));
+//         ing->set_name(response.get<std::string>(1));
+//         ing->set_unit(string_to_unit(response.get<std::string>(2)));
+// //         cache.Put(ing->get_id(), ing);
+//         cache_new.put(ing);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }
@@ -197,18 +229,20 @@ int IngredientGateway::get_max(){
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_great_then_by_name(std::string name, int id, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from ingredients where lower(name) like '%{}%' and id > {} order by id limit {};", name,id,count);
+    std::string sql = fmt::format("select id from ingredients where lower(name) like '%{}%' and id > {} order by id limit {};", name,id,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Ingredient>> result;
 
     while(response.next()){
-        auto ing = std::make_shared<Ingredient>(response.get<int>(0));
-        ing->set_name(response.get<std::string>(1));
-        ing->set_unit(string_to_unit(response.get<std::string>(2)));
-        cache.Put(ing->get_id(), ing);
-        result.push_back(ing);
+//         auto ing = std::make_shared<Ingredient>(response.get<int>(0));
+//         ing->set_name(response.get<std::string>(1));
+//         ing->set_unit(string_to_unit(response.get<std::string>(2)));
+// //         cache.Put(ing->get_id(), ing);
+//         cache_new.put(ing);
+//         result.push_back(ing);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }
@@ -216,18 +250,20 @@ std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_great_then_by_name
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_less_then_by_name(std::string name, int id, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select * from ingredients where lower(name) like '%{}%' and id < {} order by id DESC limit {};", name,id,count);
+    std::string sql = fmt::format("select id from ingredients where lower(name) like '%{}%' and id < {} order by id DESC limit {};", name,id,count);
 
     auto response = db.exec(sql);
 
     std::list<std::shared_ptr<Ingredient>> result;
 
     while(response.next()){
-        auto ing = std::make_shared<Ingredient>(response.get<int>(0));
-        ing->set_name(response.get<std::string>(1));
-        ing->set_unit(string_to_unit(response.get<std::string>(2)));
-        cache.Put(ing->get_id(), ing);
-        result.push_back(ing);
+//         auto ing = std::make_shared<Ingredient>(response.get<int>(0));
+//         ing->set_name(response.get<std::string>(1));
+//         ing->set_unit(string_to_unit(response.get<std::string>(2)));
+// //         cache.Put(ing->get_id(), ing);
+//         cache_new.put(ing);
+//         result.push_back(ing);
+        result.push_back(get(response.get<int>(0)));
     }
     return result;
 }

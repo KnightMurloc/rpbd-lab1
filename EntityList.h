@@ -38,10 +38,10 @@ private:
 
     class DefaultSearch : public ISearch<T> {
     private:
-        IGateway<T>* gateway;
+//         IGateway<T>* gateway;
     public:
 
-        DefaultSearch(IGateway<T>* gateway);
+//         DefaultSearch(IGateway<T>* gateway);
 
         std::list<std::shared_ptr<T>> get_great_then(int id, int count);
         std::list<std::shared_ptr<T>> get_less_then(int id, int count);
@@ -52,7 +52,7 @@ private:
     Gtk::SearchEntry* search_entry;
     Gtk::Box* box;
     Gtk::ScrolledWindow* scroll;
-    IGateway<T>* gateway;
+//     IGateway<T>* gateway;
 
     std::function<void(E*)> select_callback = nullptr;
 
@@ -65,7 +65,7 @@ private:
 
     void select(Gtk::ListBoxRow* row);
 public:
-    explicit EntityList(IGateway<T>* gateway);
+    explicit EntityList();
 
     void fill_list() override;
 

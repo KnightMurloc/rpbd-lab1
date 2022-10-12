@@ -17,8 +17,27 @@ private:
     std::string phone_number;
     std::string fax;
     std::string email;
-    int bank_detail_id = -1;
+//     int bank_detail_id = -1;
+    std::weak_ptr<BankDetail> bank_detail;
 public:
+    static std::list<std::shared_ptr<Provider>> get_great_than_by_id(int id, int count);
+
+    static std::list<std::shared_ptr<Provider>> get_less_than_by_id(int id, int count);
+
+    static std::shared_ptr<Provider> get(int id);
+
+    static void save(std::shared_ptr<Provider> provider);
+
+    static std::shared_ptr<Provider> create(
+        std::string name,
+        std::string post_address,
+        std::string phone_number,
+        std::string fax,
+        std::string email,
+        int bank_detail
+    );
+
+    static void remove(std::shared_ptr<Provider> provider);
 
     explicit Provider(int id);
 
@@ -34,8 +53,10 @@ public:
 
     [[nodiscard]] const std::string &get_email() const;
 
-    [[nodiscard]] int get_bank_detail_id() const;
+//     [[nodiscard]] int get_bank_detail_id() const;
     [[nodiscard]] std::shared_ptr<BankDetail> get_bank_detail();
+
+    void set_bank_detail(std::shared_ptr<BankDetail> bank_detail);
 
     void set_name(const std::string &name);
 
@@ -47,7 +68,7 @@ public:
 
     void set_email(const std::string &email);
 
-    void set_bank_detail_id(int bankDetail_id);
+//     void set_bank_detail_id(int bankDetail_id);
 };
 
 

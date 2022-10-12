@@ -26,7 +26,7 @@ private:
         int get_id() override;
     };
 
-    OrderGateway gateway;
+//     OrderGateway gateway;
 
     EntityList<Order,Entry>* list;
 

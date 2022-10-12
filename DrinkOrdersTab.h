@@ -28,7 +28,7 @@ private:
     };
     Glib::RefPtr<Gtk::Builder> builder;
 
-    DrinkOrderGateway gateway;
+//     DrinkOrderGateway gateway;
 
     EntityList<DrinkOrder,Entry>* list;
 

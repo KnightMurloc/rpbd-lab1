@@ -9,6 +9,8 @@
 #include "BankDetail.h"
 
 class BankDetailgateway : public IGateway<BankDetail> {
+private:
+//     static cache<BankDetail> cache_new;
 public:
     void save(std::shared_ptr<BankDetail> data) override;
 

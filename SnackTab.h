@@ -25,7 +25,7 @@ private:
         int get_id() override;
     };
 
-    SnackGateway gateway;
+//     SnackGateway gateway;
 
     EntityList<Snack,Entry>* list;
     Glib::RefPtr<Gtk::Builder> builder;

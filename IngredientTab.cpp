@@ -41,11 +41,11 @@ IngredientTab::IngredientTab(TabManager* tab_manager) : Tab(tab_manager) {
 void IngredientTab::search(EntityList<Ingredient,Entry>* list){
    std::string str = list->get_search_text();
    std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
-   auto gateway = dynamic_cast<IngredientGateway*>(list->get_gateway());
-   if(gateway == nullptr){
-       return;
-    }
-   auto ptr = std::make_unique<NameSearch>(gateway,str );
+//    auto gateway = dynamic_cast<IngredientGateway*>(list->get_gateway());
+//    if(gateway == nullptr){
+//        return;
+//     }
+   auto ptr = std::make_unique<NameSearch>(str );
    list->set_search(std::move(ptr));
 }
 
@@ -86,7 +86,8 @@ void IngredientTab::save(){
    ing->set_name(name_entry->get_text());
    ing->set_unit(string_to_unit(unit_combo->get_active_id()));
 
-   gateway.save(ing);
+//    gateway.save(ing);
+   Ingredient::save(ing);
 
    entry->name_label->set_text(ing->get_name());
    entry->unit_label->set_text(unit_combo->get_active_id());
@@ -119,7 +120,9 @@ void IngredientTab::create(){
                 return;
             }
 
-            auto ing = gateway.create(name_entry_dialog->get_text(), string_to_unit(unit_combo_dialog->get_active_id()));
+//             auto ing = gateway.create(name_entry_dialog->get_text(), string_to_unit(unit_combo_dialog->get_active_id()));
+
+            auto ing = Ingredient::create(name_entry_dialog->get_text(), string_to_unit(unit_combo_dialog->get_active_id()));
 
             auto entry = Gtk::make_managed<Entry>(ing);
 
@@ -143,7 +146,8 @@ void IngredientTab::remove_entry(){
        return;
    }
 
-   gateway.remove(entry->get_ingredient());
+//    gateway.remove(entry->get_ingredient());
+    Ingredient::remove(entry->get_ingredient());
    on_remove.emit(entry->get_ingredient());
     Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -175,29 +179,32 @@ int IngredientTab::Entry::get_id() {
     return ingredient->get_id();
 }
 
-IngredientTab::DefaultSearch::DefaultSearch(IngredientGateway* gateway) : gateway(gateway) {};
+// IngredientTab::DefaultSearch::DefaultSearch(IngredientGateway* gateway) : gateway(gateway) {};
 
-std::list<std::shared_ptr<Ingredient>> IngredientTab::DefaultSearch::get_great_then(int id, int count){
-    return gateway->get_great_then_by_id(id,count);
-}
+// std::list<std::shared_ptr<Ingredient>> IngredientTab::DefaultSearch::get_great_then(int id, int count){
+//     return gateway->get_great_then_by_id(id,count);
+// }
 
-std::list<std::shared_ptr<Ingredient>> IngredientTab::DefaultSearch::get_less_then(int id, int count){
-    return gateway->get_less_then_by_id(id,count);
-}
+// std::list<std::shared_ptr<Ingredient>> IngredientTab::DefaultSearch::get_less_then(int id, int count){
+//     return gateway->get_less_then_by_id(id,count);
+// }
 
-IngredientTab::NameSearch::NameSearch(IngredientGateway* gateway, std::string name) : gateway(gateway), name(name){}
+IngredientTab::NameSearch::NameSearch(std::string name) : name(name){}
 
 std::list<std::shared_ptr<Ingredient>> IngredientTab::NameSearch::get_great_then(int id, int count){
-    return gateway->get_great_then_by_name(name,id,count);
+//     return gateway->get_great_then_by_name(name,id,count);
+    return Ingredient::get_great_then_by_id_filtred_by_name(name,id,count);
 }
 
 std::list<std::shared_ptr<Ingredient>> IngredientTab::NameSearch::get_less_then(int id, int count){
-    return gateway->get_less_then_by_name(name,id,count);
+//     return gateway->get_less_then_by_name(name,id,count);
+    return Ingredient::get_less_then_by_id_filtred_by_name(name,id,count);
+
 }
 
 IList* IngredientTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Ingredient,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Ingredient,Entry>>();
     list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list));
 
     list->add_column_title("название");

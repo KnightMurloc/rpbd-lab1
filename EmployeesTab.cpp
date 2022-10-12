@@ -8,6 +8,7 @@
 #include <fmt/format.h>
 #include <memory>
 #include "gateways/Employeer/EmployeerGateway.h"
+#include "gateways/Orders/Order.h"
 #include "gateways/Orders/OrderGateway.h"
 #include "gtkmm/enums.h"
 #include "sigc++/adaptors/bind.h"
@@ -53,15 +54,15 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
 
 }
 
-//TODO устанавливать gateway в листе
+
 void EmployeesTab::search(EntityList<Employeer,Entry>* list){
    std::string str = list->get_search_text();
    std:: transform(str.begin(), str.end(), str.begin(), ::tolower);
-   auto gateway = dynamic_cast<EmployeerGateway*>(list->get_gateway());
-   if(gateway == nullptr){
-       return;
-    }
-   auto ptr = std::make_unique<NameSearch>(gateway,str );
+//    auto gateway = dynamic_cast<EmployeerGateway*>(list->get_gateway());
+//    if(gateway == nullptr){
+//        return;
+//     }
+   auto ptr = std::make_unique<NameSearch>(str);
    list->set_search(std::move(ptr));
 }
 
@@ -83,7 +84,7 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     }
     first_name_entry->set_text(entry->get_emp()->getFirstName());
     last_name_entry->set_text(entry->get_emp()->getLastName());
-    if(entry->get_emp()->get_movement_id() != -1){
+    if(entry->get_emp()->get_movement()){
         try {
             order_link->set_text(std::to_string(entry->get_emp()->get_movement()->get_order_number()));
             order_link->set_data("id", new int(entry->get_emp()->get_movement()->get_id()), [](void* data){delete (int*) data;});
@@ -170,10 +171,12 @@ void EmployeesTab::save_current() {
 
    if(order_link->get_text() != "none") {
        int* movement_id = static_cast<int*>(order_link->get_data("id"));
-       empl->set_movement_id(*movement_id);
+//        empl->set_movement_id(*movement_id);
+       empl->set_movement(Order::get(*movement_id));
    }
 
-   gateway.save(empl);
+//    gateway.save(empl);
+    Employeer::save(empl);
 
    entry->first_name->set_text(empl->getFirstName());
    entry->last_name->set_text(empl->getLastName());
@@ -194,7 +197,7 @@ void EmployeesTab::find_order() {
        return;
    }
 
-   get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement_id());
+   get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement()->get_id());
 }
 
 void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
@@ -327,15 +330,26 @@ void EmployeesTab::create() {
                 movement_id = -1;
             }
 
-            auto empl = gateway.create(
-                    first_name_entry_dialog->get_text(),
-                    last_name_entry_dialog->get_text(),
-                    patronymic_entry_dialog->get_text(),
-                    address_entry_dialog->get_text(),
-                    fmt::format("{}-{}-{}",year,month,day),
-                    salary,
-                    movement_id,
-                    string_to_post(post_combobox_dialog->get_active_id()));
+//             auto empl = gateway.create(
+//                     first_name_entry_dialog->get_text(),
+//                     last_name_entry_dialog->get_text(),
+//                     patronymic_entry_dialog->get_text(),
+//                     address_entry_dialog->get_text(),
+//                     fmt::format("{}-{}-{}",year,month,day),
+//                     salary,
+//                     movement_id,
+//                     string_to_post(post_combobox_dialog->get_active_id()));
+
+            auto empl = Employeer::create(
+                first_name_entry_dialog->get_text(),
+                last_name_entry_dialog->get_text(),
+                patronymic_entry_dialog->get_text(),
+                address_entry_dialog->get_text(),
+                fmt::format("{}-{}-{}",year,month,day),
+                salary,
+                Order::get(movement_id),
+                string_to_post(post_combobox_dialog->get_active_id())
+            );
 
             auto entry = Gtk::make_managed<Entry>(empl);
            list->add_entity(entry);
@@ -358,7 +372,8 @@ void EmployeesTab::remove() {
        return;
    }
 
-   gateway.remove(entry->get_emp());
+//    gateway.remove(entry->get_emp());
+    Employeer::remove(entry->get_emp());
 
    on_remove.emit(entry->get_emp());
 
@@ -412,19 +427,23 @@ std::list<std::shared_ptr<Employeer>> EmployeesTab::DefaultSearch::get_less_then
     return gateway->get_less_then_by_id(id,count);
 }
 
-EmployeesTab::NameSearch::NameSearch(EmployeerGateway* gateway, std::string name) : gateway(gateway), name(name){}
+EmployeesTab::NameSearch::NameSearch(std::string name) : name(name){}
 
 std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_great_then(int id, int count){
-    return gateway->get_great_then_by_name(name,id,count);
+//     return gateway->get_great_then_by_name(name,id,count);
+//     return Employeer::get_great_than_by_name()
+    return Employeer::get_great_than_by_id_filtred_by_name(name,id,count);
 }
 
 std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_less_then(int id, int count){
-    return gateway->get_less_then_by_name(name,id,count);
+//     return gateway->get_less_then_by_name(name,id,count);
+
+    return Employeer::get_less_than_by_id_filtred_by_name(name,id,count);
 }
 
 IList* EmployeesTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Employeer,Entry>>(&gateway);
+    auto list = Gtk::make_managed<EntityList<Employeer,Entry>>();
 
     list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list));
 
