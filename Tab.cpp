@@ -68,8 +68,11 @@ int Tab::select_dialog() {
 
     if(dialog.run() == Gtk::RESPONSE_OK){
         auto entry = list->get_selected();
+//         delete list;
         return entry->get_id();
     }
+
+//     delete list;
 
     return -1;
 }
@@ -94,6 +97,7 @@ void Tab::remove_entry_by_id(int id){
        auto entry = dynamic_cast<IEntry*>(child);
        if(entry->get_id() == id){
            list->remove_row(child);
+           delete child;
            break;
        }
    }

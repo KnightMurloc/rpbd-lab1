@@ -69,10 +69,19 @@ std::shared_ptr<BankDetail> BankDetail::create(
         std::string bank_name,
         std::string city,
         std::string tin,
-        std::string settlement_account
+        std::string settlement_account,
+        std::shared_ptr<Provider> provider
     ){
     BankDetailgateway gateway;
-    return gateway.create(bank_name,city,tin,settlement_account);
+    return gateway.create(bank_name,city,tin,settlement_account, provider);
+}
+
+std::shared_ptr<Provider> BankDetail::get_provider(){
+    return provider;
+}
+
+void BankDetail::set_provider(std::shared_ptr<Provider> provider){
+    this->provider = provider;
 }
 
 void BankDetail::remove(std::shared_ptr<BankDetail> detail){

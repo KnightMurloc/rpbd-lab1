@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <memory>
+#include "fmt/core.h"
 #include "gateways/Employeer/EmployeerGateway.h"
 #include "gateways/Orders/Order.h"
 #include "gateways/Orders/OrderGateway.h"
@@ -25,9 +26,9 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     builder->get_widget("employees_info", info_box);
     builder->get_widget("first_name_entry", first_name_entry);
     builder->get_widget("last_name_entry", last_name_entry);
-    builder->get_widget("oreder_link", order_link);
-    builder->get_widget("emp_find_button", find_button);
-    builder->get_widget("emp_select_button", select_button);
+//     builder->get_widget("oreder_link", order_link);
+//     builder->get_widget("emp_find_button", find_button);
+//     builder->get_widget("emp_select_button", select_button);
     builder->get_widget("patronymic_entry", patronymic_entry);
     builder->get_widget("address_entry", address_entry);
     builder->get_widget("day_entry", day_entry);
@@ -43,13 +44,13 @@ EmployeesTab::EmployeesTab(TabManager* tab_manager) : Tab(tab_manager) {
     info_box->add(*save_button);
     info_box->show_all();
 
-    find_button->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::find_order));
+//     find_button->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::find_order));
 
-    select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link, get_tab_manager()));
+//     select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link, get_tab_manager()));
 
     getAddButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::create));
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&EmployeesTab::remove));
-
+//
     list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&EmployeesTab::select));
 
 }
@@ -71,7 +72,6 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     if(entry == nullptr){
         return;
     }
-
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -84,19 +84,19 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     }
     first_name_entry->set_text(entry->get_emp()->getFirstName());
     last_name_entry->set_text(entry->get_emp()->getLastName());
-    if(entry->get_emp()->get_movement()){
-        try {
-            order_link->set_text(std::to_string(entry->get_emp()->get_movement()->get_order_number()));
-            order_link->set_data("id", new int(entry->get_emp()->get_movement()->get_id()), [](void* data){delete (int*) data;});
-            find_button->set_sensitive(true);
-        } catch (GatewayException&) {
-            order_link->set_text("none");
-            find_button->set_sensitive(false);
-        }
-    }else{
-        order_link->set_text("none");
-        find_button->set_sensitive(false);
-    }
+//     if(entry->get_emp()->get_movement()){
+//         try {
+//             order_link->set_text(std::to_string(entry->get_emp()->get_movement()->get_order_number()));
+//             order_link->set_data("id", new int(entry->get_emp()->get_movement()->get_id()), [](void* data){delete (int*) data;});
+//             find_button->set_sensitive(true);
+//         } catch (GatewayException&) {
+//             order_link->set_text("none");
+//             find_button->set_sensitive(false);
+//         }
+//     }else{
+//         order_link->set_text("none");
+//         find_button->set_sensitive(false);
+//     }
 
     patronymic_entry->set_text(entry->get_emp()->getPatronymic());
     address_entry->set_text(entry->get_emp()->getAddress());
@@ -169,11 +169,11 @@ void EmployeesTab::save_current() {
    empl->setBirthDate(fmt::format("{}-{}-{}",year,month,day));
    empl->setPost(string_to_post(post_combobox->get_active_id()));
 
-   if(order_link->get_text() != "none") {
-       int* movement_id = static_cast<int*>(order_link->get_data("id"));
-//        empl->set_movement_id(*movement_id);
-       empl->set_movement(Order::get(*movement_id));
-   }
+//    if(order_link->get_text() != "none") {
+//        int* movement_id = static_cast<int*>(order_link->get_data("id"));
+// //        empl->set_movement_id(*movement_id);
+//        empl->set_movement(Order::get(*movement_id));
+//    }
 
 //    gateway.save(empl);
     Employeer::save(empl);
@@ -191,26 +191,26 @@ void EmployeesTab::cancel_current() {
     std::cout << "cancel EmployeesTab" << std::endl;
 }
 
-void EmployeesTab::find_order() {
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
-
-   get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement()->get_id());
-}
-
-void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
-    int id = manager->select_dialog(TabName::ORDER);
-    if(id == -1){
-        return;
-    }
-    OrderGateway orderGateway;
-    try {
-        label->set_text(std::to_string(orderGateway.get(id)->get_order_number()));
-        label->set_data("id", new int(id), [](void* data){delete (int*) data;});
-    }catch(std::exception&){}
-}
+// void EmployeesTab::find_order() {
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
+//
+// //    get_tab_manager()->select_on_tab(TabName::ORDER, entry->get_emp()->get_movement()->get_id());
+// }
+//
+// void EmployeesTab::select_order(Gtk::Label* label, TabManager* manager) {
+//     int id = manager->select_dialog(TabName::ORDER);
+//     if(id == -1){
+//         return;
+//     }
+//     OrderGateway orderGateway;
+//     try {
+//         label->set_text(std::to_string(orderGateway.get(id)->get_order_number()));
+//         label->set_data("id", new int(id), [](void* data){delete (int*) data;});
+//     }catch(std::exception&){}
+// }
 
 void EmployeesTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder) {
     Gtk::Entry* day_entry;
@@ -240,17 +240,17 @@ void EmployeesTab::create() {
     Gtk::Box* box;
     builder->get_widget("employees_info", box);
 
-    Gtk::Label* order_link_dialog;
-    Gtk::Button* find_button_dialog;
-    Gtk::Button* select_button_dialog;
+//     Gtk::Label* order_link_dialog;
+//     Gtk::Button* find_button_dialog;
+//     Gtk::Button* select_button_dialog;
 
-    builder->get_widget("oreder_link", order_link_dialog);
-    builder->get_widget("emp_find_button", find_button_dialog);
-    builder->get_widget("emp_select_button", select_button_dialog);
+//     builder->get_widget("oreder_link", order_link_dialog);
+//     builder->get_widget("emp_find_button", find_button_dialog);
+//     builder->get_widget("emp_select_button", select_button_dialog);
 
-    find_button_dialog->set_sensitive(false);
+//     find_button_dialog->set_sensitive(false);
 
-    select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link_dialog, get_tab_manager()));
+//     select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&EmployeesTab::select_order, order_link_dialog, get_tab_manager()));
 
     dynamic_cast<Gtk::Container*>(dialog->get_children()[0])->add(*box);
 
@@ -258,7 +258,7 @@ void EmployeesTab::create() {
         if(response == Gtk::RESPONSE_OK) {
             Gtk::Entry* first_name_entry_dialog;
             Gtk::Entry* last_name_entry_dialog;
-            Gtk::Label* order_link_dialog;
+//             Gtk::Label* order_link_dialog;
 
             Gtk::Entry* patronymic_entry_dialog;
             Gtk::Entry* address_entry_dialog;
@@ -270,7 +270,7 @@ void EmployeesTab::create() {
 
             builder->get_widget("first_name_entry", first_name_entry_dialog);
             builder->get_widget("last_name_entry", last_name_entry_dialog);
-            builder->get_widget("oreder_link", order_link_dialog);
+//             builder->get_widget("oreder_link", order_link_dialog);
 
             builder->get_widget("patronymic_entry", patronymic_entry_dialog);
             builder->get_widget("address_entry", address_entry_dialog);
@@ -323,12 +323,12 @@ void EmployeesTab::create() {
                 message.run();
                 return;
             }
-            int movement_id;
-            if(order_link_dialog->get_text() != "none") {
-                movement_id = *static_cast<int*>(order_link_dialog->get_data("id"));
-            }else{
-                movement_id = -1;
-            }
+//             int movement_id;
+//             if(order_link_dialog->get_text() != "none") {
+//                 movement_id = *static_cast<int*>(order_link_dialog->get_data("id"));
+//             }else{
+//                 movement_id = -1;
+//             }
 
 //             auto empl = gateway.create(
 //                     first_name_entry_dialog->get_text(),
@@ -347,7 +347,7 @@ void EmployeesTab::create() {
                 address_entry_dialog->get_text(),
                 fmt::format("{}-{}-{}",year,month,day),
                 salary,
-                Order::get(movement_id),
+//                 Order::get(movement_id),
                 string_to_post(post_combobox_dialog->get_active_id())
             );
 
@@ -373,9 +373,10 @@ void EmployeesTab::remove() {
    }
 
 //    gateway.remove(entry->get_emp());
+    on_remove.emit(entry->get_emp());
     Employeer::remove(entry->get_emp());
 
-   on_remove.emit(entry->get_emp());
+
 
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -407,9 +408,13 @@ EmployeesTab::Entry::Entry(std::shared_ptr<Employeer> emp) : emp(emp) {
     box->add(*post);
 
     this->add(*box);
+
+//     emp = std::shared_ptr<Employeer>();
 }
 
 std::shared_ptr<Employeer> EmployeesTab::Entry::get_emp() {
+    fmt::print("ref count: {}\n", emp.use_count());
+
     return emp;
 }
 

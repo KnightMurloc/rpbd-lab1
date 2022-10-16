@@ -10,14 +10,17 @@
 #include <memory>
 #include "../entity.h"
 #include <list>
+#include "../Employeer/Employeer.h"
 
-class Order : IEntity {
+class Order : public IEntity {
 private:
     int id;
     std::string reason;
     int order_number;
-    std::string order_date; //TODO конвертировать
+    std::string order_date;
     Post post;
+    int employer_id = -1;
+    std::weak_ptr<Employeer> employer;
 public:
     static std::list<std::shared_ptr<Order>> get_great_than_by_id(int id, int count);
 
@@ -27,7 +30,13 @@ public:
 
     static void save(std::shared_ptr<Order> order);
 
-    static std::shared_ptr<Order> create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post);
+    static std::shared_ptr<Order> create(
+        const std::string& reason,
+        int order_number,
+        const std::string& order_date,
+        const std::string& post,
+        std::shared_ptr<Employeer> empl
+    );
 
     static void remove(std::shared_ptr<Order> order);
 
@@ -52,6 +61,10 @@ public:
     void set_post(Post post);
 
     std::string get_post_as_string() const;
+
+    [[nodiscard]] std::shared_ptr<Employeer> get_employer();
+
+    void set_employer(std::shared_ptr<Employeer> empl);
 };
 
 

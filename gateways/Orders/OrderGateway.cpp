@@ -7,6 +7,7 @@
 #include "Order.h"
 #include <fmt/format.h>
 #include <memory>
+#include "../Employeer/EmployeerGateway.h"
 
 // template<>
 // lru_cache_t<int,std::shared_ptr<Order>> IGateway<Order>::cache(CACHE_SIZE);
@@ -43,14 +44,20 @@ std::shared_ptr<Order> OrderGateway::get(int id) {
     }else{
         auto db = DbInstance::getInstance();
 
-        auto response = db.exec("select id,reason, order_number, order_date, post from orders where id = " + std::to_string(id));
+        auto response = db.exec("select id,reason, order_number, order_date,post, employer from orders where id = " + std::to_string(id));
 
         if(response.next()){
+            EmployeerGateway gateway;
+
             Order order(response.get<int>(0));
             order.set_reason(response.get<std::string>(1));
             order.set_order_number(response.get<int>(2));
-            order.set_post(string_to_post(response.get<std::string>(3)));
-            order.set_order_date(response.get<std::string>(4));
+            order.set_order_date(response.get<std::string>(3));
+            order.set_post(string_to_post(response.get<std::string>(4)));
+
+            if(!response.is_null(5)){
+                order.set_employer(gateway.get(response.get<int>(5)));
+            }
 
             auto ptr = std::make_shared<Order>(order);
 //             cache.Put(id, ptr);
@@ -89,16 +96,23 @@ std::list<std::shared_ptr<Order>> OrderGateway::get_all() {
     return result;
 }
 
-std::shared_ptr<Order> OrderGateway::create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post) {
+std::shared_ptr<Order> OrderGateway::create(
+    const std::string& reason,
+    int order_number,
+    const std::string& order_date,
+    const std::string& post,
+    std::shared_ptr<Employeer> empl
+) {
     auto db = DbInstance::getInstance();
 
     auto response =
-            db.exec(fmt::format("insert into orders(reason, order_number, order_date, post)"
-                                "values('{}', {}, '{}', '{}') returning id;",
-                                reason,
+            db.exec(fmt::format("insert into orders(reason, order_number, order_date, post, employer)"
+                                "values('{}', {}, '{}', '{}', {}) returning id;",
+                                escape_string(reason),
                                 order_number,
                                 order_date,
-                                post));
+                                post,
+                                empl->get_id()));
 
     if(response.next()){
         Order order(response.get<int>(0));
@@ -106,6 +120,7 @@ std::shared_ptr<Order> OrderGateway::create(const std::string &reason, int order
         order.set_order_number(order_number);
         order.set_order_date(order_date);
         order.set_post(string_to_post(post));
+        order.set_employer(empl);
 
         auto ptr = std::make_shared<Order>(order);
 
@@ -125,12 +140,14 @@ void OrderGateway::save(std::shared_ptr<Order> data) {
                                   " reason = '{}',"
                                   " order_number = {},"
                                   " order_date = '{}',"
-                                  " post = '{}'"
+                                  " post = '{}',"
+                                  " employer = {}"
                                   " where id = {};",
-                                  data->get_reason(),
+                                  escape_string(data->get_reason()),
                                   data->get_order_number(),
                                   data->get_order_date(),
                                   data->get_post_as_string(),
+                                  data->get_employer() ? std::to_string(data->get_employer()->get_id()) : "NULL",
                                   data->get_id());
     db.exec(sql);
 }

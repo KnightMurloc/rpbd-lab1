@@ -18,7 +18,8 @@ public:
         std::string bank_name,
         std::string city,
         std::string tin,
-        std::string settlement_account
+        std::string settlement_account,
+        std::shared_ptr<Provider> provider
     );
 
     std::shared_ptr<BankDetail> get(int id) override;

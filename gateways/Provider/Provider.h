@@ -6,10 +6,11 @@
 #define LAB1_PROVIDER_H
 
 #include <string>
-#include "../BankDetail/BankDetail.h"
 #include <memory>
+#include <list>
+#include "../entity.h"
 
-class Provider {
+class Provider : public IEntity {
 private:
     int id;
     std::string name;
@@ -18,7 +19,7 @@ private:
     std::string fax;
     std::string email;
 //     int bank_detail_id = -1;
-    std::weak_ptr<BankDetail> bank_detail;
+//     std::weak_ptr<BankDetail> bank_detail;
 public:
     static std::list<std::shared_ptr<Provider>> get_great_than_by_id(int id, int count);
 
@@ -33,8 +34,8 @@ public:
         std::string post_address,
         std::string phone_number,
         std::string fax,
-        std::string email,
-        int bank_detail
+        std::string email
+//         int bank_detail
     );
 
     static void remove(std::shared_ptr<Provider> provider);
@@ -54,9 +55,9 @@ public:
     [[nodiscard]] const std::string &get_email() const;
 
 //     [[nodiscard]] int get_bank_detail_id() const;
-    [[nodiscard]] std::shared_ptr<BankDetail> get_bank_detail();
+//     [[nodiscard]] std::shared_ptr<BankDetail> get_bank_detail();
 
-    void set_bank_detail(std::shared_ptr<BankDetail> bank_detail);
+//     void set_bank_detail(std::shared_ptr<BankDetail> bank_detail);
 
     void set_name(const std::string &name);
 

@@ -21,8 +21,8 @@ TabManager::TabManager(Gtk::Notebook *tabsContainer) : tabs_container(tabsContai
     tabs[4] = std::make_unique<IngredientTab>(this);
     tabs[1] = std::make_unique<ProductTab>(this);
     tabs[5] = std::make_unique<DrinksTab>(this);
-    tabs[6] = std::make_unique<BankDetailTab>(this);
     tabs[7] = std::make_unique<ProviderTab>(this);
+    tabs[6] = std::make_unique<BankDetailTab>(this);
     tabs[8] = std::make_unique<SnackOrdersTab>(this);
     tabs[9] = std::make_unique<DrinkOrdersTab>(this);
 

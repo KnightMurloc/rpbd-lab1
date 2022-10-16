@@ -19,7 +19,7 @@ void SnackGateway::save(std::shared_ptr<Snack> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update snacks set name = '{}', size = {} where id = {}",
-        data->get_name(),
+        escape_string(data->get_name()),
         data->get_size(),
         data->get_id()
     );
@@ -60,7 +60,7 @@ std::shared_ptr<Snack> SnackGateway::create(std::string name, int size, std::vec
 //         throw GatewayException("create error");
 //     }
 
-    std::string sql = fmt::format("insert into snacks(name, size) values('{}',{}) returning id;",name,size);
+    std::string sql = fmt::format("insert into snacks(name, size) values('{}',{}) returning id;",escape_string(name),size);
 
     auto response = db.exec(sql);
 

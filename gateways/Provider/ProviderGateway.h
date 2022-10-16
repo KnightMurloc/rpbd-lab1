@@ -17,8 +17,8 @@ public:
         std::string post_address,
         std::string phone_number,
         std::string fax,
-        std::string email,
-        int bank_detail
+        std::string email
+//         int bank_detail
     );
 
     std::shared_ptr<Provider> get(int id) override;

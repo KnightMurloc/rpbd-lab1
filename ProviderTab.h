@@ -40,15 +40,15 @@ private:
     Gtk::Entry* entry_number;
     Gtk::Entry* fax_entry;
     Gtk::Entry* email_entry;
-    Gtk::Label* detail_link;
-    Gtk::Button* select_button;
-    Gtk::Button* find_button;
+//     Gtk::Label* detail_link;
+//     Gtk::Button* select_button;
+//     Gtk::Button* find_button;
 
     void select(Gtk::ListBoxRow* row);
 
-    void find_detail();
+//     void find_detail();
 
-    static void select_deltail(Gtk::Label* label, TabManager* manager);
+//     static void select_deltail(Gtk::Label* label, TabManager* manager);
 
     void save_current();
 

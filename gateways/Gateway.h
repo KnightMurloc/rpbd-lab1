@@ -10,7 +10,9 @@
 // #include <cache.hpp>
 // #include <lru_cache_policy.hpp>
 #include <memory>
-#include "../cache.h"
+#include <string_view>
+#include "../Repository.h"
+#include <sstream>
 
 constexpr std::size_t CACHE_SIZE = 32;
 
@@ -27,8 +29,22 @@ protected:
 //     static std::unique_ptr<lru_cache_t<int,std::shared_ptr<T>>> cache;
 //     static lru_cache_t<int,std::shared_ptr<T>> cache;
 
-    static cache<T> cache_new;
+    static Repository<T> cache_new;
 
+    static std::string escape_string(std::string_view str){
+        std::stringstream stream;
+        for(const auto& c : str){
+            switch(c){
+                case '\'':
+                    stream << "''";
+                    break;
+                default:
+                    stream << c;
+            }
+        }
+
+        return stream.str();
+    }
 public:
 
     virtual void save(std::shared_ptr<T> data) = 0;
@@ -49,7 +65,7 @@ public:
 };
 
 template<class T>
-cache<T> IGateway<T>::cache_new{};
+Repository<T> IGateway<T>::cache_new{};
 
 class GatewayException : public std::exception {
 public:

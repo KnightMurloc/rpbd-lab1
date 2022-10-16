@@ -274,6 +274,7 @@ void DrinkOrdersTab::remove() {
         return;
     }
 
+    on_remove.emit(entry->get_order());
 //     gateway.remove(entry->get_order());
     DrinkOrder::remove(entry->get_order());
 

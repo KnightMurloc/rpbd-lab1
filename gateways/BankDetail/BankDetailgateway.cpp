@@ -22,12 +22,14 @@ void BankDetailgateway::save(std::shared_ptr<BankDetail> data) {
         " bank_name = '{}',"
         " city = '{}',"
         " tin = {},"
-        " settlement_account = {}"
+        " settlement_account = {},"
+        " provider = {}"
         " where id = {};",
-        data->getBankName(),
-        data->getCity(),
+        escape_string(data->getBankName()),
+        escape_string(data->getCity()),
         data->getTin(),
         data->getSettlementAccount(),
+        data->get_provider()->get_id(),
         data->get_id()
     );
 
@@ -38,7 +40,10 @@ std::shared_ptr<BankDetail> BankDetailgateway::create(
     std::string bank_name,
     std::string city,
     std::string tin,
-    std::string settlement_account){
+    std::string settlement_account,
+    std::shared_ptr<Provider> provider
+
+){
 
     auto db = DbInstance::getInstance();
 
@@ -46,12 +51,15 @@ std::shared_ptr<BankDetail> BankDetailgateway::create(
         " bank_name,"
         " city,"
         " tin,"
-        " settlement_account)"
-        "values('{}','{}','{}','{}') returning id;",
-        bank_name,
-        city,
+        " settlement_account,"
+        " provider"
+        ")"
+        "values('{}','{}','{}','{}', {}) returning id;",
+        escape_string(bank_name),
+        escape_string(city),
         tin,
-        settlement_account
+        settlement_account,
+        provider->get_id()
     );
 
     auto response = db.exec(sql);
@@ -62,6 +70,7 @@ std::shared_ptr<BankDetail> BankDetailgateway::create(
         detail.setCity(city);
         detail.setTin(tin);
         detail.setSettlementAccount(settlement_account);
+        detail.set_provider(provider);
 
         auto ptr = std::make_shared<BankDetail>(detail);
 //         cache.Put(detail.get_id(), ptr);
@@ -104,16 +113,20 @@ std::shared_ptr<BankDetail> BankDetailgateway::get(int id) {
     }else{
         auto db = DbInstance::getInstance();
 
-        std::string sql = fmt::format("select id, bank_name, city, tin, settlement_account  from bank_detail where id = {};", id);
+        std::string sql = fmt::format("select id, bank_name, city, tin, settlement_account, provider from bank_detail where id = {};", id);
 
         auto response = db.exec(sql);
 
+        ProviderGateway gateway;
+
         if(response.next()){
+
             BankDetail detail(response.get<int>(0));
             detail.setBankName(response.get<std::string>(1));
             detail.setCity(response.get<std::string>(2));
             detail.setTin(response.get<std::string>(3));
             detail.setSettlementAccount(response.get<std::string>(4));
+            detail.set_provider(gateway.get(response.get<int>(5)));
 
             auto ptr = std::make_shared<BankDetail>(detail);
             cache_new.put(ptr);

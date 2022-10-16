@@ -21,7 +21,7 @@ public:
             std::string address,
             std::string birth_date,
             float salary,
-            int movement_id,
+//             int movement_id,
             Post post);
 
     void remove(std::shared_ptr<Employeer> data) override;

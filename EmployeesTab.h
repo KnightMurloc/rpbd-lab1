@@ -29,6 +29,9 @@ class Entry : public Gtk::ListBoxRow, public IEntry {
         std::shared_ptr<Employeer> get_emp();
 
     int get_id() override;
+    ~Entry(){
+        fmt::print("test: {}\n", emp.use_count());
+    }
 };
 
     class DefaultSearch : public ISearch<Employeer> {
@@ -60,9 +63,9 @@ class Entry : public Gtk::ListBoxRow, public IEntry {
 
     Gtk::Entry* first_name_entry;
     Gtk::Entry* last_name_entry;
-    Gtk::Label* order_link;
-    Gtk::Button* find_button;
-    Gtk::Button* select_button;
+//     Gtk::Label* order_link;
+//     Gtk::Button* find_button;
+//     Gtk::Button* select_button;
     Gtk::Entry* patronymic_entry;
     Gtk::Entry* address_entry;
     Gtk::Entry* day_entry;
@@ -75,9 +78,9 @@ class Entry : public Gtk::ListBoxRow, public IEntry {
 
     void select(Gtk::ListBoxRow* row);
 
-    void find_order();
+//     void find_order();
 
-    static void select_order(Gtk::Label* label, TabManager* manager);
+//     static void select_order(Gtk::Label* label, TabManager* manager);
 
     void create();
 

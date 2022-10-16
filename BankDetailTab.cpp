@@ -5,8 +5,11 @@
 #include "BankDetailTab.h"
 #include "Form.h"
 #include "gateways/BankDetail/BankDetail.h"
+#include "gateways/Provider/Provider.h"
 #include "gtkmm/dialog.h"
 #include "gtkmm/object.h"
+#include "sigc++/adaptors/bind.h"
+#include "sigc++/functors/mem_fun.h"
 
 #include <string>
 #include <utility>
@@ -23,6 +26,9 @@ BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
     builder->get_widget("city_entry",city_entry);
     builder->get_widget("tin_entry",tin_entry);
     builder->get_widget("settlement_entry",settlement_entry);
+    builder->get_widget("provider_link", provider_link);
+    builder->get_widget("select_button", select_button);
+    builder->get_widget("find_button", find_button);
 
     setup_menu(builder);
 
@@ -35,6 +41,12 @@ BankDetailTab::BankDetailTab(TabManager *manager) : Tab(manager) {
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&BankDetailTab::remove_entry));
 
    list->get_list_box()->signal_row_selected().connect(sigc::mem_fun(this,&BankDetailTab::select));
+
+   find_button->signal_clicked().connect(sigc::mem_fun(this,&BankDetailTab::find_provider));
+
+    select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&BankDetailTab::select_provider,provider_link, get_tab_manager()));
+
+    get_tab_manager()->get_tab(TabName::PROVIDER)->signal_remove().connect(sigc::mem_fun(this,&BankDetailTab::provider_remove_callback));
 }
 
 void BankDetailTab::select(Gtk::ListBoxRow* row){
@@ -58,6 +70,8 @@ void BankDetailTab::select(Gtk::ListBoxRow* row){
     city_entry->set_text(entry->get_bank_detail()->getCity());
     tin_entry->set_text(entry->get_bank_detail()->getTin());
     settlement_entry->set_text(entry->get_bank_detail()->getSettlementAccount());
+    provider_link->set_text(entry->get_bank_detail()->get_provider()->get_name());
+    provider_link->set_data("id",new int(entry->get_bank_detail()->get_provider()->get_id()),[](void* data){delete (int*) data;});
 }
 
 void BankDetailTab::save_current(){
@@ -90,12 +104,21 @@ void BankDetailTab::save_current(){
        return;
    }
 
+   if(provider_link->get_data("id") == nullptr){
+       Gtk::MessageDialog message("не указан поставщик");
+       message.run();
+       return;
+    }
+
    auto detail = entry->get_bank_detail();
 
    detail->setBankName(name_entry->get_text());
    detail->setCity(city_entry->get_text());
    detail->setTin(tin_entry->get_text());
    detail->setSettlementAccount(settlement_entry->get_text());
+   int* p_id = static_cast<int*>(provider_link->get_data("id"));
+
+   detail->set_provider(Provider::get(*p_id));
 
 //    gateway.save(detail);
     BankDetail::save(detail);
@@ -115,6 +138,18 @@ void BankDetailTab::create(){
     dialog->add_button("OK", Gtk::RESPONSE_OK);
     dialog->add_button("отмена", Gtk::RESPONSE_CANCEL);
 
+    Gtk::Label* provider_link_dialog;
+    Gtk::Button* select_button_dialog;
+    Gtk::Button* find_button_dialog;
+
+    builder->get_widget("provider_link", provider_link_dialog);
+    builder->get_widget("select_button", select_button_dialog);
+    builder->get_widget("find_button", find_button_dialog);
+
+    find_button_dialog->set_sensitive(false);
+
+    select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&BankDetailTab::select_provider,provider_link_dialog, get_tab_manager()));
+
     Gtk::Box* box;
     builder->get_widget("box", box);
 
@@ -126,11 +161,16 @@ void BankDetailTab::create(){
             Gtk::Entry* city_entry_dialog;
             Gtk::Entry* tin_entry_dialog;
             Gtk::Entry* settlement_entry_dialog;
+            Gtk::Label* provider_link_dialog;
+
 
             builder->get_widget("name_entry",name_entry_dialog);
             builder->get_widget("city_entry",city_entry_dialog);
             builder->get_widget("tin_entry",tin_entry_dialog);
             builder->get_widget("settlement_entry",settlement_entry_dialog);
+
+            builder->get_widget("provider_link", provider_link_dialog);
+
 
             if(name_entry_dialog->get_text().empty()){
                 Gtk::MessageDialog message("не указано имя");
@@ -156,17 +196,25 @@ void BankDetailTab::create(){
                 return;
             }
 
+            if(provider_link_dialog->get_data("id") == nullptr){
+                Gtk::MessageDialog message("не указан поставщик");
+                message.run();
+                return;
+            }
+
 //             auto detail = gateway.create(
 //               name_entry_dialog->get_text(),
 //               city_entry_dialog->get_text(),
 //               tin_entry_dialog->get_text(),
 //               settlement_entry_dialog->get_text()
 //             );
+            int* p_id = static_cast<int*>(provider_link_dialog->get_data("id"));
             auto detail = BankDetail::create(
                 name_entry_dialog->get_text(),
                 city_entry_dialog->get_text(),
                 tin_entry_dialog->get_text(),
-                settlement_entry_dialog->get_text()
+                settlement_entry_dialog->get_text(),
+                Provider::get(*p_id)
             );
 
             auto entry = Gtk::make_managed<Entry>(detail);
@@ -188,6 +236,7 @@ void BankDetailTab::remove_entry(){
        return;
    }
 
+   on_remove.emit(entry->get_bank_detail());
 //    gateway.remove(entry->get_bank_detail());
     BankDetail::remove(entry->get_bank_detail());
 
@@ -245,4 +294,40 @@ IList* BankDetailTab::create_list(){
     list->add_column_title("расчётный счёт");
 
     return list;
+}
+
+void BankDetailTab::find_provider(){
+    int* id = static_cast<int*>(provider_link->get_data("id"));
+    get_tab_manager()->select_on_tab(TabName::PROVIDER,*id);
+}
+
+void BankDetailTab::select_provider(Gtk::Label* label, TabManager* manager){
+    int id = manager->select_dialog(TabName::PROVIDER);
+    if(id == -1){
+        fmt::print("not found\n");
+        return;
+    }
+    label->set_text(Provider::get(id)->get_name());
+    label->set_data("id", new int(id), [](void* data){std::cout << "delete" << std::endl; delete (int*) data;});
+//     BankDetailgateway detail_gateway;
+//     try {
+//         label->set_text(detail_gateway.get(id)->getBankName());
+//         label->set_data("id", new int(id), [](void* data){std::cout << "delete" << std::endl; delete (int*) data;});
+//     }catch(std::exception&){
+//         fmt::print("not exception\n");
+//     }
+}
+
+void BankDetailTab::provider_remove_callback(std::shared_ptr<IEntity> entity){
+//     auto waiter = std::dynamic_pointer_cast<Employeer>(entity);
+    if(entity == nullptr){
+        return;
+    }
+
+    for(auto child : list->get_list_box()->get_children()){
+        auto entry = dynamic_cast<Entry*>(child);
+        if(entry->get_bank_detail()->get_provider()->get_id() == entity->get_id()){
+            list->remove_entity(entry);
+        }
+    }
 }

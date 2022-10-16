@@ -90,7 +90,7 @@ Employeer::Employeer(int id) : id(id) {}
 //     movement_id = movementId;
 // }
 
-std::shared_ptr<Order> Employeer::get_movement() const {
+// std::shared_ptr<Order> Employeer::get_movement() const {
 //     if(movement_id == -1){
 //         throw GatewayException("not found");
 //         //throw std::exception();
@@ -105,12 +105,12 @@ std::shared_ptr<Order> Employeer::get_movement() const {
 //         movement_id = -1;
 //         throw exception;
 //     }
-    return movement.lock();
-}
+//     return movement.lock();
+// }
 
-void Employeer::set_movement(std::shared_ptr<Order> movement){
-    this->movement = movement;
-}
+// void Employeer::set_movement(std::shared_ptr<Order> movement){
+//     this->movement = movement;
+// }
 
 std::shared_ptr<Employeer> Employeer::get(int id){
     EmployeerGateway gateway;
@@ -138,7 +138,7 @@ std::shared_ptr<Employeer> Employeer::create(std::string first_name,
             std::string address,
             std::string birth_date,
             float salary,
-            std::shared_ptr<Order> movement,
+//             std::shared_ptr<Order> movement,
             Post post){
     EmployeerGateway gateway;
 
@@ -149,7 +149,7 @@ std::shared_ptr<Employeer> Employeer::create(std::string first_name,
       address,
       birth_date,
       salary,
-      movement->get_id(),
+//       movement->get_id(),
       post
     );
 }

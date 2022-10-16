@@ -7,11 +7,18 @@
 
 #include "Order.h"
 #include "../Gateway.h"
+
 class OrderGateway : public IGateway<Order> {
 public:
     void save(std::shared_ptr<Order> data) override;
 
-    std::shared_ptr<Order> create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post);
+    std::shared_ptr<Order> create(
+        const std::string& reason,
+        int order_number,
+        const std::string& order_date,
+        const std::string& post,
+        std::shared_ptr<Employeer> empl
+    );
 
     std::shared_ptr<Order> get(int id) override;
 

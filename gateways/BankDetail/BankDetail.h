@@ -9,6 +9,7 @@
 #include "../entity.h"
 #include <memory>
 #include <list>
+#include "../Provider/ProviderGateway.h"
 
 class BankDetail : public IEntity {
 private:
@@ -17,6 +18,7 @@ private:
     std::string city;
     std::string tin;
     std::string settlement_account;
+    std::shared_ptr<Provider> provider;
 public:
 
     static std::shared_ptr<BankDetail> get(int id);
@@ -31,7 +33,8 @@ public:
         std::string bank_name,
         std::string city,
         std::string tin,
-        std::string settlement_account
+        std::string settlement_account,
+        std::shared_ptr<Provider> provider
     );
 
     static void remove(std::shared_ptr<BankDetail> detail);
@@ -48,6 +51,8 @@ public:
 
     [[nodiscard]] std::string getSettlementAccount() const;
 
+    [[nodiscard]] std::shared_ptr<Provider> get_provider();
+
     void setBankName(const std::string &bankName);
 
     void setCity(const std::string &city);
@@ -55,6 +60,8 @@ public:
     void setTin(std::string tin);
 
     void setSettlementAccount(std::string settlementAccount);
+
+    void set_provider(std::shared_ptr<Provider> provider);
 };
 
 

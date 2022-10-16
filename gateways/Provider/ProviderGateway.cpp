@@ -25,15 +25,15 @@ void ProviderGateway::save(std::shared_ptr<Provider> data) {
         " post_address = '{}',"
         " phone_number = '{}',"
         " fax = '{}',"
-        " email = '{}',"
-        " bank_detail = {}"
+        " email = '{}'"
+//         " bank_detail = {}"
         " where id = {};",
         data->get_name(),
         data->get_post_address(),
         data->get_phone_number(),
         data->get_fax(),
         data->get_email(),
-        data->get_bank_detail() ? "NULL" : std::to_string(data->get_bank_detail()->get_id()),
+//         data->get_bank_detail() ? "NULL" : std::to_string(data->get_bank_detail()->get_id()),
         data->get_id()
     );
 
@@ -45,20 +45,19 @@ std::shared_ptr<Provider> ProviderGateway::create(
         std::string post_address,
         std::string phone_number,
         std::string fax,
-        std::string email,
-        int bank_detail){
+        std::string email){
     auto db = DbInstance::getInstance();
 
-    fmt::print("create {}\n",bank_detail);
+//     fmt::print("create {}\n",bank_detail);
     std::string sql = fmt::format(
-        "insert into provider(name, post_address, phone_number, fax, email, bank_detail) "
-        "values('{}', '{}','{}','{}','{}',{}) returning id;",
+        "insert into provider(name, post_address, phone_number, fax, email) "
+        "values('{}', '{}','{}','{}','{}') returning id;",
         name,
         post_address,
         phone_number,
         fax,
-        email,
-        bank_detail == -1 ? "NULL" : std::to_string(bank_detail)
+        email
+//         bank_detail == -1 ? "NULL" : std::to_string(bank_detail)
     );
 
     auto response = db.exec(sql);
@@ -73,7 +72,7 @@ std::shared_ptr<Provider> ProviderGateway::create(
         provider.set_fax(fax);
         provider.set_email(email);
 //         provider.set_bank_detail_id(bank_detail);
-        provider.set_bank_detail(gateway.get(bank_detail));
+//         provider.set_bank_detail(gateway.get(bank_detail));
 
 
         auto ptr = std::make_shared<Provider>(provider);
@@ -125,7 +124,7 @@ std::shared_ptr<Provider> ProviderGateway::get(int id) {
         BankDetailgateway gateway;
         auto db = DbInstance::getInstance();
 
-        std::string sql = fmt::format("select id, name, post_address, phone_number, fax, email, bank_detail from provider where id = {};",id);
+        std::string sql = fmt::format("select id, name, post_address, phone_number, fax, email from provider where id = {};",id);
 
         auto response = db.exec(sql);
 
@@ -136,12 +135,12 @@ std::shared_ptr<Provider> ProviderGateway::get(int id) {
             provider.set_phone_number(response.get<std::string>(3));
             provider.set_fax(response.get<std::string>(4));
             provider.set_email(response.get<std::string>(5));
-            if(response.is_null(6)){
+//             if(response.is_null(6)){
 //                 provider.set_bank_detail_id(-1);
 //                 provider.set_bank_detail(gateway.get())
-            }else{
-                provider.set_bank_detail(gateway.get(response.get<int>(6)));
-            }
+//             }else{
+//                 provider.set_bank_detail(gateway.get(response.get<int>(6)));
+//             }
 
             auto ptr = std::make_shared<Provider>(provider);
 //             cache.Put(id, ptr);

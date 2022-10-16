@@ -60,30 +60,30 @@ Provider::Provider(int id) : id(id) {}
 //     bank_detail_id = bankDetail_id;
 // }
 
-void Provider::set_bank_detail(std::shared_ptr<BankDetail> bank_detail){
-    this->bank_detail = bank_detail;
-}
+// void Provider::set_bank_detail(std::shared_ptr<BankDetail> bank_detail){
+//     this->bank_detail = bank_detail;
+// }
 
-std::shared_ptr<BankDetail> Provider::get_bank_detail(){
-//     if(bank_detail_id == -1){
+// std::shared_ptr<BankDetail> Provider::get_bank_detail(){
+// //     if(bank_detail_id == -1){
+// //         throw GatewayException("not found");
+// //     }
+// //
+// //     BankDetailgateway gateway;
+// //     try{
+// //         return gateway.get(bank_detail_id);
+// //     }catch(GatewayException& e){
+// //         bank_detail_id = -1;
+// //         throw GatewayException("not found");
+// //     }
+//
+//     if(auto ptr = bank_detail.lock()){
+//         return ptr;
+//     }else{
 //         throw GatewayException("not found");
 //     }
 //
-//     BankDetailgateway gateway;
-//     try{
-//         return gateway.get(bank_detail_id);
-//     }catch(GatewayException& e){
-//         bank_detail_id = -1;
-//         throw GatewayException("not found");
-//     }
-
-    if(auto ptr = bank_detail.lock()){
-        return ptr;
-    }else{
-        throw GatewayException("not found");
-    }
-
-}
+// }
 
 std::shared_ptr<Provider> Provider::get(int id){
     ProviderGateway gateway;
@@ -110,11 +110,11 @@ std::shared_ptr<Provider> Provider::create(
         std::string post_address,
         std::string phone_number,
         std::string fax,
-        std::string email,
-        int bank_detail
+        std::string email
+//         int bank_detail
     ){
     ProviderGateway gateway;
-    return gateway.create(name,post_address,phone_number,fax,email,bank_detail);
+    return gateway.create(name,post_address,phone_number,fax,email);
 }
 
 void Provider::remove(std::shared_ptr<Provider> provider){

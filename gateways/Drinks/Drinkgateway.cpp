@@ -21,10 +21,10 @@ void Drinkgateway::save(std::shared_ptr<Drink> data) {
     db.exec("begin transaction;");
 
     std::string sql = fmt::format("update drinks set name = '{}', strength = {}, size = {}, container = '{}' where id = {}",
-        data->getName(),
+        escape_string(data->getName()),
         data->getStrength(),
         data->getSize(),
-        data->getContainer(),
+        escape_string(data->getContainer()),
         data->get_id()
     );
 
@@ -168,10 +168,10 @@ std::shared_ptr<Drink> Drinkgateway::create(std::string name, int strength, int 
 
     std::string sql = fmt::format("insert into drinks(name, strength, size, container)"
         "values('{}', {}, {}, '{}') returning id;",
-        name,
+        escape_string(name),
         strength,
         size,
-        container
+        escape_string(container)
     );
 
     auto response = db.exec(sql);

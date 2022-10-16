@@ -117,11 +117,11 @@ std::shared_ptr<Product> Product::create(
         float price,
         std::string delivery_terms,
         std::string payment_terms,
-        int provider_id,
+        std::shared_ptr<Provider> provider,
         std::string name
     ){
     ProductGateway gateway;
-    return gateway.create(ingredient_id,price,delivery_terms,payment_terms,provider_id,name);
+    return gateway.create(ingredient_id,price,delivery_terms,payment_terms,provider->get_id(),name);
 }
 
 void Product::remove(std::shared_ptr<Product> product){

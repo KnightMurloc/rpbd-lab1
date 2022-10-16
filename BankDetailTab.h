@@ -39,6 +39,12 @@ private:
     Gtk::Entry* city_entry;
     Gtk::Entry* tin_entry;
     Gtk::Entry* settlement_entry;
+    Gtk::Label* provider_link;
+    Gtk::Button* select_button;
+    Gtk::Button* find_button;
+
+    void find_provider();
+    static void select_provider(Gtk::Label* label, TabManager* manager);
 
     EntityList<BankDetail,Entry>* list;
 
@@ -51,6 +57,8 @@ private:
     void create();
 
     void remove_entry();
+
+    void provider_remove_callback(std::shared_ptr<IEntity> entity);
 
 protected:
 

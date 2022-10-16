@@ -31,9 +31,9 @@ ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
     builder->get_widget("entry_number", entry_number);
     builder->get_widget("fax_entry", fax_entry);
     builder->get_widget("email_entry", email_entry);
-    builder->get_widget("detail_link", detail_link);
-    builder->get_widget("select_button", select_button);
-    builder->get_widget("find_button", find_button);
+//     builder->get_widget("detail_link", detail_link);
+//     builder->get_widget("select_button", select_button);
+//     builder->get_widget("find_button", find_button);
 
 //     setup_menu(builder);
 
@@ -42,8 +42,8 @@ ProviderTab::ProviderTab(TabManager* manager) : Tab(manager) {
     info_box->add(*save_button);
     info_box->show_all();
 
-    find_button->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::find_detail));
-    select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&ProviderTab::select_deltail,detail_link, get_tab_manager()));
+//     find_button->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::find_detail));
+//     select_button->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&ProviderTab::select_deltail,detail_link, get_tab_manager()));
 
     getRemoveButton()->signal_clicked().connect(sigc::mem_fun(this,&ProviderTab::remove_entry));
 
@@ -76,18 +76,18 @@ void ProviderTab::select(Gtk::ListBoxRow* row){
     fax_entry->set_text(entry->get_provider()->get_fax());
     email_entry->set_text(entry->get_provider()->get_email());
 
-    try{
-        std::shared_ptr<BankDetail> detail = entry->get_provider()->get_bank_detail();
-        detail_link->set_text(detail->getBankName());
-
-        detail_link->set_data("id",new int(detail->get_id()),[](void* data){delete (int*) data;});
-        find_button->set_sensitive(true);
-    }catch(GatewayException& e){
-        detail_link->set_text("none");
-        detail_link->set_data("id",nullptr,[](void* data){delete (int*) data;});
-        find_button->set_sensitive(false);
-
-    }
+//     try{
+//         std::shared_ptr<BankDetail> detail = entry->get_provider()->get_bank_detail();
+//         detail_link->set_text(detail->getBankName());
+//
+//         detail_link->set_data("id",new int(detail->get_id()),[](void* data){delete (int*) data;});
+//         find_button->set_sensitive(true);
+//     }catch(GatewayException& e){
+//         detail_link->set_text("none");
+//         detail_link->set_data("id",nullptr,[](void* data){delete (int*) data;});
+//         find_button->set_sensitive(false);
+//
+//     }
 
 }
 
@@ -134,10 +134,10 @@ void ProviderTab::save_current(){
    provider->set_phone_number(entry_number->get_text());
    provider->set_fax(fax_entry->get_text());
    provider->set_email(email_entry->get_text());
-   int* d_id = static_cast<int*>(detail_link->get_data("id"));
+//    int* d_id = static_cast<int*>(detail_link->get_data("id"));
 
-   if(d_id)
-       provider->set_bank_detail(BankDetail::get(*d_id));
+//    if(d_id)
+//        provider->set_bank_detail(BankDetail::get(*d_id));
 
     Provider::save(provider);
 
@@ -160,17 +160,17 @@ void ProviderTab::create(){
     dialog->add_button("отмена", Gtk::RESPONSE_CANCEL);
 
     Gtk::Box* box;
-    Gtk::Label* detail_link_dialog;
-    Gtk::Button* select_button_dialog;
-    Gtk::Button* find_button_dialog;
+//     Gtk::Label* detail_link_dialog;
+//     Gtk::Button* select_button_dialog;
+//     Gtk::Button* find_button_dialog;
 
     builder->get_widget("box", box);
-    builder->get_widget("detail_link", detail_link_dialog);
-    builder->get_widget("select_button", select_button_dialog);
-    builder->get_widget("find_button", find_button_dialog);
-    find_button_dialog->set_sensitive(false);
+//     builder->get_widget("detail_link", detail_link_dialog);
+//     builder->get_widget("select_button", select_button_dialog);
+//     builder->get_widget("find_button", find_button_dialog);
+//     find_button_dialog->set_sensitive(false);
     dynamic_cast<Gtk::Container*>(dialog->get_children()[0])->add(*box);
-    select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&ProviderTab::select_deltail,detail_link_dialog, get_tab_manager()));
+//     select_button_dialog->signal_clicked().connect(sigc::bind<Gtk::Label*,TabManager*>(&ProviderTab::select_deltail,detail_link_dialog, get_tab_manager()));
 
     dialog->signal_response().connect([this,dialog, builder](int response){
         if(response == Gtk::RESPONSE_OK){
@@ -179,14 +179,14 @@ void ProviderTab::create(){
             Gtk::Entry* entry_number_dialog;
             Gtk::Entry* fax_entry_dialog;
             Gtk::Entry* email_entry_dialog;
-            Gtk::Label* detail_link_dialog;
+//             Gtk::Label* detail_link_dialog;
 
             builder->get_widget("name_entry", name_entry_dialog);
             builder->get_widget("address_entry", address_entry_dialog);
             builder->get_widget("entry_number", entry_number_dialog);
             builder->get_widget("fax_entry", fax_entry_dialog);
             builder->get_widget("email_entry", email_entry_dialog);
-            builder->get_widget("detail_link", detail_link_dialog);
+//             builder->get_widget("detail_link", detail_link_dialog);
 
             if(name_entry_dialog->get_text().empty()){
                 Gtk::MessageDialog message("не указано имя");
@@ -218,15 +218,15 @@ void ProviderTab::create(){
                 return;
             }
 
-            int* d_id_ptr = static_cast<int*>(detail_link_dialog->get_data("id"));
+//             int* d_id_ptr = static_cast<int*>(detail_link_dialog->get_data("id"));
 
-            int d_id;
-            if(d_id_ptr == nullptr){
-                d_id = -1;
-            }else{
-                d_id = *d_id_ptr;
-            }
-            fmt::print("create provider {}\n",*d_id_ptr);
+//             int d_id;
+//             if(d_id_ptr == nullptr){
+//                 d_id = -1;
+//             }else{
+//                 d_id = *d_id_ptr;
+//             }
+//             fmt::print("create provider {}\n",*d_id_ptr);
 
 //             auto provider = gateway.create(
 //               name_entry_dialog->get_text(),
@@ -241,8 +241,8 @@ void ProviderTab::create(){
               address_entry_dialog->get_text(),
               entry_number_dialog->get_text(),
               fax_entry_dialog->get_text(),
-              email_entry_dialog->get_text(),
-              d_id
+              email_entry_dialog->get_text()
+//               d_id
             );
 
             auto entry = Gtk::make_managed<Entry>(provider);
@@ -261,6 +261,8 @@ void ProviderTab::remove_entry(){
        return;
    }
 
+   on_remove.emit(entry->get_provider());
+
    Provider::remove(entry->get_provider());
 //    gateway.remove(entry->get_provider());
 
@@ -271,7 +273,7 @@ void ProviderTab::remove_entry(){
 
    list->remove_entity(entry);
 
-   get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail()->get_id());
+//    get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail()->get_id());
 }
 
 // void ProviderTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
@@ -286,25 +288,25 @@ void ProviderTab::remove_entry(){
 //     fax_entry_menu->signal_insert_text().connect(sigc::bind<Gtk::Entry*>(&Form::number_only,fax_entry_menu));
 // }
 
-void ProviderTab::find_detail(){
-    int* id = static_cast<int*>(detail_link->get_data("id"));
-    get_tab_manager()->select_on_tab(TabName::BACK_DETAIL,*id);
-}
+// void ProviderTab::find_detail(){
+//     int* id = static_cast<int*>(detail_link->get_data("id"));
+//     get_tab_manager()->select_on_tab(TabName::BACK_DETAIL,*id);
+// }
 
-void ProviderTab::select_deltail(Gtk::Label* label, TabManager* manager){
-    int id = manager->select_dialog(TabName::BACK_DETAIL);
-    if(id == -1){
-        fmt::print("not found\n");
-        return;
-    }
-    BankDetailgateway detail_gateway;
-    try {
-        label->set_text(detail_gateway.get(id)->getBankName());
-        label->set_data("id", new int(id), [](void* data){std::cout << "delete" << std::endl; delete (int*) data;});
-    }catch(std::exception&){
-        fmt::print("not exception\n");
-    }
-}
+// void ProviderTab::select_deltail(Gtk::Label* label, TabManager* manager){
+//     int id = manager->select_dialog(TabName::BACK_DETAIL);
+//     if(id == -1){
+//         fmt::print("not found\n");
+//         return;
+//     }
+//     BankDetailgateway detail_gateway;
+//     try {
+//         label->set_text(detail_gateway.get(id)->getBankName());
+//         label->set_data("id", new int(id), [](void* data){std::cout << "delete" << std::endl; delete (int*) data;});
+//     }catch(std::exception&){
+//         fmt::print("not exception\n");
+//     }
+// }
 
 std::shared_ptr<Provider> ProviderTab::Entry::get_provider() {
     return provider;

@@ -147,8 +147,9 @@ void IngredientTab::remove_entry(){
    }
 
 //    gateway.remove(entry->get_ingredient());
+    on_remove.emit(entry->get_ingredient());
     Ingredient::remove(entry->get_ingredient());
-   on_remove.emit(entry->get_ingredient());
+
     Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);
 

@@ -9,8 +9,9 @@
 #include "../Provider/ProviderGateway.h"
 #include "../Ingredients/IngredientGateway.h"
 #include <memory>
+#include "../entity.h"
 
-class Product {
+class Product : public IEntity {
 private:
     int id;
 //     int ingredient_id = -1;
@@ -33,7 +34,8 @@ public:
         float price,
         std::string delivery_terms,
         std::string payment_terms,
-        int provider_id,
+//         int provider_id,
+        std::shared_ptr<Provider> provider,
         std::string name
     );
 

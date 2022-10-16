@@ -7,6 +7,7 @@
 
 #include <gtkmm.h>
 #include <memory>
+#include "fmt/core.h"
 #include "gateways/Gateway.h"
 
 class IEntry {
@@ -23,6 +24,10 @@ public:
     virtual bool scroll_down() = 0;
     virtual std::vector<Gtk::Widget*> get_children() = 0;
     virtual void remove_row(Gtk::Widget* widget) = 0;
+
+    virtual ~IList(){
+        fmt::print("remove list\n");
+    }
 };
 
 template<typename T>
@@ -96,6 +101,10 @@ public:
     void remove_row(Gtk::Widget* widget) override;
 
     void add_column_title(std::string title);
+
+//     ~EntityList(){
+//         fmt::print("remove list\n");
+//     }
 };
 
 #include "EntityList.inc"

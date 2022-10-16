@@ -57,16 +57,20 @@ template<class T, class E>
 void EntityList<T, E>::fill_list() {
     for(auto child : list->get_children()){
         list->remove(*child);
+        delete child;
     }
 
     first_id = 0;
     last_id = -1;
-    for(const auto& entity : current_search->get_great_then(0,20)){
+    for(auto& entity : current_search->get_great_then(0,20)){
+        fmt::print("recount const: {}\n", entity.use_count());
         if(entity->get_id() > last_id){
             last_id = entity->get_id();
         }
         auto entry = Gtk::make_managed<E>(entity);
         list->add(*entry);
+
+        entity = std::shared_ptr<T>();
     }
 
     scroll->show_all();
@@ -154,6 +158,7 @@ IEntry* EntityList<T, E>::get_selected() {
 template<class T, class E>
 void EntityList<T, E>::add_entity(E* entity){
     list->add(*entity);
+    last_id = entity->get_id();
 }
 
 template<class T, class E>
@@ -190,6 +195,7 @@ template<class T, class E>
 void EntityList<T,E>::reset_search(){
 //     current_search = std::make_unique<DefaultSearch>(gateway);
     search_entry->set_text("");
+    current_search = std::make_unique<DefaultSearch>();
     fill_list();
 }
 

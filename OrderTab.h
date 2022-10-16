@@ -38,6 +38,12 @@ private:
     Gtk::Entry* day_entry;
     Gtk::Entry* month_entry;
     Gtk::Entry* year_entry;
+    Gtk::Label* empl_link;
+    Gtk::Button* find_button;
+    Gtk::Button* select_button;
+
+    void find_empl();
+    static void select_empl(Gtk::Label* label, TabManager* manager);
 
     void select(Gtk::ListBoxRow* row);
 
@@ -48,6 +54,8 @@ private:
     void remove();
 
     void save_current();
+
+
 protected:
 
     IList* create_list() override;

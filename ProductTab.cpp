@@ -6,6 +6,7 @@
 #include "Form.h"
 #include "TabManager.h"
 #include "gateways/Product/Product.h"
+#include "gateways/Provider/Provider.h"
 #include "sigc++/functors/mem_fun.h"
 
 #include <memory>
@@ -102,6 +103,18 @@ void ProductTab::save_current() {
    if(p_id_ptr){
        p_id = *p_id_ptr;
    }
+
+   if(i_id == -1){
+       Gtk::MessageDialog message("не указан ингридиет");
+       message.run();
+       return;
+    }
+
+    if(p_id == -1){
+       Gtk::MessageDialog message("не указан поставщик");
+       message.run();
+       return;
+    }
 
 //    product->set_ingredient_id(i_id);
     product->set_ingredient(Ingredient::get(i_id));
@@ -232,7 +245,7 @@ void ProductTab::create(){
               std::stof(price_entry_dialog->get_text()),
               delivery_terms_entry_dialog->get_text(),
               payment_terms_entry_dialog->get_text(),
-              p_id,
+              Provider::get(p_id),
               name_entry_dialog->get_text()
             );
 
@@ -256,6 +269,7 @@ void ProductTab::remove_entry(){
        return;
    }
 
+   on_remove.emit(entry->get_product());
 //    gateway.remove(entry->get_product());
     Product::remove(entry->get_product());
 
@@ -304,30 +318,42 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
         box->add(*info_box);
     }
 
-    try{
+    if(entry->get_product()->get_ingredient()){
         ing_link->set_text(entry->get_product()->get_ingredient()->get_name());
         find_button_ing->set_sensitive(true);
 
         ing_link->set_data("id",new int(entry->get_product()->get_ingredient()->get_id()),[](void* data){delete (int*) data;});
-    }catch(GatewayException&){
+    }else{
         ing_link->set_text("none");
         find_button_ing->set_sensitive(false);
         ing_link->set_data("id",nullptr,free);
     }
+/*
+    try{
+
+    }catch(GatewayException&){
+
+    }*/
 
     price_entry->set_text(fmt::format("{}",entry->get_product()->get_price()));
     delivery_terms_entry->set_text(entry->get_product()->get_delivery_terms());
     payment_terms_entry->set_text(entry->get_product()->get_payment_terms());
 
-    try{
+    if(entry->get_product()->get_provider()){
         provider_link->set_text(entry->get_product()->get_provider()->get_name());
         find_button_provider->set_sensitive(true);
         provider_link->set_data("id", new int(entry->get_product()->get_provider()->get_id()),[](void* data){delete (int*) data;});
-    }catch(GatewayException&){
+    }else{
         provider_link->set_text("none");
         find_button_provider->set_sensitive(false);
         provider_link->set_data("id",nullptr,free);
     }
+
+//     try{
+//
+//     }catch(GatewayException&){
+//
+//     }
 
     name_entry->set_text(entry->get_product()->get_name());
 }
@@ -380,9 +406,10 @@ void ProductTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
 void ProductTab::remove_ingredient_callback(std::shared_ptr<IEntity> entity){
     for(auto child : list->get_list_box()->get_children()){
         auto entry = dynamic_cast<Entry*>(child);
-        if(entry->get_product()->get_ingredient()->get_id() == entity->get_id()){
-            list->remove_entity(entry);
-        }
+        if(entry->get_product()->get_ingredient())
+            if(entry->get_product()->get_ingredient()->get_id() == entity->get_id()){
+                list->remove_entity(entry);
+            }
     }
 }
 

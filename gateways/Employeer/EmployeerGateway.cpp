@@ -50,7 +50,7 @@ std::shared_ptr<Employeer> EmployeerGateway::get(int id) {
         return cache_new.get(id);
     }else{
         auto db = DbInstance::getInstance();
-        std::string sql = fmt::format("select id, first_name, last_name, patronymic, address, birth_date, salary, movement, post from employees where id = {}", id);
+        std::string sql = fmt::format("select id, first_name, last_name, patronymic, address, birth_date, salary, post from employees where id = {}", id);
         auto response = db.exec(sql);
         if(response.next()){
 
@@ -65,11 +65,11 @@ std::shared_ptr<Employeer> EmployeerGateway::get(int id) {
             employeer.setAddress(response.get<std::string>(4));
             employeer.setBirthDate(response.get<std::string>(5));
             employeer.setSalary(response.get<float>(6));
-            if(!response.is_null(7)) {
+//             if(!response.is_null(7)) {
 //                 employeer.set_movement_id(response.get<int>(7));
-                employeer.set_movement(gateway.get(response.get<int>(7)));
-            }
-            employeer.setPost(string_to_post(response.get<std::string>(8)));
+//                 employeer.set_movement(gateway.get(response.get<int>(7)));
+//             }
+            employeer.setPost(string_to_post(response.get<std::string>(7)));
 
             auto ptr = std::make_shared<Employeer>(employeer);
 //             cache.Put(id, ptr);
@@ -125,16 +125,16 @@ void EmployeerGateway::save(std::shared_ptr<Employeer> data) {
                                   " address = '{}',"
                                   " birth_date = '{}',"
                                   " salary = {},"
-                                  " movement = {},"
+//                                   " movement = {},"
                                   " post = '{}'"
                                   " where id = {};",
-                                  data->getFirstName(),
-                                  data->getLastName(),
-                                  data->getPatronymic(),
-                                  data->getAddress(),
-                                  data->getBirthDate(),
+                                  escape_string(data->getFirstName()),
+                                  escape_string(data->getLastName()),
+                                  escape_string(data->getPatronymic()),
+                                  escape_string(data->getAddress()),
+                                data->getBirthDate(),
                                   data->getSalary(),
-                                  data->get_movement() == nullptr ? "NULL" : std::to_string(data->get_movement()->get_id()),
+//                                   data->get_movement() == nullptr ? "NULL" : std::to_string(data->get_movement()->get_id()),
                                   post_to_string(data->getPost()),
                                   data->get_id()
                                   );
@@ -142,20 +142,26 @@ void EmployeerGateway::save(std::shared_ptr<Employeer> data) {
     db.exec(sql);
 }
 
-std::shared_ptr<Employeer>
-EmployeerGateway::create(std::string first_name, std::string last_name, std::string patronymic, std::string address,
-                         std::string birth_date, float salary, int movement_id, Post post) {
+std::shared_ptr<Employeer> EmployeerGateway::create(
+    std::string first_name,
+    std::string last_name,
+    std::string patronymic,
+    std::string address,
+    std::string birth_date,
+    float salary,
+//     int movement_id,
+    Post post) {
     auto db = DbInstance::getInstance();
-    std::string sql = fmt::format("insert into employees(first_name,last_name,patronymic,address,birth_date,salary,movement,post)"
-                                  " values('{}','{}','{}', '{}', '{}', {}, {}, '{}')"
+    std::string sql = fmt::format("insert into employees(first_name,last_name,patronymic,address,birth_date,salary,post)"
+                                  " values('{}','{}','{}', '{}', '{}', {}, '{}')"
                                   " returning id;",
-                                  first_name,
-                                  last_name,
-                                  patronymic,
-                                  address,
+                                  escape_string(first_name),
+                                  escape_string(last_name),
+                                  escape_string(patronymic),
+                                  escape_string(address),
                                   birth_date,
                                   salary,
-                                  movement_id == -1 ? "NULL" : std::to_string(movement_id),
+//                                   movement_id == -1 ? "NULL" : std::to_string(movement_id),
                                   post_to_string(post)
                                   );
     auto result = db.exec(sql);
@@ -171,7 +177,7 @@ EmployeerGateway::create(std::string first_name, std::string last_name, std::str
         empl.setBirthDate(birth_date);
         empl.setSalary(salary);
 //         empl.set_movement_id(movement_id);
-        empl.set_movement(gateway.get(movement_id));
+//         empl.set_movement(gateway.get(movement_id));
         empl.setPost(post);
 
         auto ptr = std::make_shared<Employeer>(empl);
@@ -268,7 +274,7 @@ std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_great_then_by_name(s
         "    lower(first_name) like '%{0}%'"
         " or lower(last_name) like '%{0}%'"
         " or lower(patronymic) like '%{0}%'"
-        " ) and id > {1} order by id DESC limit {2};", name,id,count);
+        " ) and id > {1} order by id DESC limit {2};", escape_string(name),id,count);
 
     auto response = db.exec(sql);
 
@@ -304,7 +310,7 @@ std::list<std::shared_ptr<Employeer>> EmployeerGateway::get_less_then_by_name(st
         "    lower(first_name) like '%{0}%'"
         " or lower(last_name) like '%{0}%'"
         " or lower(patronymic) like '%{0}%'"
-        " ) and id < {1} order by id DESC limit {2};", name,id,count);
+        " ) and id < {1} order by id DESC limit {2};", escape_string(name),id,count);
 
     auto response = db.exec(sql);
 

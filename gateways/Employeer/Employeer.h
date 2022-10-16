@@ -8,7 +8,6 @@
 #include <string>
 #include <ctime>
 #include "../posts.h"
-#include "../Orders/Order.h"
 #include "../entity.h"
 #include <memory>
 #include <list>
@@ -23,7 +22,7 @@ private:
     std::string birth_date;
     float salary;
 //     std movement_id = -1;
-    std::weak_ptr<Order> movement;
+//     std::weak_ptr<Order> movement;
     Post post;
 public:
     static std::list<std::shared_ptr<Employeer>> get_great_than_by_id(int id, int count);
@@ -42,7 +41,7 @@ public:
             std::string address,
             std::string birth_date,
             float salary,
-            std::shared_ptr<Order> movement,
+//             std::shared_ptr<Order> movement,
             Post post);
 
     static void save(std::shared_ptr<Employeer> empl);
@@ -77,9 +76,9 @@ public:
 
     void setSalary(float salary);
 
-    [[nodiscard]] std::shared_ptr<Order> get_movement() const;
-
-    void set_movement(std::shared_ptr<Order> movement);
+//     [[nodiscard]] std::shared_ptr<Order> get_movement() const;
+//
+//     void set_movement(std::shared_ptr<Order> movement);
 
 //     [[nodiscard]] int get_movement_id() const;
 

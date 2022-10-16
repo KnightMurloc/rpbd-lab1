@@ -29,10 +29,10 @@ void ProductGateway::save(std::shared_ptr<Product> data) {
         " where id = {};",
         data->get_ingredient()->get_id(),
         data->get_price(),
-        data->get_delivery_terms(),
-        data->get_payment_terms(),
+        escape_string(data->get_delivery_terms()),
+        escape_string(data->get_payment_terms()),
         data->get_provider()->get_id(),
-        data->get_name(),
+        escape_string(data->get_name()),
         data->get_id()
     );
 
@@ -54,10 +54,10 @@ std::shared_ptr<Product> ProductGateway::create(
         " values({},{},'{}','{}',{},'{}') returning id;",
         ingredient_id == -1 ? "NULL" : std::to_string(ingredient_id),
         price,
-        delivery_terms,
-        payment_terms,
+        escape_string(delivery_terms),
+        escape_string(payment_terms),
         provider_id == -1 ? "NULL" : std::to_string(provider_id),
-        name
+        escape_string(name)
     );
 
     auto response = db.exec(sql);

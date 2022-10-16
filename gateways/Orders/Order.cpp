@@ -4,6 +4,8 @@
 
 #include "Order.h"
 #include "OrderGateway.h"
+#include "fmt/core.h"
+#include "../Employeer/EmployeerGateway.h"
 
 Order::Order(int id) : id(id) {}
 
@@ -66,12 +68,41 @@ void Order::save(std::shared_ptr<Order> order){
     OrderGateway gateway;
     gateway.save(order);
 }
-std::shared_ptr<Order> Order::create(const std::string &reason, int order_number, const std::string &order_date, const std::string& post){
+std::shared_ptr<Order> Order::create(
+    const std::string &reason,
+    int order_number,
+    const std::string &order_date,
+    const std::string& post,
+    std::shared_ptr<Employeer> empl
+){
     OrderGateway gateway;
-    return gateway.create(reason,order_number,order_date,post);
+    return gateway.create(reason,order_number,order_date,post,empl);
 }
 
 void Order::remove(std::shared_ptr<Order> order){
     OrderGateway gateway;
     gateway.remove(order);
+}
+
+std::shared_ptr<Employeer> Order::get_employer(){
+    fmt::print("empl id: {}\n", employer.expired());
+
+    if(employer.expired() && employer_id != -1){
+        try{
+            EmployeerGateway gateway;
+            auto empl_tmp = gateway.get(employer_id);
+            employer = empl_tmp;
+//             fmt::print("test: {}\n", employer.expired());
+            return empl_tmp;
+        }catch(GatewayException& e){}
+    }
+
+    return employer.lock();
+}
+
+void Order::set_employer(std::shared_ptr<Employeer> empl){
+    employer = empl;
+    if(empl){
+        employer_id = empl->get_id();
+    }
 }

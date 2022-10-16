@@ -2,8 +2,8 @@
 // Created by victor on 03.10.2022.
 //
 
-#ifndef LAB1_CACHE_H
-#define LAB1_CACHE_H
+#ifndef LAB1_REPOSITORY_H
+#define LAB1_REPOSITORY_H
 
 #include "fmt/core.h"
 #include <map>
@@ -11,14 +11,14 @@
 #include <fmt/format.h>
 
 template<typename T>
-class cache {
+class Repository {
 private:
     std::map<int,std::weak_ptr<T>> map;
 public:
     void put(std::shared_ptr<T> data){
         for(auto entry : map){
             if(entry.second.expired()){
-                fmt::print("free: {}\n", entry.first);
+//                 fmt::print("free: {}\n", entry.first);
                 map.erase(entry.first);
                 break;
             }
@@ -27,7 +27,7 @@ public:
     }
 
     bool exist(int key){
-        fmt::print("exist: {} - {}\n",key,  map.find(key) != map.end() && !map[key].expired());
+//         fmt::print("exist: {} - {}\n",key,  map.find(key) != map.end() && !map[key].expired());
         return map.find(key) != map.end() && !map[key].expired();
     }
 
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif //LAB1_CACHE_H
+#endif //LAB1_REPOSITORY_H

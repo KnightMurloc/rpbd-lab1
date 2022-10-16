@@ -235,6 +235,11 @@ void SnackTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
     dynamic_cast<Gtk::Container*>(dialog.get_children()[0])->add(box);
 
     if(dialog.run() == Gtk::RESPONSE_OK){
+
+        if(size_entry_dialog.get_text().empty()){
+            return;
+        }
+
         IngredientGateway ingredientGateway;
         std::shared_ptr<Ingredient> ingredient = ingredientGateway.get(ing_id);
 
@@ -358,9 +363,10 @@ void SnackTab::remove_entry() {
    }
 
 //    gateway.remove(entry->get_snack());
+    on_remove.emit(entry->get_snack());
     Snack::remove(entry->get_snack());
 
-   on_remove.emit(entry->get_snack());
+
 
    Gtk::Box* box;
    Form::getInstance().getBuilder()->get_widget("info_box", box);

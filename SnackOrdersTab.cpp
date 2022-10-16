@@ -291,6 +291,8 @@ void SnackOrdersTab::remove() {
         return;
     }
 
+    on_remove.emit(entry->get_order());
+
 //     gateway.remove(entry->get_order());
     SnackOrder::remove(entry->get_order());
 

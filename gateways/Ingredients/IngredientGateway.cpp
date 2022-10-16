@@ -17,7 +17,7 @@ void IngredientGateway::save(std::shared_ptr<Ingredient> data) {
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("update ingredients set name = '{}', unit = '{}' where id = {}",
-        data->get_name(),
+        escape_string(data->get_name()),
         unit_to_string(data->get_unit()),
         data->get_id()
     );
@@ -115,7 +115,7 @@ std::shared_ptr<Ingredient> IngredientGateway::create(std::string name, Unit uni
     auto db = DbInstance::getInstance();
 
     std::string sql = fmt::format("insert into ingredients(name, unit) values('{}', '{}') returning id;",
-        name,
+        escape_string(name),
         unit_to_string(unit)
     );
 
@@ -229,7 +229,7 @@ int IngredientGateway::get_max(){
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_great_then_by_name(std::string name, int id, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select id from ingredients where lower(name) like '%{}%' and id > {} order by id limit {};", name,id,count);
+    std::string sql = fmt::format("select id from ingredients where lower(name) like '%{}%' and id > {} order by id limit {};", escape_string(name),id,count);
 
     auto response = db.exec(sql);
 
@@ -250,7 +250,7 @@ std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_great_then_by_name
 std::list<std::shared_ptr<Ingredient>> IngredientGateway::get_less_then_by_name(std::string name, int id, int count){
     auto db = DbInstance::getInstance();
 
-    std::string sql = fmt::format("select id from ingredients where lower(name) like '%{}%' and id < {} order by id DESC limit {};", name,id,count);
+    std::string sql = fmt::format("select id from ingredients where lower(name) like '%{}%' and id < {} order by id DESC limit {};", escape_string(name),id,count);
 
     auto response = db.exec(sql);
 
