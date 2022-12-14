@@ -62,13 +62,17 @@ SnackTab::SnackTab(TabManager* tab_manager) : Tab(tab_manager) {
 }
 
 void SnackTab::save_current(){
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
+//
+//    auto snack = entry->get_snack();
 
-   auto snack = entry->get_snack();
-
+    auto snack = std::dynamic_pointer_cast<Snack>(current);
+    if(!snack){
+        return;
+    }
 
    if(name_entry->get_text().empty()){
        Gtk::MessageDialog message("не указано имя");
@@ -143,10 +147,12 @@ void SnackTab::save_current(){
    snack->set_name(name_entry->get_text());
    snack->set_size(std::stoi(size_entry->get_text()));
 
+    auto entry = dynamic_cast<Entry*>(list->get_selected());
 
-   entry->name_label->set_text(name_entry->get_text());
-   entry->size_label->set_text(size_entry->get_text());
-
+    if(entry && entry->get_snack()->get_id() == snack->get_id()){
+        entry->name_label->set_text(name_entry->get_text());
+        entry->size_label->set_text(size_entry->get_text());
+    }
 //    gateway.save(snack);
    Snack::save(snack);
 }
@@ -158,6 +164,8 @@ void SnackTab::select(Gtk::ListBoxRow* entry_row) {
     if(entry == nullptr){
         return;
     }
+
+    current = entry->get_snack();
 
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
@@ -374,7 +382,7 @@ void SnackTab::remove_entry() {
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
-
+    current = std::shared_ptr<Snack>();
 }
 
 SnackTab::Entry::Entry(std::shared_ptr<Snack> snack) : snack(snack) {

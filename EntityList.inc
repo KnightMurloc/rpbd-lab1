@@ -6,7 +6,7 @@
 #include "gtkmm/object.h"
 #include "sigc++/functors/mem_fun.h"
 template<class T, class E>
-EntityList<T, E>::EntityList() {
+EntityList<T, E>::EntityList(bool has_search) {
     box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::ORIENTATION_VERTICAL);
 
@@ -35,8 +35,10 @@ EntityList<T, E>::EntityList() {
     search_entry = Gtk::make_managed<Gtk::SearchEntry>();
     search_entry->set_vexpand(false);
     search_entry->set_hexpand(true);
+    search_entry->set_sensitive(has_search);
 
     auto stop_search_button = Gtk::make_managed<Gtk::Button>(Gtk::StockID("gtk-cancel"));
+    stop_search_button->set_sensitive(has_search);
 
     stop_search_button->signal_clicked().connect(sigc::mem_fun(this,&EntityList::reset_search));
 
@@ -44,6 +46,7 @@ EntityList<T, E>::EntityList() {
     bottom_box->add(*stop_search_button);
 
     box->add(*scroll);
+
     box->add(*bottom_box);
 
     current_search = std::make_unique<DefaultSearch>();

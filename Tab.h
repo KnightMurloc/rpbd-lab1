@@ -24,8 +24,11 @@ private:
 
     Gtk::ButtonBox* create_top_panel();
 
+
+
 protected:
     sigc::signal<void(std::shared_ptr<IEntity>)> on_remove;
+    std::shared_ptr<IEntity> current;
 
     TabManager* get_tab_manager() const;
 

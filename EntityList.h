@@ -70,7 +70,7 @@ private:
 
     void select(Gtk::ListBoxRow* row);
 public:
-    explicit EntityList();
+    explicit EntityList(bool has_search = false);
 
     void fill_list() override;
 

@@ -78,6 +78,8 @@ void DrinksTab::select(Gtk::ListBoxRow* row){
         return;
     }
 
+    current = entry->get_drink();
+
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -184,9 +186,14 @@ void DrinksTab::add_ingredient(Gtk::ListBox* list, TabManager* tab_manager) {
 }
 
 void DrinksTab::save_current(){
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
 
-   auto drink = entry->get_drink();
+//    auto drink = entry->get_drink();
+
+    auto drink = std::dynamic_pointer_cast<Drink>(current);
+    if(!drink){
+        return;
+    }
 
    if(name_entry->get_text().empty()){
        Gtk::MessageDialog message("не указано имя");
@@ -276,11 +283,14 @@ void DrinksTab::save_current(){
 //    gateway.save(drink);
    Drink::save(drink);
 
-   entry->name_label->set_text(drink->getName());
-   entry->strength_label->set_text(strength_entry->get_text());
-   entry->size_label->set_text(size_entry->get_text());
-   entry->container_label->set_text(drink->getContainer());
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
 
+   if(entry && entry->get_drink()->get_id() == drink->get_id()){
+        entry->name_label->set_text(drink->getName());
+        entry->strength_label->set_text(strength_entry->get_text());
+        entry->size_label->set_text(size_entry->get_text());
+        entry->container_label->set_text(drink->getContainer());
+   }
 }
 
 void DrinksTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){
@@ -424,6 +434,7 @@ void DrinksTab::remove_entry(){
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+   current = std::shared_ptr<Drink>();
 }
 
 std::shared_ptr<Drink> DrinksTab::Entry::get_drink() {

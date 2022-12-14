@@ -61,10 +61,11 @@ ProductTab::ProductTab(TabManager* tab_manager) : Tab(tab_manager)  {
 }
 
 void ProductTab::save_current() {
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
+//     auto e
 
    if(price_entry->get_text().empty()){
        Gtk::MessageDialog message("не указана цена");
@@ -90,7 +91,11 @@ void ProductTab::save_current() {
        return;
    }
 
-   auto product = entry->get_product();
+//    auto product = entry->get_product();
+    auto product = std::dynamic_pointer_cast<Product>(current);
+    if(!product){
+        return;
+    }
 
    int* i_id_ptr = static_cast<int*>(ing_link->get_data("id"));
    int i_id = -1;
@@ -128,8 +133,12 @@ void ProductTab::save_current() {
    Product::save(product);
 //    gateway.save(product);
 
-   entry->name_label->set_text(product->get_name());
-   entry->price_label->set_text(price_entry->get_text());
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry && entry->get_product()->get_id() == product->get_id()){
+
+    entry->name_label->set_text(product->get_name());
+    entry->price_label->set_text(price_entry->get_text());
+   }
 }
 
 void ProductTab::create(){
@@ -279,6 +288,7 @@ void ProductTab::remove_entry(){
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+   current = std::shared_ptr<Product>();
 }
 
 void ProductTab::cancel_current() {
@@ -306,7 +316,7 @@ void ProductTab::select(Gtk::ListBoxRow* row) {
     if(entry == nullptr){
         return;
     }
-
+    current = entry->get_product();
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 

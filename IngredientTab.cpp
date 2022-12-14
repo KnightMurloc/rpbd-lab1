@@ -55,6 +55,8 @@ void IngredientTab::select(Gtk::ListBoxRow* row){
         return;
     }
 
+    current = entry->get_ingredient();
+
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -70,10 +72,10 @@ void IngredientTab::select(Gtk::ListBoxRow* row){
 }
 
 void IngredientTab::save(){
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
 
    if(name_entry->get_text().empty()){
        Gtk::MessageDialog message("имя не указано");
@@ -81,7 +83,12 @@ void IngredientTab::save(){
        return;
    }
 
-   auto ing = entry->get_ingredient();
+//    auto ing = entry->get_ingredient();
+
+    auto ing = std::dynamic_pointer_cast<Ingredient>(current);
+    if(!ing){
+        return;
+    }
 
    ing->set_name(name_entry->get_text());
    ing->set_unit(string_to_unit(unit_combo->get_active_id()));
@@ -89,8 +96,11 @@ void IngredientTab::save(){
 //    gateway.save(ing);
    Ingredient::save(ing);
 
-   entry->name_label->set_text(ing->get_name());
-   entry->unit_label->set_text(unit_combo->get_active_id());
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry && entry->get_ingredient()->get_id() == ing->get_id()){
+    entry->name_label->set_text(ing->get_name());
+    entry->unit_label->set_text(unit_combo->get_active_id());
+   }
 }
 
 void IngredientTab::create(){
@@ -156,6 +166,7 @@ void IngredientTab::remove_entry(){
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+   current = std::shared_ptr<Ingredient>();
 }
 
 IngredientTab::Entry::Entry(std::shared_ptr<Ingredient> ingredient) : ingredient(ingredient) {
@@ -205,7 +216,7 @@ std::list<std::shared_ptr<Ingredient>> IngredientTab::NameSearch::get_less_then(
 
 IList* IngredientTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Ingredient,Entry>>();
+    auto list = Gtk::make_managed<EntityList<Ingredient,Entry>>(true);
     list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Ingredient,Entry>*>(&IngredientTab::search,list));
 
     list->add_column_title("название");

@@ -11,6 +11,7 @@
 #include "sigc++/adaptors/bind.h"
 #include "sigc++/functors/mem_fun.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <iostream>
@@ -54,7 +55,7 @@ void BankDetailTab::select(Gtk::ListBoxRow* row){
     if(entry == nullptr){
         return;
     }
-
+    current = entry->get_bank_detail();
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -75,10 +76,10 @@ void BankDetailTab::select(Gtk::ListBoxRow* row){
 }
 
 void BankDetailTab::save_current(){
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
 
    if(name_entry->get_text().empty()){
        Gtk::MessageDialog message("не указано имя");
@@ -110,7 +111,11 @@ void BankDetailTab::save_current(){
        return;
     }
 
-   auto detail = entry->get_bank_detail();
+//    auto detail = entry->get_bank_detail();
+    auto detail = std::dynamic_pointer_cast<BankDetail>(current);
+    if(!detail){
+        return;
+    }
 
    detail->setBankName(name_entry->get_text());
    detail->setCity(city_entry->get_text());
@@ -123,10 +128,13 @@ void BankDetailTab::save_current(){
 //    gateway.save(detail);
     BankDetail::save(detail);
 
-   entry->name_label->set_text(detail->getBankName());
-   entry->city_label->set_text(detail->getCity());
-   entry->tin_label->set_text(tin_entry->get_text());
-   entry->account_label->set_text(settlement_entry->get_text().substr(0,10));
+    auto entry = dynamic_cast<Entry*>(list->get_selected());
+    if(entry && entry->get_bank_detail()->get_id() == detail->get_id()){
+        entry->name_label->set_text(detail->getBankName());
+        entry->city_label->set_text(detail->getCity());
+        entry->tin_label->set_text(tin_entry->get_text());
+        entry->account_label->set_text(settlement_entry->get_text().substr(0,10));
+    }
 }
 
 void BankDetailTab::create(){
@@ -246,6 +254,7 @@ void BankDetailTab::remove_entry(){
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+   current = std::shared_ptr<BankDetail>();
 }
 
 void BankDetailTab::setup_menu(Glib::RefPtr<Gtk::Builder> builder){

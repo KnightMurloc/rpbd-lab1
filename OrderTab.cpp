@@ -12,6 +12,7 @@
 #include "gateways/Orders/Order.h"
 #include "gateways/entity.h"
 #include <fmt/format.h>
+#include <memory>
 
 OrderTab::OrderTab(TabManager* tab_manager) : Tab(tab_manager) {
 
@@ -88,6 +89,8 @@ void OrderTab::select(Gtk::ListBoxRow *entry_row) {
         return;
     }
 
+    current = entry->get_order();
+
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -124,11 +127,13 @@ void OrderTab::select(Gtk::ListBoxRow *entry_row) {
 
 void OrderTab::save_current() {
 
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//
+//    if(entry == nullptr){
+//        return;
+//    }
 
-   if(entry == nullptr){
-       return;
-   }
+//     auto entry = std::dynamic_pointer_cast(current);
 
    if (reason_entry->get_text().empty()) {
        Gtk::MessageDialog message("не указана причина");
@@ -159,7 +164,11 @@ void OrderTab::save_current() {
        return;
    }
 
-   auto order = entry->get_order();
+//    auto order = entry->get_order();
+    auto order = std::dynamic_pointer_cast<Order>(current);
+    if(!order){
+        return;
+    }
 
    order->set_reason(reason_entry->get_text());
    order->set_order_number(std::stoi(order_number_entry->get_text()));
@@ -175,10 +184,15 @@ void OrderTab::save_current() {
 //    gateway.save(order);
    Order::save(order);
 
-   entry->reason_label->set_text(order->get_reason());
-   entry->order_number_label->set_text(std::to_string(order->get_order_number()));
-   entry->order_date_label->set_text(order->get_order_date());
-   entry->post_label->set_text(order->get_post_as_string());
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+
+   if(entry && entry->get_order()->get_id() == order->get_id()){
+
+    entry->reason_label->set_text(order->get_reason());
+    entry->order_number_label->set_text(std::to_string(order->get_order_number()));
+    entry->order_date_label->set_text(order->get_order_date());
+    entry->post_label->set_text(order->get_post_as_string());
+   }
 }
 
 void OrderTab::create(){
@@ -343,6 +357,7 @@ void OrderTab::remove() {
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+   current = std::shared_ptr<Order>();
 }
 
 IList* OrderTab::create_list(){

@@ -59,6 +59,8 @@ void ProviderTab::select(Gtk::ListBoxRow* row){
         return;
     }
 
+    current = entry->get_provider();
+
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -92,12 +94,17 @@ void ProviderTab::select(Gtk::ListBoxRow* row){
 }
 
 void ProviderTab::save_current(){
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
 
-   auto provider = entry->get_provider();
+//    auto provider = entry->get_provider();
+
+    auto provider = std::dynamic_pointer_cast<Provider>(current);
+    if(!provider){
+        return;
+    }
 
    if(name_entry->get_text().empty()){
        Gtk::MessageDialog message("не указано имя");
@@ -142,13 +149,15 @@ void ProviderTab::save_current(){
     Provider::save(provider);
 
 //    gateway.save(provider);
+    auto entry = dynamic_cast<Entry*>(list->get_selected());
 
-
-   entry->name_label->set_text(provider->get_name());
-   entry->post_address_label->set_text(provider->get_post_address());
-   entry->phone_number_label->set_text(provider->get_phone_number());
-   entry->fax_label->set_text(provider->get_fax());
-   entry->email_label->set_text(provider->get_email());
+    if(entry && entry->get_provider()->get_id() == provider->get_id()){
+        entry->name_label->set_text(provider->get_name());
+        entry->post_address_label->set_text(provider->get_post_address());
+        entry->phone_number_label->set_text(provider->get_phone_number());
+        entry->fax_label->set_text(provider->get_fax());
+        entry->email_label->set_text(provider->get_email());
+    }
 }
 
 void ProviderTab::create(){
@@ -273,6 +282,7 @@ void ProviderTab::remove_entry(){
 
    list->remove_entity(entry);
 
+   current = std::shared_ptr<Provider>();
 //    get_tab_manager()->remove_on_tab(TabName::BACK_DETAIL, entry->get_provider()->get_bank_detail()->get_id());
 }
 

@@ -72,6 +72,7 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
     if(entry == nullptr){
         return;
     }
+    current = entry->get_emp();
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -110,12 +111,15 @@ void EmployeesTab::select(Gtk::ListBoxRow *entry_row) {
 }
 
 void EmployeesTab::save_current() {
-   auto entry = dynamic_cast<Entry*>(list->get_selected());
-   if(entry == nullptr){
-       return;
-   }
+//    auto entry = dynamic_cast<Entry*>(list->get_selected());
+//    if(entry == nullptr){
+//        return;
+//    }
 
-   auto empl = entry->get_emp();
+   auto empl = std::dynamic_pointer_cast<Employeer>(current);
+   if(!empl){
+       return;
+    }
 
    if(first_name_entry->get_text().empty()){
        Gtk::MessageDialog message("не указано имя");
@@ -178,13 +182,16 @@ void EmployeesTab::save_current() {
 //    gateway.save(empl);
     Employeer::save(empl);
 
-   entry->first_name->set_text(empl->getFirstName());
-   entry->last_name->set_text(empl->getLastName());
-   entry->patronymic->set_text(empl->getPatronymic());
-   entry->address->set_text(empl->getAddress());
-   entry->birth_date->set_text(empl->getBirthDate());
-   entry->salary->set_text(std::to_string(empl->getSalary()));
-   entry->post->set_text(empl->getPostAsString());
+   auto entry = dynamic_cast<Entry*>(list->get_selected());
+   if(entry && entry->get_emp()->get_id() == empl->get_id()){
+        entry->first_name->set_text(empl->getFirstName());
+        entry->last_name->set_text(empl->getLastName());
+        entry->patronymic->set_text(empl->getPatronymic());
+        entry->address->set_text(empl->getAddress());
+        entry->birth_date->set_text(empl->getBirthDate());
+        entry->salary->set_text(std::to_string(empl->getSalary()));
+        entry->post->set_text(empl->getPostAsString());
+   }
 }
 
 void EmployeesTab::cancel_current() {
@@ -384,6 +391,7 @@ void EmployeesTab::remove() {
    box->remove(*box->get_children()[0]);
 
    list->remove_entity(entry);
+   current = std::shared_ptr<Employeer>();
 }
 
 EmployeesTab::Entry::Entry(std::shared_ptr<Employeer> emp) : emp(emp) {
@@ -448,7 +456,7 @@ std::list<std::shared_ptr<Employeer>> EmployeesTab::NameSearch::get_less_then(in
 
 IList* EmployeesTab::create_list(){
 
-    auto list = Gtk::make_managed<EntityList<Employeer,Entry>>();
+    auto list = Gtk::make_managed<EntityList<Employeer,Entry>>(true);
 
     list->get_search_entry()->signal_activate().connect(sigc::bind<EntityList<Employeer,Entry>*>(&EmployeesTab::search,list));
 

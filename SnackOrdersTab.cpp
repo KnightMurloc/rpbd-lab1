@@ -76,6 +76,8 @@ void SnackOrdersTab::select(Gtk::ListBoxRow* row) {
         return;
     }
 
+    current = entry->get_order();
+
     Gtk::Box* box;
     Form::getInstance().getBuilder()->get_widget("info_box", box);
 
@@ -121,12 +123,18 @@ void SnackOrdersTab::select_waiter(Gtk::Label* label, TabManager* manager){
 }
 
 void SnackOrdersTab::save_current(){
-    auto entry = dynamic_cast<Entry*>(list->get_selected());
-    if(entry == nullptr){
+//     auto entry = dynamic_cast<Entry*>(list->get_selected());
+//     if(entry == nullptr){
+//         return;
+//     }
+//
+//     auto order = entry->get_order();
+
+    auto order = std::dynamic_pointer_cast<SnackOrder>(current);
+
+    if(!order){
         return;
     }
-
-    auto order = entry->get_order();
 
     int* snack_id = static_cast<int*>(snack_link->get_data("id"));
     if(snack_id == nullptr){
@@ -155,14 +163,17 @@ void SnackOrdersTab::save_current(){
     SnackOrder::save(order);
 //     gateway.save(order);
 
-    entry->drink_label->set_text(order->get_snack()->get_name());
+    auto entry = dynamic_cast<Entry*>(list->get_selected());
+    if(entry && entry->get_order()->get_id() == order->get_id()){
+        entry->drink_label->set_text(order->get_snack()->get_name());
 
-    std::unique_ptr<gchar, decltype(&g_free)> first_name_ptr(g_utf8_substring(order->get_waiter()->getFirstName().c_str(),0,1), g_free);
+        std::unique_ptr<gchar, decltype(&g_free)> first_name_ptr(g_utf8_substring(order->get_waiter()->getFirstName().c_str(),0,1), g_free);
 
-    std::string waiter_name = fmt::format("{} {}.", order->get_waiter()->getLastName(), first_name_ptr.get());
+        std::string waiter_name = fmt::format("{} {}.", order->get_waiter()->getLastName(), first_name_ptr.get());
 
-    entry->waiter_label->set_text(waiter_name);
-    entry->table_label->set_text(table_entry->get_text());
+        entry->waiter_label->set_text(waiter_name);
+        entry->table_label->set_text(table_entry->get_text());
+    }
 }
 
 
@@ -302,6 +313,8 @@ void SnackOrdersTab::remove() {
     box->remove(*box->get_children()[0]);
 
     list->remove_entity(entry);
+
+    current = std::shared_ptr<SnackOrder>();
 }
 
 void SnackOrdersTab::find_snack(){
